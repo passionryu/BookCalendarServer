@@ -21,19 +21,39 @@ configurations {
 
 repositories {
 	mavenCentral()
+	maven { url 'https://repo.spring.io/milestone' } //spring ai 저장소
+	maven {url 'https://repo.spring.io/snapshot'} //스냅샷 저장소 추가
+}
+
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.ai:spring-ai-bom:0.8.1"
+	}
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	compileOnly 'org.projectlombok:lombok'
-	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
-	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	/* mariaDB */
+	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+	/* jpa */
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	/* redis */
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	/* jwt */
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+	/*lombok*/
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	/* Swagger */
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.0.4'
+	/* Spring AI */
+	implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter:1.0.0-SNAPSHOT'
 }
 
 tasks.named('test') {

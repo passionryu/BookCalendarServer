@@ -1,0 +1,15 @@
+# 무시할 IntelliJ 설정
+.idea/
+*.iml
+
+# 빌드 디렉토리 무시
+/build/
+/.gradle/
+/out/
+
+# OS별 불필요한 파일 무시
+.DS_Store
+Thumbs.db
+
+# 기타
+.vscode/

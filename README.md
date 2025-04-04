@@ -38,6 +38,17 @@ SpringBoot프레임워크(Java)로 서버를 구현한다.
 학과 서버에서는 Docker를 사용할 수 없으며, 그나마 비슷한 Podman을 활용할 수 있다한다.   
 Podman으로 총 5개의 컨테이너를 구현하여 서버 구축, 프록시, Nosql 활용, 메트릭 수집&모니터링을 진행한다.
 
+### DB Structure
+
+![image](https://github.com/user-attachments/assets/5d0b6f20-ab53-40c4-8aac-f2c52c864a6d)
+
+### Wire Frame  
+Link : https://www.figma.com/design/ndspvub92U64eh9J2MDZSV/Untitled?node-id=0-1&p=f&t=GYPT6faNrPDJDjhF-0
+![image](https://github.com/user-attachments/assets/d10e1946-0ff0-40ca-81f1-df5589b581c0)
+
+
+
+
 ### 깃모지
 
 | 아이콘 | 타이틀 | 설명 | 원문 |

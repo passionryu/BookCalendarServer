@@ -40,7 +40,8 @@ Podman으로 총 5개의 컨테이너를 구현하여 서버 구축, 프록시, 
 
 ### DB Structure
 
-![image](https://github.com/user-attachments/assets/5d0b6f20-ab53-40c4-8aac-f2c52c864a6d)
+![Copy of Copy of BookCalendar (4)](https://github.com/user-attachments/assets/c782ce1b-4f56-40aa-9cbb-8bc5d51fb862)
+
 
 ### Wire Frame  
 Link : https://www.figma.com/design/ndspvub92U64eh9J2MDZSV/Untitled?node-id=0-1&p=f&t=GYPT6faNrPDJDjhF-0

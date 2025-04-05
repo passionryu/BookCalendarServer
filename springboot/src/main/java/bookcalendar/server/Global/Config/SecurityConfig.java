@@ -1,6 +1,5 @@
 package bookcalendar.server.Global.Config;
 
-
 import bookcalendar.server.Global.JWT.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -29,7 +28,8 @@ public class SecurityConfig {
      * @throws Exception
      */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter)
+            throws Exception {
         http
                 // csrf 차단
                 .csrf(AbstractHttpConfigurer::disable)
@@ -46,9 +46,8 @@ public class SecurityConfig {
 
                         requestMatchers("/api/v1/member/register").permitAll().
 
-                        requestMatchers("/swagger-ui.html").permitAll().
-                        requestMatchers("/v3/api-docs/**").permitAll().
-                        anyRequest().authenticated())
+                        requestMatchers("/swagger-ui.html").permitAll().requestMatchers("/v3/api-docs/**").permitAll()
+                        .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // 필터 추가
 
         return http.build();
@@ -62,15 +61,17 @@ public class SecurityConfig {
 
     // ======================= 권한 설정 로직 =========================
 
-    //권한계층 생성
+    // 권한계층 생성
     @Bean
     public RoleHierarchyImpl roleHierarchy() {
-        return RoleHierarchyImpl.fromHierarchy("""
-            ADMIN > USER
-        """);
+        RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
+        roleHierarchy.setHierarchy("""
+                    ADMIN > USER
+                """);
+        return roleHierarchy;
     }
 
-    //권한 계층 등록
+    // 권한 계층 등록
     @Bean
     public DefaultWebSecurityExpressionHandler customWebSecurityExpressionHandler() {
         DefaultWebSecurityExpressionHandler expressionHandler = new DefaultWebSecurityExpressionHandler();

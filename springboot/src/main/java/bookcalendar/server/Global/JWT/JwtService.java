@@ -6,6 +6,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,19 @@ import java.util.Date;
 @Service
 @RequiredArgsConstructor
 public class JwtService {
+
+    // TODO : Redis 설정은 추후 따로 브랜치 추가하여 진행할 것
+
+    /**
+     * 학과 서버 레디스
+     * @Qualifier("companyRedisTemplate")
+     * private final RedisTemplate<String, String> companyRedis;
+     *
+     * 컨테이너 레디스
+     * @Qualifier("containerRedisTemplate")
+     * private final RedisTemplate<String, String> containerRedis;
+     *
+     */
 
     private RedisTemplate<String, String> redisTemplate;
 
@@ -28,32 +42,38 @@ public class JwtService {
     @Value("${jwt.refreshexpiration}")
     private long REFRESH_TOKEN_EXPIRATION_TIME;
 
-    // TODO : 매개변수 및 내부 함수 수정
-    public String generateAccessToken(String phone_number,String nickname,Long userNumber) {
+    // ======================= 토큰 생성 로직 =========================
+
+    // User Meta Data : userNumber, nickName, password,phoneNumber,genre ,job, birth,Role
+    // JWT input data : userNumber, Role
+
+    public String generateAccessToken(Long userNumber) {
         return Jwts.builder()
-                .setSubject(phone_number)
-                .claim("userNumber",userNumber)
-                .claim("nickName", nickname)
+                .setSubject("bookcalendarUser")
+                .claim("userNumber", userNumber)
+                .claim("Role", "USER")
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
                 .compact();
     }
 
-    // TODO : 매개변수 및 내부 함수 수정
-    public String generateRefreshToken(String phone_number,String nickname,Long userNumber) {
+    public String generateRefreshToken(Long userNumber) {
         return Jwts.builder()
-                .setSubject(phone_number)
-                .claim("userNumber",userNumber)
-                .claim("nickName", nickname)
+                .setSubject("bookcalendarUser")
+                .claim("userNumber", userNumber)
+                .claim("Role", "USER")
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
                 .compact();
     }
 
+    // ======================= 요청에서 엑시스 토큰 추출 로직 =========================
+
     /**
      * 사용자 요청으로 부터 엑세스 토큰 추출
+     * 
      * @param request 사용자 요청
      * @return 엑세스 토큰 반환
      */
@@ -66,7 +86,7 @@ public class JwtService {
         return null;
     }
 
-    // ======================= 유저 고유 번호 추출 기능 =========================
+    // ======================= 요청에서 유저 고유 번호 추출 로직 =========================
 
     /**
      * [1단계] HTTP 요청에서 액세스 토큰을 추출하고, JWT 내부의 userNumber 클레임을 반환한다.
@@ -84,93 +104,94 @@ public class JwtService {
      *
      * @param token JWT 액세스 토큰
      * @return userNumber 클레임 값 (Long)
+     *
+     * @see #extractClaims(String) 클레임 추출 메서드
      */
     public Long extractUserNumberFromToken(String token) {
-        return extractClaims_userNumber(token).get("userNumber", Long.class);
+        return extractClaims(token).get("userNumber", Long.class);
+    }
+
+    // ======================= 요청에서 유저 Role 추출 로직 =========================
+
+    /**
+     * [1단계] HTTP 요청에서 액세스 토큰을 추출하고, JWT 내부의 Role 클레임을 반환한다.
+     *
+     * @param request HTTP 요청 객체
+     * @return JWT 토큰에서 추출한 유저 Role (String)
+     */
+    public String extractRoleFromRequest(HttpServletRequest request) {
+        String accessToken = extractAccessToken(request);
+        return extractRoleFromToken(accessToken);
     }
 
     /**
-     * [3단계] JWT 파서를 통해 Claims 객체(JWT 페이로드)를 추출한다.
+     * [2단계] JWT 토큰에서 Role 클레임 값을 String 타입으로 파싱한다.
      *
      * @param token JWT 액세스 토큰
-     * @return JWT Claims 객체 (페이로드 부분)
+     * @return Role 클레임 값 (String)
+     *
+     * @see #extractClaims(String) 클레임 추출 메서드
      */
-    public Claims extractClaims_userNumber(String token) {
-        return Jwts.parser() // JWT 파서 객체 생성
-                .setSigningKey(SECRET_KEY)
-                .parseClaimsJws(token)
-                .getBody();
+    public String extractRoleFromToken(String token) {
+        return extractClaims(token).get("Role", String.class);
     }
 
-    // ======================= 닉네임 추출 기능 =========================
-
-    /**
-     * [1단계] HTTP 요청에서 액세스 토큰을 추출하고, JWT 내부의 nickName 클레임을 반환한다.
-     * @param request
-     * @return 닉네임 (String)
-     */
-    public String extractNickNameFromRequest(HttpServletRequest request){
-        String accessToken = extractAccessToken(request);
-        return extractUsername(accessToken); // [2단계]
-    }
-
-    /**
-     * [2단계] JWT 토큰에서 nickName 클레임 값을 String 타입으로 파싱한다.
-     * @param token
-     * @return 닉네임 (String)
-     */
-    public String extractUsername(String token) {
-        return extractClaims(token).get("nickName").toString(); // [3단계]
-    }
-
-    /**
-     * [3단계] JWT 파서를 통해 Claims 객체(JWT 페이로드)를 추출한다.
-     * 예외 발생 시 로깅 후 전파한다.
-     * @param token
-     * @return Claims 객체
-     */
-    public Claims extractClaims(String token) {
-        try {
-            return Jwts.parser()
-                    .setSigningKey(SECRET_KEY)
-                    .parseClaimsJws(token)
-                    .getBody();
-        } catch (Exception e) {
-            log.error("x  Failed to extract claims from token: {}", token, e);
-            throw e; // 필요 시 커스텀 예외로 전환 가능
-        }
-    }
-
-    // ======================= 로그아웃 시 Redis Black List 등록 기능 =========================
+    // ======================= Logout 후 Black List에 JWT 토큰 등록 로직
 
     /**
      * 토큰 검증 메서드 (블랙리스트 체크 포함)
+     * 
      * @param token 사용자의 엑세스 토큰
      * @return true & false
+     *
+     * @see #isTokenBlacklisted(String) 블랙리스트 확인 메서드
+     * @see #extractClaims(String) 클레임 추출 메서드
      */
     public boolean validateToken(String token) {
 
         try {
-            // 블랙리스트 체크
+
+            // [1단계] 블랙리스트 확인 → 아래 isTokenBlacklisted() 참조
             if (isTokenBlacklisted(token)) {
                 return false;
             }
-            // JWT 자체 유효성 검사
+
+            // [2단계] JWT 자체 유효성 검사
             Claims claims = extractClaims(token);
             return !claims.getExpiration().before(new Date());
+
         } catch (Exception e) {
+
             log.error("Token validation failed: {}", token, e);
             return false;
+
         }
     }
 
     /**
-     * 토큰이 블랙리스트에 있는지 확인
-     * @param token 사용자의 엑세스 토큰
-     * @return true & flase
+     * Redis에 저장된 블랙리스트에 토큰이 있는지 확인
+     *
+     * @param token 사용자의 액세스 토큰
+     * @return 블랙리스트에 있으면 true, 아니면 false
      */
     public boolean isTokenBlacklisted(String token) {
         return redisTemplate.hasKey("blacklist:" + token);
+    }
+
+    // ======================= Util Code =========================
+
+    /**
+     * 클레임 추출 메서드
+     * 
+     * @param token
+     * @return
+     *
+     */
+    public Claims extractClaims(String token) {
+        return Jwts.parser() // JWT 파서 객체 생성
+                .setSigningKey(SECRET_KEY)
+                .parseClaimsJws(token)
+                .getBody();
     }
 
 }

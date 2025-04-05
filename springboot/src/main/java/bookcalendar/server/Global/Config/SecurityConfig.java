@@ -21,6 +21,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity(securedEnabled = true, prePostEnabled = true)
 public class SecurityConfig {
 
+    /**
+     *
+     * @param http
+     * @param jwtAuthenticationFilter
+     * @return
+     * @throws Exception
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
@@ -37,13 +44,9 @@ public class SecurityConfig {
                 // 권한 url 설정
                 .authorizeHttpRequests(req -> req.
 
-                        requestMatchers("/member/register").permitAll().
-                        requestMatchers("/auth/login/email").permitAll().
-                        requestMatchers("/auth/login/id").permitAll().
+                        requestMatchers("/api/v1/member/register").permitAll().
 
-
-                        /*Swagger 무권한 접근 허용*/
-                                requestMatchers("/swagger-ui.html").permitAll().
+                        requestMatchers("/swagger-ui.html").permitAll().
                         requestMatchers("/v3/api-docs/**").permitAll().
                         anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // 필터 추가
@@ -56,6 +59,8 @@ public class SecurityConfig {
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+    // ======================= 권한 설정 로직 =========================
 
     //권한계층 생성
     @Bean
@@ -72,4 +77,5 @@ public class SecurityConfig {
         expressionHandler.setRoleHierarchy(roleHierarchy());
         return expressionHandler;
     }
+
 }

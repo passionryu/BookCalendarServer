@@ -2,7 +2,7 @@
 Project : Gachon Univ. 2025-1 CapStone Design - AI Project   
 Application Name : Book Calendar    
 Team : AI Vengers  
-- User Server Backend Developer ( 류성열 )
+- User Server Backend Developer / Team Leader ( 류성열 )
 - User Mobile APP Developer ( 박우현 )
 - Admin WEB Developer ( 김광수 )
 - AI Developer ( 안서현, 이정현 )

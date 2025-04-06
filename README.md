@@ -1,7 +1,19 @@
-### BookCalendar AI 어플리케이션 서버 구현   
+## About US
+Project : Gachon Univ. 2025-1 CapStone Design - AI Project   
+Application Name : Book Calendar    
+Team : AI Vengers  
+- User Server Backend Developer ( 류성열 )
+- User Mobile APP Developer ( 박우현 )
+- Admin WEB Developer ( 김광수 )
+- AI Developer ( 안서현, 이정현 )
+
+
+
+### Pain Point
 SpringBoot프레임워크(Java)로 서버를 구현한다.   
 서버가 배포될 환경은 가천대학교 컴퓨터 공학과 학생들이 사용가능한 온프레미스 서버이며,
-70명 가까이 되는 학생들이 128GB로 나눠서 사용해야 하므로 용량은 턱없이 부족하다.  
+70명 가까이 되는 학생들이 메모리 소비량이 많은 AI프로젝트를 128GB로 나눠서 사용해야 하므로 용량은 턱없이 부족하다.    
+서버의 Redis는 2GB밖에 되지 않으므로, 고가용성이 보장되지 않는다.  
 
 ### Swagger UI
 ```

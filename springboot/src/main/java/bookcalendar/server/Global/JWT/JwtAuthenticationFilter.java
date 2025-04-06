@@ -1,4 +1,4 @@
-package bookcalendar.server.global.JWT;
+package bookcalendar.server.global.jwt;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -41,7 +41,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final List<String> PUBLIC_APIS = List.of(
             "/api/v1/member/register",
-            "/swagger-ui/**");
+            "/swagger-ui/**",
+            "/swagger-ui/index.html",
+            "/v3/api-docs/**",
+            "/webjars/");
 
     // ======================= Filter Chain 로직 =========================
 

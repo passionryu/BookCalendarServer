@@ -1,4 +1,4 @@
-package bookcalendar.server.global.Config;
+package bookcalendar.server.global.config;
 
 import lombok.NoArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -19,6 +19,7 @@ public class CorsConfig {
 
         /* 리소스를 허용할 URL 파일 추가 */
         ArrayList<String> allowedOriginPatterns = new ArrayList<>();
+        allowedOriginPatterns.add("http://localhost:8080");
         allowedOriginPatterns.add("http://localhost:5173");
         allowedOriginPatterns.add("http://localhost:5174");
         configuration.setAllowedOrigins(allowedOriginPatterns);

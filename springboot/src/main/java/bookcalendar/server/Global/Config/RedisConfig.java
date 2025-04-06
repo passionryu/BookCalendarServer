@@ -1,4 +1,4 @@
-package bookcalendar.server.global.Config;
+package bookcalendar.server.global.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

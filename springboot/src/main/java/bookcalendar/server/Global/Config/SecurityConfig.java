@@ -1,6 +1,6 @@
-package bookcalendar.server.global.Config;
+package bookcalendar.server.global.config;
 
-import bookcalendar.server.global.JWT.JwtAuthenticationFilter;
+import bookcalendar.server.global.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,7 +35,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
 
                 // cors 설정
-                .cors(cors -> cors.configurationSource(CorsConfig.corsConfigurationSource()))
+                .cors(cors -> cors.configurationSource(bookcalendar.server.global.config.CorsConfig.corsConfigurationSource()))
 
                 // 시큐리티 기본 로그인 비활성화
                 .formLogin(AbstractHttpConfigurer::disable)
@@ -46,8 +46,11 @@ public class SecurityConfig {
 
                         requestMatchers("/api/v1/member/register").permitAll().
 
-                        requestMatchers("/swagger-ui.html").permitAll().requestMatchers("/v3/api-docs/**").permitAll()
-                        .anyRequest().authenticated())
+                        requestMatchers("/swagger-ui/**").permitAll().
+                        requestMatchers("/swagger-ui/index.html").permitAll().
+                        requestMatchers("/v3/api-docs/**").permitAll().
+                        requestMatchers("/webjars/").permitAll().
+                        anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // 필터 추가
 
         return http.build();

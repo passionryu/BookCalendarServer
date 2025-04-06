@@ -1,4 +1,4 @@
-package bookcalendar.server.global.Config;
+package bookcalendar.server.global.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,9 +12,9 @@ public class SwaggerConfig {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
-                        .version("v1.0.0") // 버전 기록
-                        .title("Server") // API 명세서 제목
-                        .description("Book Calendar")); // 상세
+                        .version("v1.0.0") // Version
+                        .title("Book Calendar Server")
+                        .description("Book Calendar 서버(User Part)에 대한 API 문서 페이지"));
 
     }
 }

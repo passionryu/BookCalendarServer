@@ -1,4 +1,4 @@
-package bookcalendar.server.global.JWT;
+package bookcalendar.server.global.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -31,7 +31,7 @@ public class JwtService {
      *
      */
 
-    private RedisTemplate<String, String> redisTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
 
     @Value("${jwt.secret}")
     private String SECRET_KEY;

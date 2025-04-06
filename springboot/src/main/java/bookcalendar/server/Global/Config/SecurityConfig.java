@@ -1,6 +1,6 @@
-package bookcalendar.server.Global.Config;
+package bookcalendar.server.global.Config;
 
-import bookcalendar.server.Global.JWT.JwtAuthenticationFilter;
+import bookcalendar.server.global.JWT.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

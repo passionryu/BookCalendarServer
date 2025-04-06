@@ -1,4 +1,4 @@
-package bookcalendar.server.Global.JWT;
+package bookcalendar.server.global.JWT;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

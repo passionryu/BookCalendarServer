@@ -1,4 +1,4 @@
-package bookcalendar.server.Global.JWT;
+package bookcalendar.server.global.JWT;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -48,8 +48,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     /**
      * 필터의 핵심 메서드 (필터 체인)
      * 
-     * @param request Http 요청 객체
-     * @param response Http 응답 객체
+     * @param request     Http 요청 객체
+     * @param response    Http 응답 객체
      * @param filterChain 필터 체인의 나머지 필터들을 호출할 때 사용
      *
      * @throws ServletException
@@ -104,7 +104,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
         } else {
-            log.debug("유효하지 않은 JWT 토큰 또는 토큰 없음");
+            log.debug("유효하지 않은 JWT 토큰 또는 토큰 없음 - Location : JwtAutenticationFilter");
         }
 
         // [8단계] 필터 체인을 계속 진행

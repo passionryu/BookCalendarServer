@@ -1,4 +1,4 @@
-package bookcalendar.server.Global.Config;
+package bookcalendar.server.global.Config;
 
 import lombok.NoArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -29,12 +29,11 @@ public class CorsConfig {
         allowedHttpMethods.add("POST");
         allowedHttpMethods.add("PUT");
         allowedHttpMethods.add("DELETE");
+        allowedHttpMethods.add("PATCH");
+        allowedHttpMethods.add("OPTIONS");
         configuration.setAllowedMethods(allowedHttpMethods);
 
-        configuration.setAllowedHeaders(Collections.singletonList("*"));
-        //configuration.setAllowedHeaders(List.of(HttpHeaders.AUTHORIZATION, HttpHeaders.CONTENT_TYPE));
-
-        //인증, 인가를 위한 credentials 를 TRUE로 설정
+        // 인증, 인가를 위한 credentials 를 TRUE로 설정
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

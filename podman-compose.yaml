@@ -2,47 +2,50 @@ version: '3'
 
 services:
   nginx:
-    image: nginx:latest
-    container_name: nginx
-    restart: always
+    image: nginx:latest  # 엔진 X 최신 버전 이미지를 도커 허브에서 가져옴 -> 정확한 버전을 명시하는 것이 좋을 수도 있음
+    container_name: nginx # podman ps 혹은 docker ps 할 때 보이는 이름
+    restart: always # 컨테이너가 예기치 않게 종료되면 항상 재시작하도록 설정
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf # 로컬의 ./nginx/nginx.conf 파일을 컨테이너 내의 설정 파일 경로 /etc/nginx/nginx.conf에 바인딩
       - ./nginx/html:/usr/share/nginx/html
     ports:
-      - "8080:80"
-      - "8443:443"
+      - "8080:80" # 호스트의 8080번 포트 → 컨테이너의 80번 포트 (HTTP 기본)
+      - "8443:443" # 호스트의 8443 포트 → 컨테이너의 443 포트 (HTTPS)
     depends_on:
       - springboot
       - redis
       - grafana
       - prometheus
 
+    # 실행 순서 정리 (다만, 서비스 시작 순서 보장 X)
+    # 예시로 springboot가 뜨기 전에 nginx가 reverse proxy를 시도하면 502 오류 가능
+
   springboot:
     image: springboot-app
     container_name: springboot
     build:
-      context: ./springboot
-      dockerfile: dockerfile
-    restart: always
-    environment:
-      - SPRING_PROFILES_ACTIVE=prod
+      context: ./springboot # 도커 파일이 위치한 경로 (실제로 존재해야 함)
+      dockerfile: dockerfile #  도커 파일명 명시
+    restart: always # 컨테이너가 죽거나 시스템이 재부팅되면 항상 다시 시작됨
+    environment: # 스프링 환경 변수
+      - SPRING_PROFILES_ACTIVE=prod # 스프링 프로파일을 prod로 활성화
       - SPRING_REDIS_HOST=redis
-      - SPRING_REDIS_PORT=6379
+      - SPRING_REDIS_PORT=6380 # redis 연결 포트
       - SPRING_DATASOURCE_URL=jdbc:mysql://host.containers.internal:3306/bookcalendar
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       - SPRING_JPA_SHOW_SQL=true
       - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.MySQLDialect
-      - LOGGING_LEVEL_ROOT=DEBUG
+      - LOGGING_LEVEL_ROOT=DEBUG # 로그 모드 : Debug
       - LOGGING_LEVEL_ORG_HIBERNATE=DEBUG
       - LOGGING_LEVEL_ORG_HIBERNATE_SQL=DEBUG
     ports:
-      - "8081:8080"
+      - "8081:8080" # 외부에서는 8081로 접근 -> 컨테이너 내부에서는 8080로 연결
     depends_on:
-      - redis
+      - redis # 이 springboot 컨테이너가 실행되기 전 redis 컨테이너가 먼저 실행되도록 보장
     extra_hosts:
-      - "host.containers.internal:host-gateway"
+      - "host.containers.internal:host-gateway" # 컨테이너 안에서 host.containers.internal로 로컬 PC에 접근 가능
 
   redis:
     image: redis:latest
@@ -53,7 +56,7 @@ services:
       - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
       - redis-data:/data
     ports:
-      - "6379:6379"
+      - "6380:6380"
 
   prometheus:
     image: prom/prometheus:latest
@@ -80,7 +83,7 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_PASSWORD=eric1225^^
       - GF_USERS_ALLOW_SIGN_UP=false
 
 volumes:

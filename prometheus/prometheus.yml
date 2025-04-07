@@ -1,6 +1,9 @@
+# 메트링 수집 텀 : 15초
 global:
   scrape_interval: 15s
 
+# job name이 spring boot인 타겟에서 메트릭 수집
+# 도커 컴포즈 내스프링 부트 컨테이너의 8080포트에서 메트릭 수집
 scrape_configs:
   - job_name: 'springboot'
     static_configs:

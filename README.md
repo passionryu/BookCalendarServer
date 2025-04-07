@@ -83,7 +83,25 @@ Redis는 학과서버에 설치되어 있는 Redis와 유저 서버 내부에 �
 캐싱 전략 
 
 ### Nginx Strategy 
-엔진 X 전략 
+
+```
+[ User ]
+        │
+        ▼
+   [ Nginx (8080, 8443) ]
+   ├──── / → static html
+   └──── /api → Spring Boot (8080)
+               ├── uses Redis (6380)
+               ├── uses MariaDB (host.containers.internal:3306) 
+               └── exposes /actuator/prometheus
+                          │
+                          ▼
+         [ Prometheus (9090) ]
+                 │
+                 ▼
+         [ Grafana (3000) ]
+
+```
 
 ### DB Structure
 

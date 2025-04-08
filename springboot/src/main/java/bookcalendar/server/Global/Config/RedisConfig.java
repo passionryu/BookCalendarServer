@@ -40,6 +40,22 @@ public class RedisConfig {
     @Value("${spring.data.redis.container.password}")
     private String containerRedisPassword;
 
+    // ======================= Redis Basic Configuration : 오류 방지용 =========================
+
+    /**
+     * 기본 이름의 redisTemplate
+     *
+     * description : RedisTemplate의 기본 이름이 필요한 외부 또는 내부 컴포넌트를 에러 없이 동작시키기 위해 사용
+     *
+     * @param connectionFactory
+     * @return
+     */
+    @Bean(name = "redisTemplate")
+    public RedisTemplate<String, String> redisTemplate(
+            @Qualifier("containerRedisConnectionFactory") RedisConnectionFactory connectionFactory) {
+        return containerRedisTemplate(connectionFactory); // 재사용
+    }
+
     // ======================= Company Server Local Redis - only Cache =========================
 
     /**

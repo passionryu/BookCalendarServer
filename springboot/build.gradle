@@ -61,3 +61,9 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+/* 생성자 파라미터 이름이 보존되어 @Qualifier와 함께 @RequiredArgsConstructor 사용 시 의존성 주입 오류를 방지 */
+tasks.withType(JavaCompile).configureEach {
+	options.compilerArgs += ["-parameters"]
+}
+

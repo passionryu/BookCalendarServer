@@ -1,4 +1,5 @@
 #!/bin/bash
+export LANG=en_US.UTF-8
 
 # 자동화 스크립트에 down 넣기
 echo "🧹 Step 0: Stopping existing containers..."

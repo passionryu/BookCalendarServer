@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# 자동화 스크립트에 down 넣기
+echo "🧹 Step 0: Stopping existing containers..."
+podman-compose -f podman-compose.yaml down
+
 # 📌 Step 1: Spring Boot JAR 파일 빌드
 echo "🔨 Step 1: Moving to springboot directory and building jar..."
 cd springboot || { echo "❌ Failed to enter springboot directory"; exit 1; }

@@ -4,7 +4,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,11 +14,7 @@ import java.util.Date;
 
 @Slf4j
 @Service
-//@RequiredArgsConstructor
 public class JwtService {
-
-    //private final @Qualifier("companyRedisTemplate") RedisTemplate<String, String> companyRedis;
-    //private final @Qualifier("containerRedisTemplate") RedisTemplate<String, String> containerRedis;
 
     private final RedisTemplate<String, String> companyRedis;
     private final RedisTemplate<String, String> containerRedis;

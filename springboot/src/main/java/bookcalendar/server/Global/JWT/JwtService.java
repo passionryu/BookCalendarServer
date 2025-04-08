@@ -15,23 +15,22 @@ import java.util.Date;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 public class JwtService {
 
-    // TODO : Redis 설정은 추후 따로 브랜치 추가하여 진행할 것
+    //private final @Qualifier("companyRedisTemplate") RedisTemplate<String, String> companyRedis;
+    //private final @Qualifier("containerRedisTemplate") RedisTemplate<String, String> containerRedis;
 
-    /**
-     * 학과 서버 레디스
-     * @Qualifier("companyRedisTemplate")
-     * private final RedisTemplate<String, String> companyRedis;
-     *
-     * 컨테이너 레디스
-     * @Qualifier("containerRedisTemplate")
-     * private final RedisTemplate<String, String> containerRedis;
-     *
-     */
+    private final RedisTemplate<String, String> companyRedis;
+    private final RedisTemplate<String, String> containerRedis;
 
-    private final RedisTemplate<String, String> redisTemplate;
+    public JwtService(
+            @Qualifier("companyRedisTemplate") RedisTemplate<String, String> companyRedis,
+            @Qualifier("containerRedisTemplate") RedisTemplate<String, String> containerRedis
+    ) {
+        this.companyRedis = companyRedis;
+        this.containerRedis = containerRedis;
+    }
 
     @Value("${jwt.secret}")
     private String SECRET_KEY;
@@ -175,7 +174,7 @@ public class JwtService {
      * @return 블랙리스트에 있으면 true, 아니면 false
      */
     public boolean isTokenBlacklisted(String token) {
-        return redisTemplate.hasKey("blacklist:" + token);
+        return Boolean.TRUE.equals(containerRedis.hasKey("blacklist:" + token));
     }
 
     // ======================= Util Code =========================

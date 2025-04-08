@@ -54,7 +54,8 @@ http://localhost:8080/swagger-ui/index.html
 ```
 ### Infra Structure
 
-![image](https://github.com/user-attachments/assets/acff6ff0-c5d5-4ba3-a716-e0dff7fded3a)
+![image](https://github.com/user-attachments/assets/31ad30f2-4a8e-491f-8c68-3ff746130d19)
+
 위 인프라 구조도는, 가천대학교 학과 서버를 기준으로 설계되었다.  
 내가 담당하고 있는 부분은 좌측 하단에 5개의 컨테이너가 띄어져 있는 유저 서버 부분이며,   
 Github Actions를 통해 학과서버에 CI/CD를 진행한다.  

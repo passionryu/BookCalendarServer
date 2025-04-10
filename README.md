@@ -1,14 +1,40 @@
-## About US
+## About Us
+
 Project : Gachon Univ. 2025-1 CapStone Design - AI Project   
 Application Name : Book Calendar    
 Team : AI Vengers  
-- User Server Backend Developer / Team Leader ( 류성열 )
+- User Server Backend Developer(DevOps) / Team Leader ( 류성열 )
 - User Mobile APP Developer ( 박우현 )
 - Admin WEB Developer ( 김광수 )
 - AI Developer ( 안서현, 이정현 )
 
-
-
+## About Me _ in this project
+### TeamLeading
+* 매주 2회 팀 회의 리딩 (15주)
+* 매주 팀장 발표 전담 (15주)
+* 서비스 기획 및 와이어프레임 제작 
+### Backend 
+* Springboot 3.3.6 (Java 17)
+* JPA & Mybatis
+* Spring AI
+* JWT, Spring Security
+* WebClient 
+### DevOPs 
+* 시스템 아키텍쳐 설계 : Gachon univ. Onpremise server 
+* CI/CD 파이프 라인 구축 : Github Actions
+* 컨테이너 관리  : Podman, Podman-compose
+* 모니터링/로깅 시스템 구축 : Prometheus, Grafana
+### DB  
+* DB 설계
+* MariaDB
+* Redis (캐싱 redis + 세션 redis 분할 운용)
+* INDEX, ON CASECADE 설정
+### Collaboration
+* Swagger
+* Notion
+* Discord
+  
+---
 ### Pain Point
 SpringBoot프레임워크(Java)로 서버를 구현한다.   
 서버가 배포될 환경은 가천대학교 컴퓨터 공학과 학생들이 사용가능한 온프레미스 서버이며,

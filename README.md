@@ -12,14 +12,15 @@ Team : AI Vengers
 ### TeamLeading
 * 매주 2회 팀 회의 리딩 (15주)
 * 매주 팀장 발표 전담 (15주)
-* 서비스 기획 및 와이어프레임 제작 
+* 서비스 기획 및 와이어프레임 제작(Figma)
 ### Backend 
 * Springboot 3.3.6 (Java 17)
-* JPA & Mybatis
-* Spring AI
-* JWT, Spring Security
-* WebClient 
-### DevOPs 
+* JPA - 단순 CRUD 서비스 구현
+* MyBatis - 복잡한 쿼리(JOIN,서브쿼리 등), 성능 최적화가 필요한 서비스 구현
+* Spring AI 
+* JWT, Spring Security 
+* WebClient - Fast-API AI 서버와 통신 
+### DevOps 
 * 시스템 아키텍쳐 설계 : Gachon univ. Onpremise server 
 * CI/CD 파이프 라인 구축 : Github Actions
 * 컨테이너 관리  : Podman, Podman-compose
@@ -27,13 +28,12 @@ Team : AI Vengers
 ### DB  
 * DB 설계
 * MariaDB
-* Redis (캐싱 redis + 세션 redis 분할 운용)
-* INDEX, ON CASECADE 설정
+* Server Redis(Port:6379) - Cahcing Redis 
+* Container Redis(Port:6380) - Session Redis
+* INDEX, ON DELETE CASECADE 설정
 ### Collaboration
-* Swagger
-* Notion
-* Discord
-  
+* Swagger - for FE & BE 
+* Notion, Discord -for Team play
 ---
 ### Pain Point
 SpringBoot프레임워크(Java)로 서버를 구현한다.   
@@ -105,8 +105,9 @@ Redis는 학과서버에 설치되어 있는 Redis와 유저 서버 내부에 �
 특히 Spring Boot 서버의 경우 최초 시작 메모리와 최대 메모리를 동일하게 설정하여 동적 메모리 할당을 방지하여 성능 향상을 유도한다.
 
 > 설계자 : 류성열
-
-### Caching Strategy
+### 자동화 설정 
+### 역할과 책임에 따른 Redis의 분할
+### Server Redis Caching Strategy
 캐싱 전략 
 
 ### Nginx Strategy 

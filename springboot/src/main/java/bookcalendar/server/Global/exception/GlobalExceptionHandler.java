@@ -27,10 +27,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, ex.getErrorcode().getHttpStatus());
     }
 
-
-
-
-
     // ======================================================================================================
     /**
      * @Valid오류 예외처리 메서드

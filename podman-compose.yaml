@@ -13,14 +13,12 @@ services:
       - "8443:443" # 호스트의 8443 포트 → 컨테이너의 443 포트 (HTTPS)
     depends_on:
       - springboot
-      - redis
-      - grafana
-      - prometheus
     networks:
       - bookcalendar_network
 
     # 실행 순서 정리 (다만, 서비스 시작 순서 보장 X)
     # 예시로 springboot가 뜨기 전에 nginx가 reverse proxy를 시도하면 502 오류 가능
+
 
   springboot:
     image: springboot-app
@@ -31,41 +29,78 @@ services:
     restart: always
     environment:
       - SPRING_PROFILES_ACTIVE=prod
-      # 캐싱용 Redis (호스트 PC)
-      - SPRING_DATA_REDIS_CACHE_HOST=host.containers.internal
+      # 캐싱용 Redis (컨테이너)
+      - SPRING_DATA_REDIS_CACHE_HOST=redis-cache
       - SPRING_DATA_REDIS_CACHE_PORT=6379
       # 세션용 Redis (컨테이너)
-      - SPRING_DATA_REDIS_SESSION_HOST=redis
+      - SPRING_DATA_REDIS_SESSION_HOST=redis-session
       - SPRING_DATA_REDIS_SESSION_PORT=6379
-      # MariaDB (호스트 PC)
-      - SPRING_DATASOURCE_URL=jdbc:mariadb://host.containers.internal:3306/bookcalendar
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=
+      # MariaDB (컨테이너)
+      - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadb:3306/bookcalendar
+      - SPRING_DATASOURCE_USERNAME=bookcalendar
+      - SPRING_DATASOURCE_PASSWORD=bookcalendar123
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       - SPRING_JPA_SHOW_SQL=true
-      - LOGGING_LEVEL_ROOT=INFO # 로그 모드 : Debug
+      - LOGGING_LEVEL_ROOT=INFO
       - LOGGING_LEVEL_ORG_HIBERNATE=INFO
       - LOGGING_LEVEL_ORG_HIBERNATE_SQL=INFO
       - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.MySQLDialect
     ports:
-      - "8081:8080" # 외부에서는 8081로 접근 -> 컨테이너 내부에서는 8080로 연결
+      - "8081:8080"
     depends_on:
-      - redis # 이 springboot 컨테이너가 실행되기 전 redis 컨테이너가 먼저 실행되도록 보장
-    extra_hosts:
-      - "host.containers.internal:host-gateway" # 컨테이너 안에서 host.containers.internal로 로컬 PC에 접근 가능
-
-  redis:
-    image: redis:latest
-    container_name: redis
-    restart: always
-    command: redis-server --appendonly yes
-    volumes:
-      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
-      - redis-data:/data
-    ports:
-      - "6380:6379"
+      - redis-session
+      - redis-cache
+      - mariadb
     networks:
       - bookcalendar_network
+
+  redis-session:
+    image: redis:latest
+    container_name: redis-session
+    restart: always
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - redis-session-data:/data
+    ports:
+      - "6382:6379"
+    networks:
+      - bookcalendar_network
+
+  redis-cache:
+    image: redis:latest
+    container_name: redis-cache
+    restart: always
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - ./redis-cache/redis.conf:/usr/local/etc/redis/redis.conf
+      - redis-cache-data:/data
+    ports:
+      - "6381:6379"
+    networks:
+      - bookcalendar_network
+
+  mariadb:
+    image: mariadb:latest
+    container_name: mariadb
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=bookcalendar
+      - MYSQL_USER=bookcalendar
+      - MYSQL_PASSWORD=bookcalendar123
+    volumes:
+      - ./mariadb/my.cnf:/etc/mysql/conf.d/my.cnf
+      - mariadb-data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - bookcalendar_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   prometheus:
     image: prom/prometheus:latest
@@ -104,6 +139,8 @@ networks:
     driver: bridge
 
 volumes:
-  redis-data:
+  redis-session-data:
+  redis-cache-data:
   prometheus-data:
   grafana-data:
+  mariadb-data:

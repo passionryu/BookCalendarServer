@@ -36,7 +36,7 @@ services:
       - SPRING_DATA_REDIS_SESSION_HOST=redis-session
       - SPRING_DATA_REDIS_SESSION_PORT=6379
       # MariaDB (컨테이너)
-      - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadb:3306/bookcalendar
+      - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadb:3307/bookcalendar
       - SPRING_DATASOURCE_USERNAME=bookcalendar
       - SPRING_DATASOURCE_PASSWORD=bookcalendar123
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
@@ -93,7 +93,7 @@ services:
       - ./mariadb/my.cnf:/etc/mysql/conf.d/my.cnf
       - mariadb-data:/var/lib/mysql
     ports:
-      - "3306:3306"
+      - "3307:3306"
     networks:
       - bookcalendar_network
     healthcheck:

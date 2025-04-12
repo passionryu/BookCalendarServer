@@ -53,7 +53,7 @@ public class MemberServiceImpl implements MemberService {
                 .job(registerRequest.job())
                 .completion(0)
                 .rank(100)
-                .role("USER") // 기본 권한 설정
+                .role("USER")
                 .build();
 
         // Member 엔티티 DB 저장 후 반환

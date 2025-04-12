@@ -16,6 +16,8 @@ services:
       - redis
       - grafana
       - prometheus
+    networks:
+      - bookcalendar_network
 
     # 실행 순서 정리 (다만, 서비스 시작 순서 보장 X)
     # 예시로 springboot가 뜨기 전에 nginx가 reverse proxy를 시도하면 502 오류 가능
@@ -24,22 +26,27 @@ services:
     image: springboot-app
     container_name: springboot
     build:
-      context: ./springboot # 도커 파일이 위치한 경로 (실제로 존재해야 함)
-      dockerfile: dockerfile #  도커 파일명 명시
-    restart: always # 컨테이너가 죽거나 시스템이 재부팅되면 항상 다시 시작됨
-    environment: # 스프링 환경 변수
-      - SPRING_PROFILES_ACTIVE=prod # 스프링 프로파일을 prod로 활성화
-      - SPRING_REDIS_HOST=redis
-      - SPRING_REDIS_PORT=6380 # redis 연결 포트
-      - SPRING_DATASOURCE_URL=jdbc:mysql://host.containers.internal:3306/bookcalendar
+      context: ./springboot
+      dockerfile: dockerfile
+    restart: always
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+      # 캐싱용 Redis (호스트 PC)
+      - SPRING_DATA_REDIS_CACHE_HOST=host.containers.internal
+      - SPRING_DATA_REDIS_CACHE_PORT=6379
+      # 세션용 Redis (컨테이너)
+      - SPRING_DATA_REDIS_SESSION_HOST=redis
+      - SPRING_DATA_REDIS_SESSION_PORT=6379
+      # MariaDB (호스트 PC)
+      - SPRING_DATASOURCE_URL=jdbc:mariadb://host.containers.internal:3306/bookcalendar
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       - SPRING_JPA_SHOW_SQL=true
+      - LOGGING_LEVEL_ROOT=INFO # 로그 모드 : Debug
+      - LOGGING_LEVEL_ORG_HIBERNATE=INFO
+      - LOGGING_LEVEL_ORG_HIBERNATE_SQL=INFO
       - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.MySQLDialect
-      - LOGGING_LEVEL_ROOT=DEBUG # 로그 모드 : Debug
-      - LOGGING_LEVEL_ORG_HIBERNATE=DEBUG
-      - LOGGING_LEVEL_ORG_HIBERNATE_SQL=DEBUG
     ports:
       - "8081:8080" # 외부에서는 8081로 접근 -> 컨테이너 내부에서는 8080로 연결
     depends_on:
@@ -56,7 +63,9 @@ services:
       - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
       - redis-data:/data
     ports:
-      - "6380:6380"
+      - "6380:6379"
+    networks:
+      - bookcalendar_network
 
   prometheus:
     image: prom/prometheus:latest
@@ -72,6 +81,8 @@ services:
       - '--storage.tsdb.path=/prometheus'
       - '--web.console.libraries=/usr/share/prometheus/console_libraries'
       - '--web.console.templates=/usr/share/prometheus/consoles'
+    networks:
+      - bookcalendar_network
 
   grafana:
     image: grafana/grafana:latest
@@ -85,6 +96,12 @@ services:
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=eric1225^^
       - GF_USERS_ALLOW_SIGN_UP=false
+    networks:
+      - bookcalendar_network
+
+networks:
+  bookcalendar_network:
+    driver: bridge
 
 volumes:
   redis-data:

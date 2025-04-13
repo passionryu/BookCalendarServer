@@ -39,7 +39,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadb:3307/bookcalendar
       - SPRING_DATASOURCE_USERNAME=bookcalendar
       - SPRING_DATASOURCE_PASSWORD=bookcalendar123
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=none
       - SPRING_JPA_SHOW_SQL=true
       - LOGGING_LEVEL_ROOT=INFO
       - LOGGING_LEVEL_ORG_HIBERNATE=INFO

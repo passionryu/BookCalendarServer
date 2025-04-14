@@ -21,26 +21,27 @@ import java.time.Duration;
 public class RedisConfig {
 
     // 회사 서버 Redis 설정
-    @Value("${spring.data.redis.company.host}")
-    private String companyRedisHost;
+    @Value("${spring.data.redis.cache.host}")
+    private String cacheRedisHost;
 
-    @Value("${spring.data.redis.company.port}")
-    private int companyRedisPort;
+    @Value("${spring.data.redis.cache.port}")
+    private int cacheRedisPort;
 
-    @Value("${spring.data.redis.company.password}")
-    private String companyRedisPassword;
+    // @Value("${spring.data.redis.cache.password}")
+    // private String cacheRedisPassword;
 
     // 컨테이너 Redis 설정
-    @Value("${spring.data.redis.container.host}")
-    private String containerRedisHost;
+    @Value("${spring.data.redis.session.host}")
+    private String sessionRedisHost;
 
-    @Value("${spring.data.redis.container.port}")
-    private int containerRedisPort;
+    @Value("${spring.data.redis.session.port}")
+    private int sessionRedisPort;
 
-    @Value("${spring.data.redis.container.password}")
-    private String containerRedisPassword;
+    @Value("${spring.data.redis.session.password}")
+    private String sessionRedisPassword;
 
-    // ======================= Redis Basic Configuration : 오류 방지용 =========================
+    // ======================= Redis Basic Configuration : 오류 방지용
+    // =========================
 
     /**
      * 기본 이름의 redisTemplate
@@ -52,23 +53,24 @@ public class RedisConfig {
      */
     @Bean(name = "redisTemplate")
     public RedisTemplate<String, String> redisTemplate(
-            @Qualifier("containerRedisConnectionFactory") RedisConnectionFactory connectionFactory) {
-        return containerRedisTemplate(connectionFactory); // 재사용
+            @Qualifier("sessionRedisConnectionFactory") RedisConnectionFactory connectionFactory) {
+        return sessionRedisTemplate(connectionFactory); // 재사용
     }
 
-    // ======================= Company Server Local Redis - only Cache =========================
+    // ======================= Company Server Local Redis - only Cache
+    // =========================
 
     /**
      * 회사 서버 Redis Connection Factory
      *
      * @return
      */
-    @Bean(name = "companyRedisConnectionFactory")
-    public RedisConnectionFactory companyRedisConnectionFactory() {
+    @Bean(name = "cacheRedisConnectionFactory")
+    public RedisConnectionFactory cacheRedisConnectionFactory() {
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
-        config.setHostName(companyRedisHost);
-        config.setPort(companyRedisPort);
-        config.setPassword(companyRedisPassword);
+        config.setHostName(cacheRedisHost);
+        config.setPort(cacheRedisPort);
+        // config.setPassword(cacheRedisPassword);
         return new LettuceConnectionFactory(config);
     }
 
@@ -78,9 +80,9 @@ public class RedisConfig {
      * @param connectionFactory
      * @return
      */
-    @Bean(name = "companyRedisCacheManager")
-    public CacheManager companyRedisCacheManager(
-            @Qualifier("companyRedisConnectionFactory") RedisConnectionFactory connectionFactory) {
+    @Bean(name = "cacheRedisCacheManager")
+    public CacheManager cacheRedisCacheManager(
+            @Qualifier("cacheRedisConnectionFactory") RedisConnectionFactory connectionFactory) {
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofMinutes(30))
                 .serializeKeysWith(RedisSerializationContext.SerializationPair
@@ -99,9 +101,9 @@ public class RedisConfig {
      * @param connectionFactory
      * @return
      */
-    @Bean(name = "companyRedisTemplate")
-    public RedisTemplate<String, String> companyRedisTemplate(
-            @Qualifier("companyRedisConnectionFactory") RedisConnectionFactory connectionFactory) {
+    @Bean(name = "cacheRedisTemplate")
+    public RedisTemplate<String, String> cacheRedisTemplate(
+            @Qualifier("cacheRedisConnectionFactory") RedisConnectionFactory connectionFactory) {
         RedisTemplate<String, String> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
         template.setKeySerializer(new StringRedisSerializer());
@@ -112,19 +114,20 @@ public class RedisConfig {
         return template;
     }
 
-    // ======================= Podman Container Redis - For Session & ETC =========================
+    // ======================= Podman Container Redis - For Session & ETC
+    // =========================
 
     /**
      * 컨테이너 Redis Connection Factory
      *
      * @return
      */
-    @Bean(name = "containerRedisConnectionFactory")
-    public RedisConnectionFactory containerRedisConnectionFactory() {
+    @Bean(name = "sessionRedisConnectionFactory")
+    public RedisConnectionFactory sessionRedisConnectionFactory() {
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
-        config.setHostName(containerRedisHost);
-        config.setPort(containerRedisPort);
-        config.setPassword(containerRedisPassword);
+        config.setHostName(sessionRedisHost);
+        config.setPort(sessionRedisPort);
+        config.setPassword(sessionRedisPassword);
         return new LettuceConnectionFactory(config);
     }
 
@@ -134,9 +137,9 @@ public class RedisConfig {
      * @param connectionFactory
      * @return
      */
-    @Bean(name = "containerRedisTemplate")
-    public RedisTemplate<String, String> containerRedisTemplate(
-            @Qualifier("containerRedisConnectionFactory") RedisConnectionFactory connectionFactory) {
+    @Bean(name = "sessionRedisTemplate")
+    public RedisTemplate<String, String> sessionRedisTemplate(
+            @Qualifier("sessionRedisConnectionFactory") RedisConnectionFactory connectionFactory) {
         RedisTemplate<String, String> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
         template.setKeySerializer(new StringRedisSerializer());

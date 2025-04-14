@@ -23,13 +23,11 @@ podman-compose -f podman-compose.yaml build springboot || { echo "❌ Podman bui
 # docker일 경우
 # docker compose -f podman-compose.yaml build springboot || { echo "❌ Docker build failed"; exit 1; }
 
-# 📌 Step 3: Spring Boot 컨테이너 재시작
-echo "🚀 Step 3: Restarting springboot container..."
+# 📌 Step 3: 모든 컨테이너 다시 시작
+echo "🚀 Step 3: Restarting all containers..."
 
-# 'springboot' 컨테이너만 백그라운드(-d)로 재시작
-podman-compose -f podman-compose.yaml up -d springboot || { echo "❌ Podman up failed"; exit 1; }
-# Docker일 경우
-# docker compose -f podman-compose.yaml up -d springboot || { echo "❌ Docker up failed"; exit 1; }
+# 모든 컨테이너를 다시 시작 (Spring Boot 포함)
+podman-compose -f podman-compose.yaml up -d || { echo "❌ Podman up failed"; exit 1; }
 
 # ✅ 완료 메시지 출력
 echo "✅ Done! Spring Boot app has been rebuilt and redeployed."

@@ -19,7 +19,6 @@ services:
     # 실행 순서 정리 (다만, 서비스 시작 순서 보장 X)
     # 예시로 springboot가 뜨기 전에 nginx가 reverse proxy를 시도하면 502 오류 가능
 
-
   springboot:
     image: springboot-app
     container_name: springboot
@@ -35,8 +34,9 @@ services:
       # 세션용 Redis (컨테이너)
       - SPRING_DATA_REDIS_SESSION_HOST=redis-session
       - SPRING_DATA_REDIS_SESSION_PORT=6379
+      - SPRING_DATA_REDIS_SESSION_PASSWORD=1234
       # MariaDB (컨테이너)
-      - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadb:3307/bookcalendar
+      - SPRING_DATASOURCE_URL=jdbc:mariadb://mariadb:3306/bookcalendar
       - SPRING_DATASOURCE_USERNAME=bookcalendar
       - SPRING_DATASOURCE_PASSWORD=bookcalendar123
       - SPRING_JPA_HIBERNATE_DDL_AUTO=none
@@ -44,7 +44,7 @@ services:
       - LOGGING_LEVEL_ROOT=INFO
       - LOGGING_LEVEL_ORG_HIBERNATE=INFO
       - LOGGING_LEVEL_ORG_HIBERNATE_SQL=INFO
-      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.MySQLDialect
+      # SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.MySQLDialect
     ports:
       - "8081:8080"
     depends_on:
@@ -58,9 +58,9 @@ services:
     image: redis:latest
     container_name: redis-session
     restart: always
-    command: redis-server /usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis-session.conf
     volumes:
-      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+      - ./redis-session/redis.conf:/usr/local/etc/redis/redis-session.conf
       - redis-session-data:/data
     ports:
       - "6382:6379"
@@ -68,12 +68,13 @@ services:
       - bookcalendar_network
 
   redis-cache:
+
     image: redis:latest
     container_name: redis-cache
     restart: always
-    command: redis-server /usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis-cache.conf
     volumes:
-      - ./redis-cache/redis.conf:/usr/local/etc/redis/redis.conf
+      - ./redis-cache/redis.conf:/usr/local/etc/redis/redis-cache.conf
       - redis-cache-data:/data
     ports:
       - "6381:6379"

@@ -1,84 +1,73 @@
-## About Us
-
-Project : Gachon Univ. 2025-1 CapStone Design - AI Project   
-Application Name : Book Calendar    
-Team : AI Vengers  
+## 📌 About Us
+프로젝트 명 : Gachon Univ. 2025-1 CapStone Design - AI Project   
+팀 이름 : AI Vengers  
 - User Server Backend Developer(DevOps) / Team Leader ( 류성열 )
 - User Mobile APP Developer ( 박우현 )
 - Admin WEB Developer ( 김광수 )
 - AI Developer ( 안서현, 이정현 )
 
-## About Me _ in this project
-### TeamLeading
+## 📱 About Our App
+앱 이름 : Book Calendar  
+🎯해결하려는 문제 : 우리 나라의 과도한 IT문화의 발달로 인해, 쇠퇴한 성인 독서율 문제에 대해 해결책을 간구한다.  
+특히 본 서비스는 독서 동기부여 및 독서 습관 형성을 위한 AI 서비스 및 커뮤니티 기능을 제공하여 해당 문제를 해결하고자 한다.  
+
+### 📖 1. 독후감 나눠 쓰기 기능 
+우리는 흔히 독후감이라 하면, 책을 완독 한 후 한번만 기록하는 것으로 알고 있다.  
+그러나 우리 BoolCalendar앱에서는 한 권의 도서에 대해 여러번 독후감을 나눠서 작성할 수 있으며,   
+각 독서 기록은 캘린더에 추적되며, 매 독서 활동 마다 AI 서비스들(내 독후감을 기반으로 한 질문지 작성 & AI 사서의 독후감 리뷰)이 적용된다. 
+
+### 🗣️ 2. 도서 커뮤니티 
+게시판 형식의 도서 커뮤니티를 지원한다.  
+유저들은 챌린지를 통해 메달을 획득, 본인의 랭킹을 올릴 수 있다.   
+본인의 메달 및 랭킹은 도서 커뮤니티에서 활동을 할 떄, 본인 사진 옆에 자동으로 표시되어 동기부여 효과를 기대한다. 
+
+### 🤖 3. AI 서비스 
+1. 유저 맞춤형 질문지 생성 서비스
+> 유저의 당일 독후감을 스캔하여 3개의 질문지를 맞춤형 생성
+2. AI BookCalendar 사서의 독후감 리뷰 
+> 유저의 당일 독후감과 질문지 답변 기록을 AI가 스캔하여 리뷰 및 격려 메시지를 반환
+3. AI BookCalendar 사서의 챗봇 서비스
+> 유저와의 챗봇 서비스를 통해, 유저의 니즈를 파악하여 맞춤형 추천 도서 5가지를 추천이유와 함께 반환
+
+## 🙋‍♂️ About Me _ in this project
+### 🧭 TeamLeading
 * 매주 2회 팀 회의 리딩 (15주)
 * 매주 팀장 발표 전담 (15주)
 * 서비스 기획 및 와이어프레임 제작(Figma)
-### Backend 
+### ⚙️Backend 
 * Springboot 3.3.6 (Java 17)
 * JPA - 단순 CRUD 서비스 구현
 * MyBatis - 복잡한 쿼리(JOIN,서브쿼리 등), 성능 최적화가 필요한 서비스 구현
-* Spring AI 
-* JWT, Spring Security 
+* Spring AI - GPT api 연결
+* JWT, Spring Security - Refresh Token Rotation(RTR방식)을 통한 높은 보안의 인증&인가 시스템 구축
 * WebClient - Fast-API AI 서버와 통신 
-### DevOps 
+### 🚀DevOps 
 * 시스템 아키텍쳐 설계 : Gachon univ. Onpremise server 
 * CI/CD 파이프 라인 구축 : Github Actions
 * 컨테이너 관리  : Podman, Podman-compose
 * 모니터링/로깅 시스템 구축 : Prometheus, Grafana
-### DB  
+### 🛢️DB  (MariaDB)
 * DB 설계
-* MariaDB
-* Server Redis(Port:6379) - Cahcing Redis 
-* Container Redis(Port:6380) - Session Redis
-* INDEX, ON DELETE CASECADE 설정
-### Collaboration
+* Container Redis(Port:6381) - Session Redis
+* Server Redis(Port:6382) - Cahcing Redis 
+* INDEX - 쿼리 기능 최적화 
+* ON DELETE CASECADE 
+### 🤝Collaboration
 * Swagger - for FE & BE 
 * Notion, Discord -for Team play
 ---
-### Pain Point
+### 😵 Pain Point
 SpringBoot프레임워크(Java)로 서버를 구현한다.   
 서버가 배포될 환경은 가천대학교 컴퓨터 공학과 학생들이 사용가능한 온프레미스 서버이며,
 70명 가까이 되는 학생들이 메모리 소비량이 많은 AI프로젝트를 128GB로 나눠서 사용해야 하므로 용량은 턱없이 부족하다.    
 서버의 Redis는 2GB밖에 되지 않으므로, 고가용성이 보장되지 않는다.  
 
-### Swagger UI
+### 🧪Swagger UI
 ```
 http://localhost:8081/swagger-ui/index.html
 ```
 
-### 디렉토리 구조  
-```
-📦 BookCalendar 
-├── 📂 springboot            # Spring Boot 애플리케이션 
-│   ├── 📂 src
-│   ├── 📂 target
-│   ├── 📄 Dockerfile     # Spring Boot 컨테이너용 Dockerfile
-│   ├── 📄 pom.xml
-│   └── ...
-├── 📂 nginx              # Nginx 설정
-│   ├── 📄 Dockerfile     # Nginx 컨테이너용 Dockerfile
-│   ├── 📄 nginx.conf
-│   └── ...
-├── 📂 redis              # Redis 설정
-│   ├── 📄 Dockerfile     # Redis 컨테이너용 Dockerfile
-│   ├── 📄 redis.conf
-│   └── ...
-├── 📂 grafana            # Grafana 설정
-│   ├── 📄 Dockerfile     # Grafana 컨테이너용 Dockerfile
-│   ├── 📄 grafana.ini
-│   └── ...
-├── 📂 prometheus         # Prometheus 설정
-│   ├── 📄 Dockerfile     # Prometheus 컨테이너용 Dockerfile
-│   ├── 📄 prometheus.yml
-│   └── ...
-├── 📂 .github            # GitHub Actions 설정
-│   ├── 📂 workflows
-│   │   ├── 📄 ci-cd.yaml
-│   └── ...
-├── 📄 podman-compose.yaml # Podman Compose 설정 파일
-└── 📄 README.md          # 프로젝트 설명
-```
-### Infra Structure
+### 🧱 Infra Structure
 
 ![image](https://github.com/user-attachments/assets/31ad30f2-4a8e-491f-8c68-3ff746130d19)
 
@@ -88,56 +77,37 @@ Github Actions를 통해 학과서버에 CI/CD를 진행한다.
 
 
 학과 서버에서는 Docker를 사용할 수 없으며, 그나마 비슷한 Podman을 활용할 수 있다한다.   
-Podman으로 총 8개의 컨테이너를 구현하여 서버 구축, 프록시, Nosql 활용, 메트릭 수집&모니터링을 진행한다.
+Podman으로 총 8개의 컨테이너를 구현하여 서버 구축, 리버스 프록시, DB 구축, 메트릭 수집&모니터링을 진행한다.
 
 그리고 Fast-API에 있는 4가지의 AI 모델을 사용하기 위해, Spring 프레임워크에 내장되어 있는 Http Client인 WebClinet를 활용하여 Fast-API에 요청을 보내고,
 Fast-API 앞단에 Router를 배치하여 요청에 맞는 알맞는 AI 모델로 라우팅하여 반환값을 다시 Spring 서버로 받아온다.  
 
 외부 API는 GPT-turbo3.5 와 알라딘 API를 활용하며, 
 Redis는 학과서버에 설치되어 있는 Redis와 유저 서버 내부에 컨테이너를 활용해 하나의 Redis를 추가하며,  
-- 학과서버 Redis = 캐싱용 Redis (Only Read)   
-- 컨테이너 Redis = 세션 및 기능 구현 Redis (Read & Write)
+- 6381포트 Redis Container = 세션 및 기능 구현 Redis (Read & Write)  
+- 6382포트 Redis Container = 캐싱용 Redis (Only Read)   
 
 로 역할을 나눠서 구현한다.   
-학과 서버 Redis 를 캐싱용 Reids로 정한 이유는 컨테이너 Redis와 학과 서버 Redis 중 응답속도 성능이 더 좋은 것은 컨테이너 Redis 보다는 학과 서버 Redis이기 때문이다.  
 
-컨테이너는 기본적으로 메모리를 제한하지 않으면 무제한으로 자원을 소비할 수 있기에 5개의 각 컨테이너는 compose 파일에서 최대 메모리를 제한하고,   
+컨테이너는 기본적으로 메모리를 제한하지 않으면 무제한으로 자원을 소비할 수 있기에 8개의 각 컨테이너는 compose 파일에서 최대 메모리를 제한하고,   
 특히 Spring Boot 서버의 경우 최초 시작 메모리와 최대 메모리를 동일하게 설정하여 동적 메모리 할당을 방지하여 성능 향상을 유도한다.
 
 > 설계자 : 류성열
-### 자동화 설정 
+### 🤖자동화 설정 
 1. rebuild_springboot.sh
 > springboot 코드를 수정한 후, 모든 컨테이너 중지 -> jar file rebuild -> image rebuild ->  모든 컨테이너 재시작
 ``` 
 bash rebuild_springboot.sh
 ```
 
-### 역할과 책임에 따른 Redis의 분할
-### Server Redis Caching Strategy
+### 🧠 역할과 책임에 따른 Redis의 분할
+
+### 💡 Server Redis Caching Strategy
 캐싱 전략 
 
-### Nginx Strategy 
+### 🌐 Nginx Strategy 
 
-```
-[ User ]
-        │
-        ▼
-   [ Nginx (8080, 8443) ]
-   ├──── / → static html
-   └──── /api → Spring Boot (8080)
-               ├── uses Redis (6380)
-               ├── uses MariaDB (host.containers.internal:3306) 
-               └── exposes /actuator/prometheus
-                          │
-                          ▼
-         [ Prometheus (9090) ]
-                 │
-                 ▼
-         [ Grafana (3000) ]
-
-```
-
-### DB Structure
+### 🧬 DB Structure
 
 ![Copy of Copy of BookCalendar (4)](https://github.com/user-attachments/assets/c782ce1b-4f56-40aa-9cbb-8bc5d51fb862)
 
@@ -148,7 +118,7 @@ DB 구조도는 ERD Cloud 서비스로 제작하였고,
 > 제작자 : 류성열
 
 
-### Wire Frame  
+### 🧾 Wire Frame  
 Link : https://www.figma.com/design/ndspvub92U64eh9J2MDZSV/Untitled?node-id=0-1&p=f&t=GYPT6faNrPDJDjhF-0
 ![image](https://github.com/user-attachments/assets/d10e1946-0ff0-40ca-81f1-df5589b581c0)
 
@@ -157,6 +127,7 @@ Link : https://www.figma.com/design/ndspvub92U64eh9J2MDZSV/Untitled?node-id=0-1&
 
 
 ### 깃모지
+> 가독성 높은 Commit을 기록한다.
 
 | 아이콘 | 타이틀 | 설명 | 원문 |
 | --- | --- | --- | --- |

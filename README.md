@@ -127,7 +127,7 @@ Link : https://www.figma.com/design/ndspvub92U64eh9J2MDZSV/Untitled?node-id=0-1&
 
 
 ### 깃모지
-> 가독성 높은 Commit을 기록한다.
+> 가독성 높은 Commit을 기록한다.  
 
 | 아이콘 | 타이틀 | 설명 | 원문 |
 | --- | --- | --- | --- |

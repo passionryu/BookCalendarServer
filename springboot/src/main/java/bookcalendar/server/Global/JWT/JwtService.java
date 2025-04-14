@@ -16,15 +16,14 @@ import java.util.Date;
 @Service
 public class JwtService {
 
-    private final RedisTemplate<String, String> companyRedis;
-    private final RedisTemplate<String, String> containerRedis;
+    private final RedisTemplate<String, String> cacheRedis;
+    private final RedisTemplate<String, String> sessionRedis;
 
     public JwtService(
-            @Qualifier("companyRedisTemplate") RedisTemplate<String, String> companyRedis,
-            @Qualifier("containerRedisTemplate") RedisTemplate<String, String> containerRedis
-    ) {
-        this.companyRedis = companyRedis;
-        this.containerRedis = containerRedis;
+            @Qualifier("cacheRedisTemplate") RedisTemplate<String, String> cacheRedis,
+            @Qualifier("sessionRedisTemplate") RedisTemplate<String, String> sessionRedis) {
+        this.cacheRedis = cacheRedis;
+        this.sessionRedis = sessionRedis;
     }
 
     @Value("${jwt.secret}")
@@ -38,7 +37,8 @@ public class JwtService {
 
     // ======================= 토큰 생성 로직 =========================
 
-    // User Meta Data : userNumber, nickName, password,phoneNumber,genre ,job, birth,Role
+    // User Meta Data : userNumber, nickName, password,phoneNumber,genre ,job,
+    // birth,Role
     // JWT input data : userNumber, Role
 
     public String generateAccessToken(Long userNumber) {
@@ -169,7 +169,7 @@ public class JwtService {
      * @return 블랙리스트에 있으면 true, 아니면 false
      */
     public boolean isTokenBlacklisted(String token) {
-        return Boolean.TRUE.equals(containerRedis.hasKey("blacklist:" + token));
+        return Boolean.TRUE.equals(sessionRedis.hasKey("blacklist:" + token));
     }
 
     // ======================= Util Code =========================

@@ -62,8 +62,8 @@ services:
     volumes:
       - ./redis-session/redis.conf:/usr/local/etc/redis/redis-session.conf
       - redis-session-data:/data
-    ports:
-      - "6382:6379"
+    #ports: -> Redis 외부 노출 경로 삭제
+    #  - "6382:6379"
     networks:
       - bookcalendar_network
 
@@ -76,8 +76,8 @@ services:
     volumes:
       - ./redis-cache/redis.conf:/usr/local/etc/redis/redis-cache.conf
       - redis-cache-data:/data
-    ports:
-      - "6381:6379"
+    #ports: -> Redis 외부 노출 경로 삭제
+    #  - "6381:6379"
     networks:
       - bookcalendar_network
 

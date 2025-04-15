@@ -1,7 +1,9 @@
 package bookcalendar.server.Domain.Member.Service;
 
 import bookcalendar.server.Domain.Member.DTO.Request.LoginRequest;
+import bookcalendar.server.Domain.Member.DTO.Request.TokenRequest;
 import bookcalendar.server.Domain.Member.DTO.Request.RegisterRequest;
+import bookcalendar.server.Domain.Member.DTO.Response.TokenResponse;
 import bookcalendar.server.Domain.Member.Entity.Member;
 
 public interface MemberService {
@@ -20,5 +22,13 @@ public interface MemberService {
      * @param loginRequest
      * @return
      */
-    String login(LoginRequest loginRequest);
+    TokenResponse login(LoginRequest loginRequest);
+
+    /**
+     * 토큰 최신화 인터페이스
+     *
+     * @param refreshRequest
+     * @return
+     */
+    TokenResponse refreshToken(TokenRequest refreshRequest);
 }

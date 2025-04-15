@@ -2,6 +2,8 @@ package bookcalendar.server.Domain.Member.Controller;
 
 import bookcalendar.server.Domain.Member.DTO.Request.LoginRequest;
 import bookcalendar.server.Domain.Member.DTO.Request.RegisterRequest;
+import bookcalendar.server.Domain.Member.DTO.Request.TokenRequest;
+import bookcalendar.server.Domain.Member.DTO.Response.TokenResponse;
 import bookcalendar.server.Domain.Member.Entity.Member;
 import bookcalendar.server.Domain.Member.Service.MemberService;
 import bookcalendar.server.global.response.ApiResponseWrapper;
@@ -56,22 +58,44 @@ public class MemberController {
          * @return JWT AccessToken + 로그인 성공 메시지
          */
         @Operation(summary = "로그인 API",description = "로그인을 진행하는 API로 닉네임과 비밀번호를 받고 클라이언트에게 AccessToken을 반환하고, Redis-session 저장소에 RefreshToken을 저장한다.",
-                   responses = {
+                responses = {
                         @ApiResponse(responseCode = "200", description = "로그인 성공"),
-                           @ApiResponse(responseCode = "401", description = "비밀번호가 일치하지 않습니다."),
+                        @ApiResponse(responseCode = "401", description = "비밀번호가 일치하지 않습니다."),
                         @ApiResponse(responseCode = "404", description = "해당 유저를 찾울 수 없음")
-                   })
+                })
         @PostMapping("/login")
-        public ResponseEntity<ApiResponseWrapper<String>> login(@RequestBody LoginRequest loginRequest){
+        public ResponseEntity<ApiResponseWrapper<TokenResponse>> login(@RequestBody LoginRequest loginRequest){
 
                 // 로그인 서비스 레이어 호출
-                String jwtAccessToken = memberService.login(loginRequest);
-                log.info("jwtAccessToken: {}", jwtAccessToken);
+                TokenResponse jwtToken = memberService.login(loginRequest);
 
                 return ResponseEntity
                         .status(HttpStatus.OK)
-                        .body(new ApiResponseWrapper<>(jwtAccessToken,"정상적으로 로그인에 성공하였습니다."));
+                        .body(new ApiResponseWrapper<>(jwtToken,"정상적으로 로그인에 성공하였습니다."));
         }
+
+        /**
+         * JWT 토큰 최신화 API (RTR)
+         *
+         * @param tokenRequest 유저가 전송한 토큰
+         * @return JWT 토큰 DTO + 최신화 성공 메시지
+         */
+        @Operation(summary = "RTR API", description = "엑세스 토큰 만료시, 클라이언트 측에서 body에 리프레시 토큰을 담아 엑세스토큰, 리프레시 토큰 재발급을 요청하는 API.",
+                responses = {
+                        @ApiResponse(responseCode = "201", description = "토큰 RTR 재발급 성공"),
+                        @ApiResponse(responseCode = "401", description = "요청한 리프레시 토큰과 저장된 리프레시 토큰이 일치하지 안ㅇㅎ습니다.")
+                })
+        @PostMapping("/rtr")
+        public ResponseEntity<ApiResponseWrapper<TokenResponse>> refreshToken(@RequestBody TokenRequest tokenRequest){
+
+                // 토큰 최신화 서비스 레이어 호출
+                TokenResponse tokenResponse = memberService.refreshToken(tokenRequest);
+
+                return ResponseEntity
+                        .status(HttpStatus.CREATED)
+                        .body(new ApiResponseWrapper<>(tokenResponse, "엑세스 토큰 & 리프레시 토큰이 정상적으로 재발급 되었습니다."));
+        }
+
 
         /* 유저 메달 및 랭킹 반환 */
 

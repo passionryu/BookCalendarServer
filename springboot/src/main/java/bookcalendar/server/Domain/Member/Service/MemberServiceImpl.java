@@ -1,7 +1,9 @@
 package bookcalendar.server.Domain.Member.Service;
 
 import bookcalendar.server.Domain.Member.DTO.Request.LoginRequest;
+import bookcalendar.server.Domain.Member.DTO.Request.TokenRequest;
 import bookcalendar.server.Domain.Member.DTO.Request.RegisterRequest;
+import bookcalendar.server.Domain.Member.DTO.Response.TokenResponse;
 import bookcalendar.server.Domain.Member.Entity.Member;
 import bookcalendar.server.Domain.Member.Exception.MemberException;
 import bookcalendar.server.Domain.Member.Repository.MemberRepository;
@@ -11,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -104,12 +105,11 @@ public class MemberServiceImpl implements MemberService {
      * @return JWT AccessToken
      */
     @Override
-    public String login(LoginRequest loginRequest) {
+    public TokenResponse login(LoginRequest loginRequest) {
 
         // 닉네임으로 사용자 조회
         Member member = memberRepository.findByNickName(loginRequest.nickName())
                 .orElseThrow(() -> new MemberException(ErrorCode.USER_NOT_FOUND));
-        log.info("member : {}", member );
 
         // 비밀번호 검증
         if (!passwordEncoder.matches(loginRequest.password(), member.getPassword())) {
@@ -124,10 +124,51 @@ public class MemberServiceImpl implements MemberService {
         sessionRedisTemplate.opsForValue().set(
                 String.valueOf(member.getMemberId()),
                 refreshToken,
-                Duration.ofHours(1));
+                Duration.ofDays(7));
 
         // AccessToken은 클라이언트에 반환
-        return accessToken;
+        return new TokenResponse(accessToken,refreshToken);
+    }
+
+    // ======================= 토큰 최신화 로직 =========================
+
+    /**
+     * 토큰 최신화 메서드
+     *
+     * @param refreshRequest 유저가 전송한 리프레시 토큰
+     * @return JWT 토큰 DTO
+     */
+    @Override
+    public TokenResponse refreshToken(TokenRequest refreshRequest) {
+
+        // 리프레시 토큰 유효성 검사
+
+        // 토큰에서 유저 고유 번호 추출
+        Long memberId = jwtService.extractUserNumberFromToken(refreshRequest.accessToken());
+
+        // 전송받은 리프레시 토큰 추출
+        String oldRefreshToken = refreshRequest.refreshToken();
+
+        // 전송받은 리프레시 토큰 - redis session에 있는 리프레시 토큰 비교
+        String redisRefreshToken = sessionRedisTemplate.opsForValue().get(memberId.toString());
+        if (redisRefreshToken == null || !redisRefreshToken.equals(oldRefreshToken)) {
+            throw new MemberException(ErrorCode.REFRESH_TOKEN_NOT_MATCHED);
+        }
+
+        // 새 토큰 발급
+        String newAccessToken = jwtService.generateAccessToken(memberId, jwtService.extractNickNameFromToken(refreshRequest.accessToken()));
+        String newRefreshToken = jwtService.generateRefreshToken(memberId, jwtService.extractNickNameFromToken(refreshRequest.accessToken()));
+
+        // 기존 리프레시 토큰 제거
+        sessionRedisTemplate.delete(String.valueOf(memberId));
+
+        // 새 리프레시 토큰 저장
+        sessionRedisTemplate.opsForValue().set(
+                String.valueOf(memberId),
+                newRefreshToken,
+                Duration.ofDays(7));
+
+        return new TokenResponse(newAccessToken,newRefreshToken);
     }
 
 }

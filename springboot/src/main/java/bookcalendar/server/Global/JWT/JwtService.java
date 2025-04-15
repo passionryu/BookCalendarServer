@@ -46,8 +46,8 @@ public class JwtService {
         return Jwts.builder()
                 .setSubject("bookcalendarUser")
                 .claim("userNumber", userNumber)
-//                .claim("nickName", nickName)
-//                .claim("Role", "USER")
+                .claim("nickName", nickName)
+                .claim("Role", "USER")
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
@@ -58,8 +58,8 @@ public class JwtService {
         return Jwts.builder()
                 .setSubject("bookcalendarUser")
                 .claim("userNumber", userNumber)
-//                .claim("nickName", nickName)
-//                .claim("Role", "USER")
+                .claim("nickName", nickName)
+                .claim("Role", "USER")
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
@@ -106,6 +106,31 @@ public class JwtService {
      */
     public Long extractUserNumberFromToken(String token) {
         return extractClaims(token).get("userNumber", Long.class);
+    }
+
+    // ======================= 요청에서 유저 nickName 추출 로직 =========================
+
+    /**
+     * [1단계] HTTP 요청에서 액세스 토큰을 추출하고, JWT 내부의 nickName 클레임을 반환한다.
+     *
+     * @param request HTTP 요청 객체
+     * @return JWT 토큰에서 추출한 유저 nickName (String)
+     */
+    public String extractNickNameFromRequest(HttpServletRequest request) {
+        String accessToken = extractAccessToken(request);
+        return extractNickNameFromToken(accessToken);
+    }
+
+    /**
+     * [2단계] JWT 토큰에서 nickName 클레임 값을 String 타입으로 파싱한다.
+     *
+     * @param token JWT 액세스 토큰
+     * @return nickName 클레임 값 (String)
+     *
+     * @see #extractClaims(String) 클레임 추출 메서드
+     */
+    public String extractNickNameFromToken(String token) {
+        return extractClaims(token).get("nickName", String.class);
     }
 
     // ======================= 요청에서 유저 Role 추출 로직 =========================

@@ -17,9 +17,9 @@ public class ApiResponseWrapper<T> {
         this.message = message;
     }
 
-    public ApiResponseWrapper(String errorCode, String errorMessage) {
+    /*public ApiResponseWrapper(String errorCode, String errorMessage) {
         this.errorCode = errorCode;
         this.message = errorMessage;
-    }
+    }*/
 
 }

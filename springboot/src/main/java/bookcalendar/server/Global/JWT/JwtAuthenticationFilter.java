@@ -41,6 +41,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final List<String> PUBLIC_APIS = List.of(
             "/api/v1/member/register",
+            "/api/v1/member/login",
             "/swagger-ui/**",
             "/swagger-ui/index.html",
             "/v3/api-docs/**",

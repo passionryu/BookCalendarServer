@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.Date;
 
 @Slf4j
@@ -41,22 +42,24 @@ public class JwtService {
     // birth,Role
     // JWT input data : userNumber, Role
 
-    public String generateAccessToken(Long userNumber) {
+    public String generateAccessToken(Long userNumber,String nickName) {
         return Jwts.builder()
                 .setSubject("bookcalendarUser")
                 .claim("userNumber", userNumber)
-                .claim("Role", "USER")
+//                .claim("nickName", nickName)
+//                .claim("Role", "USER")
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
                 .compact();
     }
 
-    public String generateRefreshToken(Long userNumber) {
+    public String generateRefreshToken(Long userNumber,String nickName) {
         return Jwts.builder()
                 .setSubject("bookcalendarUser")
                 .claim("userNumber", userNumber)
-                .claim("Role", "USER")
+//                .claim("nickName", nickName)
+//                .claim("Role", "USER")
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
@@ -130,6 +133,25 @@ public class JwtService {
         return extractClaims(token).get("Role", String.class);
     }
 
+    // ======================= RefreshToken 저장 및 refresh token rotation 로직  =========================
+
+    /**
+     * 리프레쉬 토큰 세션 레디스에 저장 메서드
+     *
+     * @param memberId 로그인하는 유저의 고유 번호
+     * @param refreshToken 로그인 한 후 반환된 리프레쉬 토큰(세션에 저장)
+     */
+    public void saveRefreshTokenToSessionRedis(Long memberId,String refreshToken) {
+
+        log.info("length : {}",refreshToken.getBytes().length);
+        String key = "refresh_token:" + memberId;
+        sessionRedis.opsForValue().set(key, refreshToken, REFRESH_TOKEN_EXPIRATION_TIME);
+
+    }
+
+    /* 기간 만료된 AccessToken 입력 시 새로운 accesstoken, refreshToken반환 (RTR) */
+
+
     // ======================= Logout 후 Black List에 JWT 토큰 등록 로직
 
     /**
@@ -144,21 +166,16 @@ public class JwtService {
     public boolean validateToken(String token) {
 
         try {
-
             // [1단계] 블랙리스트 확인 → 아래 isTokenBlacklisted() 참조
             if (isTokenBlacklisted(token)) {
                 return false;
             }
-
             // [2단계] JWT 자체 유효성 검사
             Claims claims = extractClaims(token);
             return !claims.getExpiration().before(new Date());
-
         } catch (Exception e) {
-
             log.error("Token validation failed: {}", token, e);
             return false;
-
         }
     }
 

@@ -1,20 +1,35 @@
 package bookcalendar.server.Domain.Member.Service;
 
+import bookcalendar.server.Domain.Member.DTO.Request.LoginRequest;
 import bookcalendar.server.Domain.Member.DTO.Request.RegisterRequest;
 import bookcalendar.server.Domain.Member.Entity.Member;
 import bookcalendar.server.Domain.Member.Exception.MemberException;
 import bookcalendar.server.Domain.Member.Repository.MemberRepository;
 import bookcalendar.server.global.exception.ErrorCode;
+import bookcalendar.server.global.jwt.JwtService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MemberServiceImpl implements MemberService {
 
     private final BCryptPasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
+    private final JwtService jwtService;
+
+    @Qualifier("sessionRedisTemplate")
+    @Autowired
+    private RedisTemplate<String, String> sessionRedisTemplate;
 
     // ======================= 회원가입 로직 =========================
 
@@ -83,14 +98,36 @@ public class MemberServiceImpl implements MemberService {
     // ======================= 로그인 로직 =========================
 
     /**
-     * 로그인 시 비밀번호 검증 메서드
+     * 로그인 메서드
      *
-     * @param password
-     * @param storedPassword
-     * @return
+     * @param loginRequest 로그인 요청 (nickname + password)
+     * @return JWT AccessToken
      */
-    public boolean validateLogin(String password, String storedPassword) {
-        // 로그인 시 입력된 비밀번호와 DB에 저장된 해시된 비밀번호 비교
-        return passwordEncoder.matches(password, storedPassword);
+    @Override
+    public String login(LoginRequest loginRequest) {
+
+        // 닉네임으로 사용자 조회
+        Member member = memberRepository.findByNickName(loginRequest.nickName())
+                .orElseThrow(() -> new MemberException(ErrorCode.USER_NOT_FOUND));
+        log.info("member : {}", member );
+
+        // 비밀번호 검증
+        if (!passwordEncoder.matches(loginRequest.password(), member.getPassword())) {
+            throw new MemberException(ErrorCode.INVALID_PASSWORD);
+        }
+
+        // 모든 조건이 만족되면, JWT 생성
+        String accessToken = jwtService.generateAccessToken(member.getMemberId(),member.getNickName());
+        String refreshToken = jwtService.generateRefreshToken(member.getMemberId(),member.getNickName());
+
+        // redis-session 저장소에 refreshToken 저장
+        sessionRedisTemplate.opsForValue().set(
+                String.valueOf(member.getMemberId()),
+                refreshToken,
+                Duration.ofHours(1));
+
+        // AccessToken은 클라이언트에 반환
+        return accessToken;
     }
+
 }

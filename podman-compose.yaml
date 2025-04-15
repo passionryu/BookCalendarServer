@@ -31,6 +31,7 @@ services:
       # 캐싱용 Redis (컨테이너)
       - SPRING_DATA_REDIS_CACHE_HOST=redis-cache
       - SPRING_DATA_REDIS_CACHE_PORT=6379
+      - SPRING_DATA_REDIS_CACHE_PASSWORD=1234
       # 세션용 Redis (컨테이너)
       - SPRING_DATA_REDIS_SESSION_HOST=redis-session
       - SPRING_DATA_REDIS_SESSION_PORT=6379
@@ -67,6 +68,16 @@ services:
     networks:
       - bookcalendar_network
 
+  redis-exporter-session:
+    image: oliver006/redis_exporter:latest
+    container_name: redis-exporter-session
+    command:
+      - '--redis.addr=redis://:1234@redis-session:6379'
+    depends_on:
+      - redis-session
+    networks:
+      - bookcalendar_network
+
   redis-cache:
 
     image: redis:latest
@@ -78,6 +89,16 @@ services:
       - redis-cache-data:/data
     #ports: -> Redis 외부 노출 경로 삭제
     #  - "6381:6379"
+    networks:
+      - bookcalendar_network
+
+  redis-exporter-cache:
+    image: oliver006/redis_exporter:latest
+    container_name: redis-exporter-cache
+    command:
+      - '--redis.addr=redis://:1234@redis-cache:6379'
+    depends_on:
+      - redis-cache
     networks:
       - bookcalendar_network
 

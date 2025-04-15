@@ -27,8 +27,8 @@ public class RedisConfig {
     @Value("${spring.data.redis.cache.port}")
     private int cacheRedisPort;
 
-    // @Value("${spring.data.redis.cache.password}")
-    // private String cacheRedisPassword;
+    @Value("${spring.data.redis.cache.password}")
+    private String cacheRedisPassword;
 
     // 컨테이너 Redis 설정
     @Value("${spring.data.redis.session.host}")
@@ -70,7 +70,7 @@ public class RedisConfig {
         RedisStandaloneConfiguration config = new RedisStandaloneConfiguration();
         config.setHostName(cacheRedisHost);
         config.setPort(cacheRedisPort);
-        // config.setPassword(cacheRedisPassword);
+        config.setPassword(cacheRedisPassword);
         return new LettuceConnectionFactory(config);
     }
 

@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -164,20 +165,24 @@ public class MemberServiceImpl implements MemberService {
      *
      * @param customUserDetails 인증된 유저의 정보 객체
      * @return 유저 메달 & 랭킹 정보 반환
+     *
+     * description : 독서 완료 시 캐싱 데이터 무효화
+     * description : 랭킹 변동 시 캐싱 데이터 무효화
      */
     @Override
+    @Cacheable(value = "rankCache", key = "#customUserDetails.memberId")
     public RankResponse getRank(CustomUserDetails customUserDetails) {
 
         Member member;
 
         try {
             member = memberRepository.findByMemberId(customUserDetails.getMemberId())
-                    .orElseThrow(() -> new MemberException(ErrorCode.USER_NOT_FOUND));
-        } catch (NoSuchElementException e) {
-            throw new MemberException(ErrorCode.USER_NOT_FOUND);
-        } catch (DataAccessException e) {
-            throw new MemberException(ErrorCode.DATABASE_ERROR);
-        }
+                        .orElseThrow(() -> new MemberException(ErrorCode.USER_NOT_FOUND));
+            } catch (NoSuchElementException e) {
+                throw new MemberException(ErrorCode.USER_NOT_FOUND);
+            } catch (DataAccessException e) {
+                throw new MemberException(ErrorCode.DATABASE_ERROR);
+            }
 
         // 유저 메달 정보 & 랭킹 반환
         Integer completion = member.getCompletion();
@@ -185,6 +190,5 @@ public class MemberServiceImpl implements MemberService {
 
         return new RankResponse(rank,completion);
     }
-
 
 }

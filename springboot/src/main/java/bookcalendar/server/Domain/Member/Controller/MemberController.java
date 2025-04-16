@@ -120,5 +120,4 @@ public class MemberController {
                         .body(new ApiResponseWrapper<>(rankResponse,"유저 메달 및 랭킹에 대한 정보가 정상적으로 반환되었습니다."));
         }
 
-
 }

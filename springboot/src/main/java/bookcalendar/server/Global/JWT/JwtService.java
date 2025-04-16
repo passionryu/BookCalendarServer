@@ -1,5 +1,9 @@
 package bookcalendar.server.global.jwt;
 
+import bookcalendar.server.Domain.Member.Entity.Member;
+import bookcalendar.server.Domain.Member.Exception.MemberException;
+import bookcalendar.server.Domain.Member.Repository.MemberRepository;
+import bookcalendar.server.global.exception.ErrorCode;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -19,12 +23,15 @@ public class JwtService {
 
     private final RedisTemplate<String, String> cacheRedis;
     private final RedisTemplate<String, String> sessionRedis;
+    private final MemberRepository memberRepository;
 
     public JwtService(
             @Qualifier("cacheRedisTemplate") RedisTemplate<String, String> cacheRedis,
-            @Qualifier("sessionRedisTemplate") RedisTemplate<String, String> sessionRedis) {
+            @Qualifier("sessionRedisTemplate") RedisTemplate<String, String> sessionRedis,
+            MemberRepository memberRepository) {
         this.cacheRedis = cacheRedis;
         this.sessionRedis = sessionRedis;
+        this.memberRepository = memberRepository;
     }
 
     @Value("${jwt.secret}")
@@ -65,6 +72,15 @@ public class JwtService {
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
                 .compact();
     }
+
+    // ======================= 토큰에서 멤버 객체 추출 로직 =========================
+
+    public Member getMemberFromToken(String token) {
+        Long memberId = extractUserNumberFromToken(token);
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(ErrorCode.USER_NOT_FOUND));
+    }
+
 
     // ======================= 요청에서 엑시스 토큰 추출 로직 =========================
 

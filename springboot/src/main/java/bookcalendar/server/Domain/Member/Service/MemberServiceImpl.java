@@ -3,21 +3,25 @@ package bookcalendar.server.Domain.Member.Service;
 import bookcalendar.server.Domain.Member.DTO.Request.LoginRequest;
 import bookcalendar.server.Domain.Member.DTO.Request.TokenRequest;
 import bookcalendar.server.Domain.Member.DTO.Request.RegisterRequest;
+import bookcalendar.server.Domain.Member.DTO.Response.RankResponse;
 import bookcalendar.server.Domain.Member.DTO.Response.TokenResponse;
 import bookcalendar.server.Domain.Member.Entity.Member;
 import bookcalendar.server.Domain.Member.Exception.MemberException;
 import bookcalendar.server.Domain.Member.Repository.MemberRepository;
+import bookcalendar.server.global.Security.CustomUserDetails;
 import bookcalendar.server.global.exception.ErrorCode;
 import bookcalendar.server.global.jwt.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.NoSuchElementException;
 
 @Slf4j
 @Service
@@ -170,5 +174,35 @@ public class MemberServiceImpl implements MemberService {
 
         return new TokenResponse(newAccessToken,newRefreshToken);
     }
+
+    // ======================= 유저 메달 및 랭킹 반환 로직 =========================
+
+    /**
+     * 유저 메달 및 랭킹 반환 메서드
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @return 유저 메달 & 랭킹 정보 반환
+     */
+    @Override
+    public RankResponse getRank(CustomUserDetails customUserDetails) {
+
+        Member member;
+
+        try {
+            member = memberRepository.findByMemberId(customUserDetails.getMemberId())
+                    .orElseThrow(() -> new MemberException(ErrorCode.USER_NOT_FOUND));
+        } catch (NoSuchElementException e) {
+            throw new MemberException(ErrorCode.USER_NOT_FOUND);
+        } catch (DataAccessException e) {
+            throw new MemberException(ErrorCode.DATABASE_ERROR);
+        }
+
+        // 유저 메달 정보 & 랭킹 반환
+        Integer completion = member.getCompletion();
+        Integer rank = member.getRank();
+
+        return new RankResponse(rank,completion);
+    }
+
 
 }

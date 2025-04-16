@@ -3,9 +3,11 @@ package bookcalendar.server.Domain.Member.Controller;
 import bookcalendar.server.Domain.Member.DTO.Request.LoginRequest;
 import bookcalendar.server.Domain.Member.DTO.Request.RegisterRequest;
 import bookcalendar.server.Domain.Member.DTO.Request.TokenRequest;
+import bookcalendar.server.Domain.Member.DTO.Response.RankResponse;
 import bookcalendar.server.Domain.Member.DTO.Response.TokenResponse;
 import bookcalendar.server.Domain.Member.Entity.Member;
 import bookcalendar.server.Domain.Member.Service.MemberService;
+import bookcalendar.server.global.Security.CustomUserDetails;
 import bookcalendar.server.global.response.ApiResponseWrapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -15,10 +17,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @Tag(name = "Member", description = "회원관리 API")
@@ -97,6 +97,28 @@ public class MemberController {
         }
 
 
-        /* 유저 메달 및 랭킹 반환 */
+        /**
+         * 유저 메달 및 랭킹 반환
+         *
+         * @param customUserDetails 인증된 유저의 정보 객체
+         * @return 유저 메달 & 랭킹 정보 + 반환 성공 메시지
+         */
+        @Operation(summary = " 유저 메달 및 랭킹 반환 API", description = "유저가 커뮤니티 등에서 사용할 메달에 대한 정보와 랭킹에 대한 정보를 반환한다.",
+                responses = {
+                        @ApiResponse(responseCode = "200", description = "유저의 메달 및 랭킹 정상적으로 반환"),
+                        @ApiResponse(responseCode = "404", description = "해당 유저를 찾을 수 없습니다."),
+                        @ApiResponse(responseCode = "500", description = "데이터 베이스 연결에 문제가 발생했습니다.")
+                })
+        @GetMapping("/rank")
+        public ResponseEntity<ApiResponseWrapper<RankResponse>> getRank( @AuthenticationPrincipal CustomUserDetails customUserDetails){
+
+                // 유저 메달 및 랭킹 반환 서비스 레이어 호출
+                RankResponse rankResponse = memberService.getRank(customUserDetails);
+
+                return ResponseEntity
+                        .status(HttpStatus.OK)
+                        .body(new ApiResponseWrapper<>(rankResponse,"유저 메달 및 랭킹에 대한 정보가 정상적으로 반환되었습니다."));
+        }
+
 
 }

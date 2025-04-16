@@ -98,7 +98,7 @@ bash rebuild_springboot.sh
 2.  check-logs.sh
 > redis-session, redis-exporter-session, redis-cache, redis-exporter-cache의 현재 로그 모두 조회 후 최종적으로 springboot 로그 실시간 조회
 ```
-bash  check-logs.sh  
+bash check-logs.sh  
 ```
 
 ### 🧠 역할과 책임에 따른 Redis의 분할

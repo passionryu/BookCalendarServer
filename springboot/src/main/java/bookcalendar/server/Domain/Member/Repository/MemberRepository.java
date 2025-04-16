@@ -3,6 +3,8 @@ package bookcalendar.server.Domain.Member.Repository;
 import bookcalendar.server.Domain.Member.Entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
+
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
     /**
@@ -20,5 +22,21 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
      * @return
      */
     boolean existsByPhoneNumber(String phoneNumber);
+
+    /**
+     * 닉네임으로 유저 객체 조회
+     *
+     * @param nickName 로그인 요청한 닉네임
+     * @return 유저 객체
+     */
+    Optional<Member> findByNickName(String nickName);
+
+    /**
+     * 유저의 고유 번호로 유저 객체 조회
+     *
+     * @param memberId 유저의 고유 번호
+     * @return 유저 객체
+     */
+    Optional<Member> findByMemberId(Long memberId);
 
 }

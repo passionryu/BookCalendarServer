@@ -1,5 +1,9 @@
 package bookcalendar.server.global.jwt;
 
+import bookcalendar.server.Domain.Member.Entity.Member;
+import bookcalendar.server.Domain.Member.Exception.MemberException;
+import bookcalendar.server.Domain.Member.Repository.MemberRepository;
+import bookcalendar.server.global.exception.ErrorCode;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -10,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.Date;
 
 @Slf4j
@@ -18,12 +23,15 @@ public class JwtService {
 
     private final RedisTemplate<String, String> cacheRedis;
     private final RedisTemplate<String, String> sessionRedis;
+    private final MemberRepository memberRepository;
 
     public JwtService(
             @Qualifier("cacheRedisTemplate") RedisTemplate<String, String> cacheRedis,
-            @Qualifier("sessionRedisTemplate") RedisTemplate<String, String> sessionRedis) {
+            @Qualifier("sessionRedisTemplate") RedisTemplate<String, String> sessionRedis,
+            MemberRepository memberRepository) {
         this.cacheRedis = cacheRedis;
         this.sessionRedis = sessionRedis;
+        this.memberRepository = memberRepository;
     }
 
     @Value("${jwt.secret}")
@@ -41,10 +49,11 @@ public class JwtService {
     // birth,Role
     // JWT input data : userNumber, Role
 
-    public String generateAccessToken(Long userNumber) {
+    public String generateAccessToken(Long userNumber,String nickName) {
         return Jwts.builder()
                 .setSubject("bookcalendarUser")
                 .claim("userNumber", userNumber)
+                .claim("nickName", nickName)
                 .claim("Role", "USER")
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION_TIME))
@@ -52,16 +61,26 @@ public class JwtService {
                 .compact();
     }
 
-    public String generateRefreshToken(Long userNumber) {
+    public String generateRefreshToken(Long userNumber,String nickName) {
         return Jwts.builder()
                 .setSubject("bookcalendarUser")
                 .claim("userNumber", userNumber)
+                .claim("nickName", nickName)
                 .claim("Role", "USER")
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION_TIME))
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
                 .compact();
     }
+
+    // ======================= 토큰에서 멤버 객체 추출 로직 =========================
+
+    public Member getMemberFromToken(String token) {
+        Long memberId = extractUserNumberFromToken(token);
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberException(ErrorCode.USER_NOT_FOUND));
+    }
+
 
     // ======================= 요청에서 엑시스 토큰 추출 로직 =========================
 
@@ -105,6 +124,31 @@ public class JwtService {
         return extractClaims(token).get("userNumber", Long.class);
     }
 
+    // ======================= 요청에서 유저 nickName 추출 로직 =========================
+
+    /**
+     * [1단계] HTTP 요청에서 액세스 토큰을 추출하고, JWT 내부의 nickName 클레임을 반환한다.
+     *
+     * @param request HTTP 요청 객체
+     * @return JWT 토큰에서 추출한 유저 nickName (String)
+     */
+    public String extractNickNameFromRequest(HttpServletRequest request) {
+        String accessToken = extractAccessToken(request);
+        return extractNickNameFromToken(accessToken);
+    }
+
+    /**
+     * [2단계] JWT 토큰에서 nickName 클레임 값을 String 타입으로 파싱한다.
+     *
+     * @param token JWT 액세스 토큰
+     * @return nickName 클레임 값 (String)
+     *
+     * @see #extractClaims(String) 클레임 추출 메서드
+     */
+    public String extractNickNameFromToken(String token) {
+        return extractClaims(token).get("nickName", String.class);
+    }
+
     // ======================= 요청에서 유저 Role 추출 로직 =========================
 
     /**
@@ -130,6 +174,25 @@ public class JwtService {
         return extractClaims(token).get("Role", String.class);
     }
 
+    // ======================= RefreshToken 저장 및 refresh token rotation 로직  =========================
+
+    /**
+     * 리프레쉬 토큰 세션 레디스에 저장 메서드
+     *
+     * @param memberId 로그인하는 유저의 고유 번호
+     * @param refreshToken 로그인 한 후 반환된 리프레쉬 토큰(세션에 저장)
+     */
+    public void saveRefreshTokenToSessionRedis(Long memberId,String refreshToken) {
+
+        log.info("length : {}",refreshToken.getBytes().length);
+        String key = "refresh_token:" + memberId;
+        sessionRedis.opsForValue().set(key, refreshToken, REFRESH_TOKEN_EXPIRATION_TIME);
+
+    }
+
+    /* 기간 만료된 AccessToken 입력 시 새로운 accesstoken, refreshToken반환 (RTR) */
+
+
     // ======================= Logout 후 Black List에 JWT 토큰 등록 로직
 
     /**
@@ -144,21 +207,16 @@ public class JwtService {
     public boolean validateToken(String token) {
 
         try {
-
             // [1단계] 블랙리스트 확인 → 아래 isTokenBlacklisted() 참조
             if (isTokenBlacklisted(token)) {
                 return false;
             }
-
             // [2단계] JWT 자체 유효성 검사
             Claims claims = extractClaims(token);
             return !claims.getExpiration().before(new Date());
-
         } catch (Exception e) {
-
             log.error("Token validation failed: {}", token, e);
             return false;
-
         }
     }
 

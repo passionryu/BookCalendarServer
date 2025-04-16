@@ -1,5 +1,7 @@
 package bookcalendar.server.global.jwt;
 
+import bookcalendar.server.Domain.Member.Entity.Member;
+import bookcalendar.server.global.Security.CustomUserDetails;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
@@ -41,6 +43,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final List<String> PUBLIC_APIS = List.of(
             "/api/v1/member/register",
+            "/api/v1/member/login",
             "/swagger-ui/**",
             "/swagger-ui/index.html",
             "/v3/api-docs/**",
@@ -82,8 +85,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String role = jwtService.extractRoleFromRequest(request);
 
                 // [6단계] Spring Security의 인증 객체를 생성
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        userNumber, null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role)));
+                //UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                //        userNumber, null, Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role)));
+
+                // [6단계] Member 엔티티 조회 후 CustomUserDetails로 인증 처리
+                Member member = jwtService.getMemberFromToken(accessToken);
+                CustomUserDetails userDetails = new CustomUserDetails(member);
+
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
                 // [7단계] SecurityContext에 인증 정보를 설정
                 SecurityContextHolder.getContext().setAuthentication(authentication);

@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -28,13 +29,17 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 public class MemberServiceImpl implements MemberService {
 
+    @Qualifier("sessionRedisTemplate")
+    @Autowired
+    private RedisTemplate<String, String> sessionRedisTemplate;
+
     private final BCryptPasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
     private final JwtService jwtService;
 
-    @Qualifier("sessionRedisTemplate")
-    @Autowired
-    private RedisTemplate<String, String> sessionRedisTemplate;
+    @Value("${jwt.refreshexpiration}")
+    private long REFRESH_TOKEN_EXPIRATION_TIME;
+
 
     // ======================= 회원가입 로직 =========================
 
@@ -43,20 +48,17 @@ public class MemberServiceImpl implements MemberService {
      *
      * @param registerRequest 회원가입 데이터
      * @return member 객체
-     *
-     * @see #nicknameExists(String)
-     * @see #phoneNumberExists(String)
      */
     @Override
     public Member register(RegisterRequest registerRequest) {
 
         // 닉네임 중복 체크 로직
-        if (nicknameExists(registerRequest.nickName())) {
+        if (memberRepository.existsByNickName(registerRequest.nickName())) {
             throw new MemberException(ErrorCode.ALREADY_EXIST_NICKNAME);
         }
 
         // 전화번호 중복 체크 로직
-        if (phoneNumberExists(registerRequest.phoneNumber())) {
+        if (memberRepository.existsByPhoneNumber(registerRequest.phoneNumber())) {
             throw new MemberException(ErrorCode.ALREADY_EXIST_PHONE_NUMBER);
         }
 
@@ -78,26 +80,6 @@ public class MemberServiceImpl implements MemberService {
 
         // Member 엔티티 DB 저장 후 반환
         return memberRepository.save(member);
-    }
-
-    /**
-     * 닉네임 중복 체크 메서드
-     *
-     * @param nickname 회원가입 요청이 들어온 닉네임
-     * @return Ture / False
-     */
-    private boolean nicknameExists(String nickname) {
-        return memberRepository.existsByNickName(nickname);
-    }
-
-    /**
-     * 전화번호 중복 체크 메서드
-     *
-     * @param phoneNumber 회원가입 요청이 들어온 전화번호
-     * @return Ture / False
-     */
-    private boolean phoneNumberExists(String phoneNumber) {
-        return memberRepository.existsByPhoneNumber(phoneNumber);
     }
 
     // ======================= 로그인 로직 =========================
@@ -128,7 +110,7 @@ public class MemberServiceImpl implements MemberService {
         sessionRedisTemplate.opsForValue().set(
                 String.valueOf(member.getMemberId()),
                 refreshToken,
-                Duration.ofDays(7));
+                Duration.ofMillis(REFRESH_TOKEN_EXPIRATION_TIME));
 
         // AccessToken은 클라이언트에 반환
         return new TokenResponse(accessToken,refreshToken);
@@ -170,7 +152,7 @@ public class MemberServiceImpl implements MemberService {
         sessionRedisTemplate.opsForValue().set(
                 String.valueOf(memberId),
                 newRefreshToken,
-                Duration.ofDays(7));
+                Duration.ofMillis(REFRESH_TOKEN_EXPIRATION_TIME));
 
         return new TokenResponse(newAccessToken,newRefreshToken);
     }

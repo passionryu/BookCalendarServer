@@ -1,9 +1,12 @@
 #!/bin/bash
 export LANG=en_US.UTF-8
 
+# 📌 스크립트의 절대 경로 기준 루트로 이동
+cd "$(dirname "$0")/.."
+
 # 자동화 스크립트에 down 넣기
 echo "🧹 Step 0: Stopping existing containers..."
-podman-compose -f ../podman-compose.yaml down
+podman-compose -f podman-compose.yaml down || echo "⚠️ Containers may not have stopped cleanly."
 
 # 📌 Step 1: Spring Boot JAR 파일 빌드
 echo "🔨 Step 1: Moving to springboot directory and building jar..."

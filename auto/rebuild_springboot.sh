@@ -10,7 +10,7 @@ podman-compose -f podman-compose.yaml down || echo "⚠️ Containers may not ha
 
 # 📌 Step 1: Spring Boot JAR 파일 빌드
 echo "🔨 Step 1: Moving to springboot directory and building jar..."
-cd ../springboot || { echo "❌ Failed to enter springboot directory"; exit 1; }
+cd ./springboot || { echo "❌ Failed to enter springboot directory"; exit 1; }
 
 # Gradle을 이용해 Spring Boot 애플리케이션을 JAR 파일로 빌드
 ./gradlew bootJar || { echo "❌ Gradle build failed"; exit 1; }

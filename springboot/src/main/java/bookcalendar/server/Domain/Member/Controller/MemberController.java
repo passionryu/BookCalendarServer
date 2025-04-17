@@ -96,7 +96,6 @@ public class MemberController {
                         .body(new ApiResponseWrapper<>(tokenResponse, "엑세스 토큰 & 리프레시 토큰이 정상적으로 재발급 되었습니다."));
         }
 
-
         /**
          * 유저 메달 및 랭킹 반환
          *

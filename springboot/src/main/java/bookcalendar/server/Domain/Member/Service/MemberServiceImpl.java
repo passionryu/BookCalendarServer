@@ -131,7 +131,7 @@ public class MemberServiceImpl implements MemberService {
         // 리프레시 토큰 유효성 검사
 
         // 토큰에서 유저 고유 번호 추출
-        Long memberId = jwtService.extractUserNumberFromToken(refreshRequest.accessToken());
+        Integer memberId = jwtService.extractUserNumberFromToken(refreshRequest.accessToken());
 
         // 전송받은 리프레시 토큰 추출
         String oldRefreshToken = refreshRequest.refreshToken();

@@ -2,6 +2,7 @@
 export LANG=en_US.UTF-8
 
 # 📌 스크립트의 절대 경로 기준 루트로 이동
+echo "✈️ : move to root dir "
 cd "$(dirname "$0")/.."
 
 # 자동화 스크립트에 down 넣기

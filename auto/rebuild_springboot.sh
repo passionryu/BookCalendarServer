@@ -3,7 +3,7 @@ export LANG=en_US.UTF-8
 
 # 자동화 스크립트에 down 넣기
 echo "🧹 Step 0: Stopping existing containers..."
-podman-compose -f podman-compose.yaml down
+podman-compose -f ../podman-compose.yaml down
 
 # 📌 Step 1: Spring Boot JAR 파일 빌드
 echo "🔨 Step 1: Moving to springboot directory and building jar..."
@@ -19,7 +19,7 @@ cd .. || { echo "❌ Failed to return to root directory"; exit 1; }
 echo "🐳 Step 2: Rebuilding Docker image for springboot..."
 
 # podman-compose.yaml 파일을 사용하여 'springboot' 서비스의 이미지 재빌드
-podman-compose -f ../podman-compose.yaml build springboot || { echo "❌ Podman build failed"; exit 1; }
+podman-compose -f podman-compose.yaml build springboot || { echo "❌ Podman build failed"; exit 1; }
 # docker일 경우
 # docker compose -f podman-compose.yaml build springboot || { echo "❌ Docker build failed"; exit 1; }
 

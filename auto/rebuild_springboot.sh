@@ -5,7 +5,7 @@ export LANG=en_US.UTF-8
 echo "✈️ : move to root dir "
 cd "$(dirname "$0")/.."
 
-# 자동화 스크립트에 down 넣기
+# 📌 자동화 스크립트에 down 넣기
 echo "🧹 Step 0: Stopping existing containers..."
 podman-compose -f podman-compose.yaml down || echo "⚠️ Containers may not have stopped cleanly."
 

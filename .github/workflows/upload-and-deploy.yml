@@ -1,0 +1,37 @@
+name: Upload and Deploy to On-Premise Server
+
+on:
+  push:
+    branches:
+      - master  # maater 브랜치에 push 시 실행
+
+jobs:
+  upload-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. 코드 다운로드
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # 2. SSH 설정
+    - name: Setup SSH
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
+        ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+
+    # 3. 코드 서버로 업로드
+    - name: Upload code to server
+      run: |
+        rsync -avz --exclude '.git' -e "ssh -i ~/.ssh/id_rsa" ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.DEPLOY_PATH }}
+
+    # 4. 서버에서 podman-compose 실행
+    - name: Deploy containers using podman-compose
+      run: |
+        ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+          cd ${{ secrets.DEPLOY_PATH }}
+          podman-compose down
+          podman-compose up -d --build  # 최신 코드로 재빌드 후 실행
+        EOF

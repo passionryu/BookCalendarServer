@@ -4,7 +4,9 @@ import bookcalendar.server.Domain.Book.DTO.Request.BookRegisterRequest;
 import bookcalendar.server.Domain.Book.DTO.Response.BookResponse;
 import bookcalendar.server.Domain.Book.Entity.Book;
 import bookcalendar.server.Domain.Book.Repository.BookRepository;
+import bookcalendar.server.Domain.Member.Exception.MemberException;
 import bookcalendar.server.global.Security.CustomUserDetails;
+import bookcalendar.server.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -70,10 +72,10 @@ public class BookServiceImpl implements BookService {
     @Transactional
     public Book registerBook(BookRegisterRequest bookRegisterRequest,CustomUserDetails customUserDetails) {
 
-        // 유저의 정보 객체에서 memberId 추출
-        Integer memberId = customUserDetails.getMemberId();
+        // 입력 DTO를 Entity로 전환
+        Book book = bookRegisterRequest.toEntity(customUserDetails.getMemberId());
 
-        // 도서를 객체화 하여 저장 후 결과 반환
-        return bookRegisterRequest.toEntity(memberId);
+        // 저장 및 book 객체 반환
+        return bookRepository.save(book);
     }
 }

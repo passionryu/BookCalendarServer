@@ -235,32 +235,25 @@ public class JwtService {
     // ======================= Util Code =========================
 
     /**
-     * 클레임 추출 메서드 - Deprecated
+     * 클레임 추출 메서드
      * 
      * @param token
      * @return
      *
      */
-//    public Claims extractClaims(String token) {
-//        return Jwts.parser() // JWT 파서 객체 생성
-//                .setSigningKey(SECRET_KEY)
-//                .parseClaimsJws(token)
-//                .getBody();
-//    }
-
-    /**
-     *
-     *
-     * @param token
-     * @return
-     */
     public Claims extractClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8)))
-                .build()
+        return Jwts.parser() // JWT 파서 객체 생성
+                .setSigningKey(SECRET_KEY)
                 .parseClaimsJws(token)
                 .getBody();
     }
 
+//    public Claims extractClaims(String token) {
+//        return Jwts.parserBuilder()
+//                .setSigningKey(Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8)))
+//                .build()
+//                .parseClaimsJws(token)
+//                .getBody();
+//    }
 
 }

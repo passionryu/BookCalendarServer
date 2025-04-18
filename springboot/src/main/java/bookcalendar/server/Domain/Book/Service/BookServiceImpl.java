@@ -1,5 +1,6 @@
 package bookcalendar.server.Domain.Book.Service;
 
+import bookcalendar.server.Domain.Book.DTO.Request.BookRegisterRequest;
 import bookcalendar.server.Domain.Book.DTO.Response.BookResponse;
 import bookcalendar.server.Domain.Book.Entity.Book;
 import bookcalendar.server.Domain.Book.Repository.BookRepository;
@@ -7,6 +8,7 @@ import bookcalendar.server.global.Security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -54,5 +56,24 @@ public class BookServiceImpl implements BookService {
                     book.getGenre(),
                     book.getStartDate(),
                     book.getFinishDate());
+    }
+
+    // ======================= 도서 등록 로직 =========================
+
+    /**
+     * 도서 등록 메서드
+     *
+     * @param bookRegisterRequest 도서 등록 데이터
+     * @return 등록 도서 데이터
+     */
+    @Override
+    @Transactional
+    public Book registerBook(BookRegisterRequest bookRegisterRequest,CustomUserDetails customUserDetails) {
+
+        // 유저의 정보 객체에서 memberId 추출
+        Integer memberId = customUserDetails.getMemberId();
+
+        // 도서를 객체화 하여 저장 후 결과 반환
+        return bookRegisterRequest.toEntity(memberId);
     }
 }

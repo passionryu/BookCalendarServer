@@ -2,14 +2,17 @@ package bookcalendar.server.Domain.Book.Entity;
 
 import bookcalendar.server.Domain.Member.Entity.Member;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
+
 import java.time.LocalDate;
 
 @Entity
 @Table(name = "book")
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Book {
 
     @Id

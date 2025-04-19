@@ -3,35 +3,49 @@ name: Upload and Deploy to On-Premise Server
 on:
   push:
     branches:
-      - master  # maater 브랜치에 push 시
+      - master  # master 브랜치에 push 시 실행
 
 jobs:
   upload-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-    # 1. 코드 다운로드
-    - name: Checkout code
-      uses: actions/checkout@v3
+      # 1. 코드 체크아웃
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    # 2. SSH 설정
-    - name: Setup SSH
-      run: |
-        mkdir -p ~/.ssh
-        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+      # 2. SSH 설정
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
-    # 3. 코드 서버로 업로드
-    - name: Upload code to server
-      run: |
-        rsync -avz --exclude '.git' -e "ssh -i ~/.ssh/id_rsa" ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.DEPLOY_PATH }}
+      # 3. 코드 서버로 업로드
+      - name: Upload code to server
+        run: |
+          rsync -avz --exclude '.git' -e "ssh -i ~/.ssh/id_rsa" ./ ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:${{ secrets.DEPLOY_PATH }}
 
-    # 4. 서버에서 podman-compose 실행
-    - name: Deploy containers using podman-compose
-      run: |
-        ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-          cd ${{ secrets.DEPLOY_PATH }}
-          podman-compose down
-          podman-compose up -d --build  # 최신 코드로 재빌드 후 실행
-        EOF
+      # 4. 설정 파일 확인 및 생성
+      - name: Ensure configuration files exist
+        run: |
+          ssh -T -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            cd ${{ secrets.DEPLOY_PATH }}
+            mkdir -p nginx redis-session redis-cache mariadb prometheus grafana
+            touch nginx/nginx.conf redis-session/redis.conf redis-cache/redis.conf mariadb/my.cnf prometheus/prometheus.yml grafana/grafana.ini
+            chmod -R 644 nginx redis-session redis-cache mariadb prometheus grafana
+          EOF
+
+      # 5. 컨테이너 배포
+      - name: Deploy containers using podman-compose
+        run: |
+          ssh -T -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
+            cd ${{ secrets.DEPLOY_PATH }}
+            podman rm -f $(podman ps -aq) || true
+            podman network rm bookcalendar_network || true
+            podman system prune -f
+            podman-compose down --remove-orphans
+            podman-compose up -d --build || (podman logs springboot && exit 1)
+            podman ps -a
+          EOF

@@ -3,7 +3,7 @@ name: Upload and Deploy to On-Premise Server
 on:
   push:
     branches:
-      - master  # maater 브랜치에 push 시 실행
+      - master  # maater 브랜치에 push 시
 
 jobs:
   upload-and-deploy:

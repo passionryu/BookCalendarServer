@@ -2,7 +2,7 @@ version: '3'
 
 services:
   nginx:
-    image: nginx:latest  # 엔진 X 최신 버전 이미지를 도커 허브에서 가져옴 -> 정확한 버전을 명시하는 것이 좋을 수도 있음
+    image: docker.io/library/nginx:latest  # 엔진 X 최신 버전 이미지를 도커 허브에서 가져옴 -> 정확한 버전을 명시하는 것이 좋을 수도 있음
     container_name: nginx # podman ps 혹은 docker ps 할 때 보이는 이름
     restart: always # 컨테이너가 예기치 않게 종료되면 항상 재시작하도록 설정
     volumes:
@@ -56,7 +56,7 @@ services:
       - bookcalendar_network
 
   redis-session:
-    image: redis:latest
+    image: docker.io/library/redis:latest
     container_name: redis-session
     restart: always
     command: redis-server /usr/local/etc/redis/redis-session.conf
@@ -69,7 +69,7 @@ services:
       - bookcalendar_network
 
   redis-exporter-session:
-    image: oliver006/redis_exporter:latest
+    image: docker.io/oliver006/redis_exporter:latest
     container_name: redis-exporter-session
     command:
       - '--redis.addr=redis://:1234@redis-session:6379'
@@ -80,7 +80,7 @@ services:
 
   redis-cache:
 
-    image: redis:latest
+    image: docker.io/library/redis:latest
     container_name: redis-cache
     restart: always
     command: redis-server /usr/local/etc/redis/redis-cache.conf
@@ -93,7 +93,7 @@ services:
       - bookcalendar_network
 
   redis-exporter-cache:
-    image: oliver006/redis_exporter:latest
+    image: docker.io/oliver006/redis_exporter:latest
     container_name: redis-exporter-cache
     command:
       - '--redis.addr=redis://:1234@redis-cache:6379'
@@ -103,7 +103,7 @@ services:
       - bookcalendar_network
 
   mariadb:
-    image: mariadb:latest
+    image: docker.io/library/mariadb:latest
     container_name: mariadb
     restart: always
     environment:
@@ -125,7 +125,7 @@ services:
       retries: 5
 
   prometheus:
-    image: prom/prometheus:latest
+    image: docker.io/prom/prometheus:latest
     container_name: prometheus
     restart: always
     volumes:
@@ -142,7 +142,7 @@ services:
       - bookcalendar_network
 
   grafana:
-    image: grafana/grafana:latest
+    image: docker.io/grafana/grafana:latest
     container_name: grafana
     restart: always
     volumes:

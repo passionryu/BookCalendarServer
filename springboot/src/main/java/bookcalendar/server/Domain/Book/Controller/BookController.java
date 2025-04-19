@@ -86,5 +86,8 @@ public class BookController {
                 .body(new ApiResponseWrapper<>(book,"입력하신 도서가 정상적으로 등록되었습니다."));
     }
 
+    /* 독서 포기 API */
+
+
 }
 

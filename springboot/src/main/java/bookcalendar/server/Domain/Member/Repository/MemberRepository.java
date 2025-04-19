@@ -37,6 +37,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
      * @param memberId 유저의 고유 번호
      * @return 유저 객체
      */
-    Optional<Member> findByMemberId(Long memberId);
+    Optional<Member> findByMemberId(Integer memberId);
 
 }

@@ -12,7 +12,7 @@ import java.util.Collections;
 @Getter
 public class CustomUserDetails implements UserDetails {
 
-    private final Long memberId;
+    private final Integer memberId;
     private final String nickname;
     private final String role;
 

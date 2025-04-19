@@ -79,7 +79,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (accessToken != null && jwtService.validateToken(accessToken)) {
             try {
                 // [4단계] 토큰에서 사용자 정보를 추출
-                Long userNumber = jwtService.extractUserNumberFromToken(accessToken);
+                Integer userNumber = jwtService.extractUserNumberFromToken(accessToken);
 
                 // [5단계] 토큰에서 권한 정보를 추출
                 String role = jwtService.extractRoleFromRequest(request);

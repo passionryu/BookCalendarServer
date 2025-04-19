@@ -7,6 +7,7 @@ import bookcalendar.server.global.exception.ErrorCode;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Date;
 
@@ -49,7 +51,7 @@ public class JwtService {
     // birth,Role
     // JWT input data : userNumber, Role
 
-    public String generateAccessToken(Long userNumber,String nickName) {
+    public String generateAccessToken(Integer userNumber,String nickName) {
         return Jwts.builder()
                 .setSubject("bookcalendarUser")
                 .claim("userNumber", userNumber)
@@ -61,7 +63,7 @@ public class JwtService {
                 .compact();
     }
 
-    public String generateRefreshToken(Long userNumber,String nickName) {
+    public String generateRefreshToken(Integer userNumber,String nickName) {
         return Jwts.builder()
                 .setSubject("bookcalendarUser")
                 .claim("userNumber", userNumber)
@@ -76,8 +78,8 @@ public class JwtService {
     // ======================= 토큰에서 멤버 객체 추출 로직 =========================
 
     public Member getMemberFromToken(String token) {
-        Long memberId = extractUserNumberFromToken(token);
-        return memberRepository.findById(memberId)
+        Integer memberId = extractUserNumberFromToken(token);
+        return memberRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new MemberException(ErrorCode.USER_NOT_FOUND));
     }
 
@@ -107,7 +109,7 @@ public class JwtService {
      * @param request HTTP 요청 객체
      * @return JWT 토큰에서 추출한 유저 고유번호 (userNumber)
      */
-    public Long extractUserNumberFromRequest(HttpServletRequest request) {
+    public Integer extractUserNumberFromRequest(HttpServletRequest request) {
         String accessToken = extractAccessToken(request);
         return extractUserNumberFromToken(accessToken);
     }
@@ -120,8 +122,8 @@ public class JwtService {
      *
      * @see #extractClaims(String) 클레임 추출 메서드
      */
-    public Long extractUserNumberFromToken(String token) {
-        return extractClaims(token).get("userNumber", Long.class);
+    public Integer extractUserNumberFromToken(String token) {
+        return extractClaims(token).get("userNumber", Integer.class);
     }
 
     // ======================= 요청에서 유저 nickName 추출 로직 =========================
@@ -182,7 +184,7 @@ public class JwtService {
      * @param memberId 로그인하는 유저의 고유 번호
      * @param refreshToken 로그인 한 후 반환된 리프레쉬 토큰(세션에 저장)
      */
-    public void saveRefreshTokenToSessionRedis(Long memberId,String refreshToken) {
+    public void saveRefreshTokenToSessionRedis(Integer memberId,String refreshToken) {
 
         log.info("length : {}",refreshToken.getBytes().length);
         String key = "refresh_token:" + memberId;
@@ -245,5 +247,13 @@ public class JwtService {
                 .parseClaimsJws(token)
                 .getBody();
     }
+
+//    public Claims extractClaims(String token) {
+//        return Jwts.parserBuilder()
+//                .setSigningKey(Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8)))
+//                .build()
+//                .parseClaimsJws(token)
+//                .getBody();
+//    }
 
 }

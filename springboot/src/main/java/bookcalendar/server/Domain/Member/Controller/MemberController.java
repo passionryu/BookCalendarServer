@@ -46,8 +46,7 @@ public class MemberController {
                 // 회원가입 서비스 레이어 호출
                 Member member = memberService.register(registerRequest);
 
-                return ResponseEntity
-                        .status(HttpStatus.CREATED)
+                return ResponseEntity.status(HttpStatus.CREATED)
                         .body(new ApiResponseWrapper<>(member, "회원가입이 정상적으로 완료되었습니다"));
         }
 
@@ -69,8 +68,7 @@ public class MemberController {
                 // 로그인 서비스 레이어 호출
                 TokenResponse jwtToken = memberService.login(loginRequest);
 
-                return ResponseEntity
-                        .status(HttpStatus.OK)
+                return ResponseEntity.status(HttpStatus.OK)
                         .body(new ApiResponseWrapper<>(jwtToken,"정상적으로 로그인에 성공하였습니다."));
         }
 
@@ -91,11 +89,9 @@ public class MemberController {
                 // 토큰 최신화 서비스 레이어 호출
                 TokenResponse tokenResponse = memberService.refreshToken(tokenRequest);
 
-                return ResponseEntity
-                        .status(HttpStatus.CREATED)
+                return ResponseEntity.status(HttpStatus.CREATED)
                         .body(new ApiResponseWrapper<>(tokenResponse, "엑세스 토큰 & 리프레시 토큰이 정상적으로 재발급 되었습니다."));
         }
-
 
         /**
          * 유저 메달 및 랭킹 반환
@@ -115,8 +111,7 @@ public class MemberController {
                 // 유저 메달 및 랭킹 반환 서비스 레이어 호출
                 RankResponse rankResponse = memberService.getRank(customUserDetails);
 
-                return ResponseEntity
-                        .status(HttpStatus.OK)
+                return ResponseEntity.status(HttpStatus.OK)
                         .body(new ApiResponseWrapper<>(rankResponse,"유저 메달 및 랭킹에 대한 정보가 정상적으로 반환되었습니다."));
         }
 

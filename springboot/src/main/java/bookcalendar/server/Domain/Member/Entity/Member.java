@@ -1,9 +1,12 @@
 package bookcalendar.server.Domain.Member.Entity;
 
+import bookcalendar.server.Domain.Book.Entity.Book;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "member")
@@ -17,7 +20,7 @@ public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "memberId")
-    private Long memberId;
+    private Integer memberId;
 
     @Column(nullable = false, unique = true, length = 50)
     private String nickName;
@@ -56,4 +59,13 @@ public class Member {
 
     @Column(nullable = false, length = 20)
     private String role;
+
+    /**
+     * Member와 Book 간의 일대다 관계
+     * mappedBy: Book 엔티티의 member 필드가 관계의 주인임을 나타냄
+     * cascade: Member 삭제 시 연관된 Book도 삭제 (DB의 ON DELETE CASCADE와 일치)
+     */
+    @Builder.Default
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Book> books = new ArrayList<>();
 }

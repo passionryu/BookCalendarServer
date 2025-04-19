@@ -37,7 +37,7 @@ jobs:
             chmod -R 644 nginx redis-session redis-cache mariadb prometheus grafana
           EOF
 
-      # 5. 컨테이너 배포
+      # 5. 컨테이너 배포.
       - name: Deploy containers using podman-compose
         run: |
           ssh -T -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'

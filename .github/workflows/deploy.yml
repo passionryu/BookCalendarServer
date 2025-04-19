@@ -32,6 +32,7 @@ jobs:
         run: |
           ssh -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
             cd ${{ secrets.DEPLOY_PATH }}
-            podman-compose down
+            podman-compose down || true
+            podman rm -f nginx || true
             podman-compose up -d --build  # 최신 코드로 재빌드 후 실행
           EOF

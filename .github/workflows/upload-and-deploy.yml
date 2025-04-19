@@ -85,11 +85,15 @@ jobs:
       - name: Deploy containers using podman-compose
         run: |
           ssh -T -i ~/.ssh/id_rsa ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
-            cd ${{ secrets.DEPLOY_PATH }}
-            podman rm -f $(podman ps -aq) || true
-            podman network rm bookcalendar_network || true
-            podman system prune -f
-            podman-compose down --remove-orphans
-            podman-compose up -d --build || (podman logs springboot && exit 1)
-            podman ps -a
+          cd ${{ secrets.DEPLOY_PATH }}
+          CONTAINERS=$(podman ps -aq)
+          if [ -n "$CONTAINERS" ]; then
+          podman rm -f $CONTAINERS
+          fi
+          
+          podman network rm bookcalendar_network || true
+          podman system prune -f
+          podman-compose down --remove-orphans
+          podman-compose up -d --build || (podman logs springboot && exit 1)
+          podman ps -a
           EOF

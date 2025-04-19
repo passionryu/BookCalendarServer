@@ -44,6 +44,7 @@ public class SecurityConfig {
                 // 권한 url 설정
                 .authorizeHttpRequests(req -> req.requestMatchers("/api/v1/member/register").permitAll().
                         requestMatchers("/api/v1/member/login").permitAll().
+                        requestMatchers("/api/**").permitAll().
 
                         requestMatchers("/swagger-ui/**").permitAll().
                         requestMatchers("/swagger-ui/index.html").permitAll().

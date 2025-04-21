@@ -49,6 +49,14 @@ public class Member {
     private Integer completion;
 
     /**
+     * 유저가 작성한 리뷰 수
+     * Default = 0 으로 시작
+     */
+    @Column
+    @org.hibernate.annotations.ColumnDefault("0")
+    private Integer reviewCount;
+
+    /**
      * 유저의 랭킹 (예 : 상위 50%)
      * Default = 100 으로 시작
      * rank는 sql 예약어 이므로 백틱으로 감쌈

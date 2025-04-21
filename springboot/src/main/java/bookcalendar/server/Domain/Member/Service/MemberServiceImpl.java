@@ -75,6 +75,7 @@ public class MemberServiceImpl implements MemberService {
                 .genre(registerRequest.genre())
                 .job(registerRequest.job())
                 .completion(0)
+                .reviewCount(0)
                 .rank(100)
                 .role("USER")
                 .build();
@@ -185,10 +186,10 @@ public class MemberServiceImpl implements MemberService {
             }
 
         // 유저 메달 정보 & 랭킹 반환
-        Integer completion = member.getCompletion();
+        Integer reviewCount = member.getReviewCount();
         Integer rank = member.getRank();
 
-        return new RankResponse(rank,completion);
+        return new RankResponse(rank,reviewCount);
     }
 
 }

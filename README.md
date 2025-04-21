@@ -57,7 +57,11 @@
 ---
 
 ### 🧪Swagger UI
-입장 주소 
+학과 서버 swagger 입장 주소 
+```
+http://ceprj.gachon.ac.kr:60001/api/swagger-ui/index.html
+```
+로컬 서버 swagger입장 주소 
 ```
 http://localhost:8081/swagger-ui/index.html
 ```

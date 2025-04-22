@@ -35,8 +35,8 @@ public class Book {
     @Column(name = "genre", length = 100)
     private String genre;
 
-    //@Column(name = "memberId")
-    //private Integer memberId;
+    @Column(name = "memberId")
+    private Integer memberId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)

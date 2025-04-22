@@ -1,6 +1,7 @@
 package bookcalendar.server.Domain.Book.DTO.Request;
 
 import bookcalendar.server.Domain.Book.Entity.Book;
+import bookcalendar.server.Domain.Member.Entity.Member;
 
 import java.time.LocalDate;
 
@@ -21,7 +22,7 @@ public record BookRegisterRequest(
                 .startDate(startDate)
                 .finishDate(finishDate)
                 .status(Book.Status.독서중) // 기본값 지정
-                .memberId(memberId)
+                .member(Member.builder().memberId(memberId).build())
                 .build();
     }
 }

@@ -1,9 +1,12 @@
 package bookcalendar.server.Domain.Book.Entity;
 
 import bookcalendar.server.Domain.Member.Entity.Member;
+import bookcalendar.server.Domain.Review.Entity.Review;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.time.LocalDate;
 
 @Entity
@@ -32,8 +35,8 @@ public class Book {
     @Column(name = "genre", length = 100)
     private String genre;
 
-    @Column(name = "memberId")
-    private Integer memberId;
+    //@Column(name = "memberId")
+    //private Integer memberId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
@@ -49,6 +52,10 @@ public class Book {
     @ManyToOne
     @JoinColumn(name = "memberId", referencedColumnName = "memberId", insertable = false, updatable = false)
     private Member member;
+
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Review> reviews = new ArrayList<>();
 
     /**
      * 독서의 상태

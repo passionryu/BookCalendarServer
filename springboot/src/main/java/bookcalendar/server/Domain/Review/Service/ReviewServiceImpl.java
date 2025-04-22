@@ -20,8 +20,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.ChatClient;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -42,9 +44,10 @@ public class ReviewServiceImpl implements ReviewService {
      * @return 독후감에 대한 AI 질문 3가지
      */
     @Override
+    @Transactional
     public QuestionResponse writeReview(CustomUserDetails customUserDetails, ReviewRequest reviewRequest) {
 
-        // 요청에서 본문 추출
+        // 사용자 요청에서 본문/오늘 독서한 페이지 수 추출
         String contents = reviewRequest.contents();
         Integer pages = reviewRequest.pages();
 
@@ -56,10 +59,19 @@ public class ReviewServiceImpl implements ReviewService {
         Member member = memberRepository.findByMemberId(customUserDetails.getMemberId())
                 .orElseThrow(() -> new MemberException(ErrorCode.USER_NOT_FOUND));
 
-        // Progress 계산 로직
-        //Integer progress = (pages / book.getTotalPage())* 100;
-        Integer progress = (int)(((double) pages / book.getTotalPage()) * 100);
+        // 특정 멤버와 책에 대한 기존 리뷰들의 총 페이지 수 계산
+        List<Review> reviews = reviewRepository.findByMember_MemberIdAndBook_BookId(
+                member.getMemberId(),
+                book.getBookId()
+        );
 
+        int previousPages = reviews.stream()
+                .mapToInt(Review::getPages)
+                .sum();
+
+        // Progress 계산 로직
+        Integer progress = (int)(((double) (previousPages + pages) / book.getTotalPage()) * 100);
+        log.info("previousPages : {}", previousPages);
         log.info("book.getTotalPage() : {}", book.getTotalPage());
         log.info("progress : {}", progress);
 
@@ -73,7 +85,7 @@ public class ReviewServiceImpl implements ReviewService {
         Review savedReview = reviewRepository.save(Review.builder()
                         .contents(contents)
                         .progress(progress)
-                        .pages(pages)
+                        .pages(previousPages+pages)
                         .member(member)
                         .book(book)
                         .date(LocalDate.now())
@@ -81,6 +93,11 @@ public class ReviewServiceImpl implements ReviewService {
 
         // reviewId 반환
         Integer reviewId = savedReview.getReviewId();
+
+        // review저장 후 member의 reviewCount에 +1
+        log.info("Before : member.getReviewCount() : {}", member.getReviewCount());
+        member.setReviewCount(member.getReviewCount() + 1);
+        log.info("After : member.getReviewCount() : {}", member.getReviewCount());
 
         /* 결과를 Question DB에 저장하는 로직 */
         Question question = questionRepository.save(Question.builder()

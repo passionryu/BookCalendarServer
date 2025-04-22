@@ -1,6 +1,8 @@
 package bookcalendar.server.global.exception;
 
+import bookcalendar.server.Domain.Book.Exception.BookException;
 import bookcalendar.server.Domain.Member.Exception.MemberException;
+import bookcalendar.server.Domain.Question.Exception.QuestionException;
 import bookcalendar.server.global.response.ApiResponseWrapper;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
@@ -23,6 +25,30 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(MemberException.class)
     public ResponseEntity<ApiResponseWrapper<String>> memberExceptions(MemberException ex) {
+        ApiResponseWrapper<String> response = new ApiResponseWrapper<>(ex.getErrorcode().getErrorCode(),ex.getErrorcode().getMessage());
+        return new ResponseEntity<>(response, ex.getErrorcode().getHttpStatus());
+    }
+
+    /**
+     * Book Domain Global Exception Method
+     *
+     * @param ex
+     * @return
+     */
+    @ExceptionHandler(BookException.class)
+    public ResponseEntity<ApiResponseWrapper<String>> bookExceptions(BookException ex) {
+        ApiResponseWrapper<String> response = new ApiResponseWrapper<>(ex.getErrorcode().getErrorCode(),ex.getErrorcode().getMessage());
+        return new ResponseEntity<>(response, ex.getErrorcode().getHttpStatus());
+    }
+
+    /**
+     * Question Domain Global Exception Method
+     *
+     * @param ex
+     * @return
+     */
+    @ExceptionHandler(QuestionException.class)
+    public ResponseEntity<ApiResponseWrapper<String>> questionExceptions(QuestionException ex) {
         ApiResponseWrapper<String> response = new ApiResponseWrapper<>(ex.getErrorcode().getErrorCode(),ex.getErrorcode().getMessage());
         return new ResponseEntity<>(response, ex.getErrorcode().getHttpStatus());
     }

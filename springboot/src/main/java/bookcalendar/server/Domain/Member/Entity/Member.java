@@ -1,6 +1,7 @@
 package bookcalendar.server.Domain.Member.Entity;
 
 import bookcalendar.server.Domain.Book.Entity.Book;
+import bookcalendar.server.Domain.Review.Entity.Review;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -76,4 +77,10 @@ public class Member {
     @Builder.Default
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Book> books = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> reviews = new ArrayList<>();
+
+
 }

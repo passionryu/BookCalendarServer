@@ -3,6 +3,8 @@ package bookcalendar.server.Domain.Book.Repository;
 import bookcalendar.server.Domain.Book.Entity.Book;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
+
 public interface BookRepository extends JpaRepository<Book, Integer> {
 
     /**
@@ -14,6 +16,9 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
      */
     boolean existsByMemberIdAndStatus(Integer memberId, Book.Status status);
 
+    // 수정된 메서드 선언
+    //boolean existsByMember_MemberIdAndStatus(Integer memberId, Book.Status status);
+
     /**
      * 현재 독서중인 도서 반환
      *
@@ -21,6 +26,6 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
      * @param status "독서중"인 도서
      * @return 현재 유저가 독서중인 도서
      */
-    Book findByMemberIdAndStatus(Integer memberId, Book.Status status);
+    Optional<Book> findByMemberIdAndStatus(Integer memberId, Book.Status status);
 
 }

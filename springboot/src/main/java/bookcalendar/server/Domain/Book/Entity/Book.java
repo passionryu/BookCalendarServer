@@ -1,9 +1,12 @@
 package bookcalendar.server.Domain.Book.Entity;
 
 import bookcalendar.server.Domain.Member.Entity.Member;
+import bookcalendar.server.Domain.Review.Entity.Review;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.time.LocalDate;
 
 @Entity
@@ -49,6 +52,10 @@ public class Book {
     @ManyToOne
     @JoinColumn(name = "memberId", referencedColumnName = "memberId", insertable = false, updatable = false)
     private Member member;
+
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Review> reviews = new ArrayList<>();
 
     /**
      * 독서의 상태

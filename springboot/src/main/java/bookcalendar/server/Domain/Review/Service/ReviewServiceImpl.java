@@ -6,6 +6,8 @@ import bookcalendar.server.Domain.Book.Repository.BookRepository;
 import bookcalendar.server.Domain.Member.Entity.Member;
 import bookcalendar.server.Domain.Member.Exception.MemberException;
 import bookcalendar.server.Domain.Member.Repository.MemberRepository;
+import bookcalendar.server.Domain.Question.Entity.Question;
+import bookcalendar.server.Domain.Question.Repository.QuestionRepository;
 import bookcalendar.server.Domain.Review.DTO.Request.ReviewRequest;
 import bookcalendar.server.Domain.Review.DTO.Response.QuestionNumberOneResponse;
 import bookcalendar.server.Domain.Review.DTO.Response.QuestionNumberTwoThreeResponse;
@@ -29,6 +31,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final ReviewRepository reviewRepository;
     private final MemberRepository memberRepository;
     private final BookRepository bookRepository;
+    private final QuestionRepository questionRepository;
     private final ChatClient chatClient;
 
     /**
@@ -46,15 +49,17 @@ public class ReviewServiceImpl implements ReviewService {
         Integer pages = reviewRequest.pages();
 
         // 현재 유저의 독서중인 도서 객체 반환
-        Book book = bookRepository.findByMemberIdAndStatus( customUserDetails.getMemberId(),
-                                                            Book.Status.독서중) ;
+        Book book = bookRepository.findByMemberIdAndStatus( customUserDetails.getMemberId(), Book.Status.독서중)
+                .orElseThrow(()->new MemberException(ErrorCode.USER_NOT_FOUND) );
 
         // 현재 유저의 멤버 객체 반환
         Member member = memberRepository.findByMemberId(customUserDetails.getMemberId())
                 .orElseThrow(() -> new MemberException(ErrorCode.USER_NOT_FOUND));
 
         // Progress 계산 로직
-        Integer progress = (pages / book.getTotalPage())* 100;
+        //Integer progress = (pages / book.getTotalPage())* 100;
+        Integer progress = (int)(((double) pages / book.getTotalPage()) * 100);
+
         log.info("book.getTotalPage() : {}", book.getTotalPage());
         log.info("progress : {}", progress);
 
@@ -64,33 +69,36 @@ public class ReviewServiceImpl implements ReviewService {
         /* 2번 질문지 생성 AI 모델로 요청 */
         QuestionNumberTwoThreeResponse questionNumberTwoThreeResponse = numberTwoThreeQuestion(contents);
 
-        /**
-         * 결과 Review DB에 저장 하는 로직
-         *
-         * memberId
-         * bookId
-         * contents
-         * progress
-         * pages
-         * date
-         * emotion
-         */
-//        reviewRepository.save(Review.builder()
-//                        .contents(contents)
-//                        .progress(progress)
-//                        .pages(pages)
-//                        .member(member)
-//                        .book(book)
-//                        .date(LocalDate.now())
-//                        .build());
+        /* 결과 Review DB에 저장 하는 로직 */
+        Review savedReview = reviewRepository.save(Review.builder()
+                        .contents(contents)
+                        .progress(progress)
+                        .pages(pages)
+                        .member(member)
+                        .book(book)
+                        .date(LocalDate.now())
+                        .build());
 
-        /**
-         * 결과를 Question DB에 저장하는 로직
-         *
-         */
+        // reviewId 반환
+        Integer reviewId = savedReview.getReviewId();
 
+        /* 결과를 Question DB에 저장하는 로직 */
+        Question question = questionRepository.save(Question.builder()
+                        .review(savedReview)
+                        .member(member)
+                        .question1(questionNumberOneResponse.question1())
+                        .question2(questionNumberTwoThreeResponse.question2())
+                        .question3(questionNumberTwoThreeResponse.question3())
+                        .feedback1(0)
+                        .feedback2(0)
+                        .feedback3(0)
+                        .build());
 
-        return new QuestionResponse(questionNumberOneResponse.question1(),
+        // questionId 반환
+        Integer questionId = question.getQuestionId();
+
+        return new QuestionResponse(reviewId,questionId,
+                questionNumberOneResponse.question1(),
                 questionNumberTwoThreeResponse.question2(),
                 questionNumberTwoThreeResponse.question3());
     }

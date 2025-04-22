@@ -3,10 +3,13 @@ package bookcalendar.server.Domain.Review.Entity;
 
 import bookcalendar.server.Domain.Book.Entity.Book;
 import bookcalendar.server.Domain.Member.Entity.Member;
+import bookcalendar.server.Domain.Question.Entity.Question;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "review", indexes = {
@@ -42,6 +45,9 @@ public class Review {
     @JoinColumn(name = "bookId", nullable = false, foreignKey = @ForeignKey(name = "fk_review_book"))
     private Book book;
 
+    @OneToMany(mappedBy = "review", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Question> questions = new ArrayList<>();
+    
     @Column(name = "date", columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
     private LocalDate date;
 }

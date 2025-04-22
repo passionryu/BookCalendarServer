@@ -46,9 +46,8 @@ public class BookServiceImpl implements BookService {
     public BookResponse bookInfo(CustomUserDetails customUserDetails) {
 
             // 독서중인 도서 객체 반환
-            Book book = bookRepository.findByMemberIdAndStatus(
-                    customUserDetails.getMemberId(),
-                    Book.Status.독서중);
+            Book book = bookRepository.findByMemberIdAndStatus(customUserDetails.getMemberId(), Book.Status.독서중)
+                    .orElseThrow(()->new MemberException(ErrorCode.USER_NOT_FOUND) );
 
             // 도서 정보 조회 페이지에 필요한 정보 DTO 패키징 후 반환
             return new BookResponse(

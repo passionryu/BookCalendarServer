@@ -110,12 +110,12 @@ public class QuestionServiceImpl implements QuestionService {
      * @param questionAnswerRequest
      */
     private void saveAnswer(Question question,QuestionAnswerRequest questionAnswerRequest) {
-        if (question.getAnswer1() == null && questionAnswerRequest.answer1() != null)
-            question.setQuestion1(questionAnswerRequest.answer1());
-        if (question.getAnswer2() == null && questionAnswerRequest.answer2() != null)
-            question.setQuestion2(questionAnswerRequest.answer2());
-        if (question.getAnswer3() == null && questionAnswerRequest.answer3() != null)
-            question.setQuestion3(questionAnswerRequest.answer3());
+        if (questionAnswerRequest.answer1() != null)
+            question.setAnswer1(questionAnswerRequest.answer1());
+        if (questionAnswerRequest.answer2() != null)
+            question.setAnswer2(questionAnswerRequest.answer2());
+        if (questionAnswerRequest.answer3() != null)
+            question.setAnswer3(questionAnswerRequest.answer3());
     }
 
     /**

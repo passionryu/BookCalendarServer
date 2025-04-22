@@ -49,18 +49,22 @@ public class QuestionServiceImpl implements QuestionService {
         // member 객체 반환
         Member member = memberRepository.findByMemberId(customUserDetails.getMemberId())
                 .orElseThrow(()-> new MemberException(ErrorCode.USER_NOT_FOUND));
+        log.info("member : {}", member);
 
         // book 객체 반환
         Book book = bookRepository.findByMemberIdAndStatus(customUserDetails.getMemberId(),Book.Status.독서중)
                 .orElseThrow(()-> new MemberException(ErrorCode.USER_NOT_FOUND));
+        log.info("book : {}", book);
 
         // question 객체 반환
         Question question = questionRepository.findByQuestionId(questionAnswerRequest.questionId())
                 .orElseThrow(() -> new QuestionException(ErrorCode.QUESTION_NOT_FOUND));
+        log.info("question : {}", question);
 
         // review 객체 반환
         Review review = reviewRepository.findByMember_MemberIdAndDate(member.getMemberId(), LocalDate.now())
                 .orElseThrow(()-> new MemberException(ErrorCode.USER_NOT_FOUND));
+        log.info("review : {}", review);
 
         // 질문지에 대한 답변 저장 메서드
         saveAnswer(question,questionAnswerRequest);

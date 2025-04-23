@@ -2,6 +2,8 @@ package bookcalendar.server.Domain.Review.Repository;
 
 import bookcalendar.server.Domain.Review.Entity.Review;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -43,5 +45,14 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
      * @return
      */
     List<Review> findByBook_BookId(Integer bookId);
+
+    @Query("SELECT r FROM Review r " +
+            "WHERE r.member.memberId = :memberId " +
+            "AND YEAR(r.date) = :year " +
+            "AND MONTH(r.date) = :month")
+    List<Review> findByMemberIdAndMonth(
+            @Param("memberId") Integer memberId,
+            @Param("year") int year,
+            @Param("month") int month);
 
 }

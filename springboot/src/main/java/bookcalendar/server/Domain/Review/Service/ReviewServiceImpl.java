@@ -11,11 +11,7 @@ import bookcalendar.server.Domain.Question.Entity.Question;
 import bookcalendar.server.Domain.Question.Exception.QuestionException;
 import bookcalendar.server.Domain.Question.Repository.QuestionRepository;
 import bookcalendar.server.Domain.Review.DTO.Request.ReviewRequest;
-import bookcalendar.server.Domain.Review.DTO.Response.MainPageResponse;
-import bookcalendar.server.Domain.Review.DTO.Response.QuestionNumberOneResponse;
-import bookcalendar.server.Domain.Review.DTO.Response.QuestionNumberTwoThreeResponse;
-import bookcalendar.server.Domain.Review.DTO.Response.QuestionResponse;
-import bookcalendar.server.Domain.Review.DTO.Response.ReviewByDateResponse;
+import bookcalendar.server.Domain.Review.DTO.Response.*;
 import bookcalendar.server.Domain.Review.Entity.Review;
 import bookcalendar.server.Domain.Review.Exception.ReviewException;
 import bookcalendar.server.Domain.Review.Repository.ReviewRepository;
@@ -194,6 +190,31 @@ public class ReviewServiceImpl implements ReviewService {
 
         return new MainPageResponse(latestReview.getProgress(), remainDate);
 
+    }
+
+    // ======================= 캘린더에 독후감 진행률 표시 로직 =========================
+
+    /**
+     * 캘린더에 독후감 진행률 표시 메서드
+     *
+     * @param customUserDetails
+     * @return
+     */
+    @Override
+    public List<CalendarResponse> calendar(CustomUserDetails customUserDetails, Integer month) {
+
+        int targetMonth = (month != null) ? month : LocalDate.now().getMonthValue();
+        int targetYear = LocalDate.now().getYear();
+
+        List<Review> reviews = reviewRepository.findByMemberIdAndMonth(customUserDetails.getMemberId(), targetYear, targetMonth);
+
+        return reviews.stream()
+                .map(review -> new CalendarResponse(
+                        review.getReviewId(),
+                        review.getProgress(),
+                        review.getDate()
+                ))
+                .toList();
     }
 
     // ======================= AI 모델 임시 대체 private 메서드 =========================

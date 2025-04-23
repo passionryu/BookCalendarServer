@@ -50,7 +50,7 @@ public class Book {
     private LocalDate finishDate;
 
     @ManyToOne
-    @JoinColumn(name = "memberId", referencedColumnName = "memberId", insertable = false, updatable = false)
+    @JoinColumn(name = "memberId", referencedColumnName = "memberId", insertable = false, updatable = false,nullable = false)
     private Member member;
 
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -64,6 +64,6 @@ public class Book {
      * 3. 독서 포기 (해당 도서에 대한 데이터는 삭제 X)
      */
     public enum Status {
-        독서중, 독서_완료, 독서_포기
+        독서중, 독서완료, 독서포기
     }
 }

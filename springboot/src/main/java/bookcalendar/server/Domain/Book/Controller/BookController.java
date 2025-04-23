@@ -86,7 +86,25 @@ public class BookController {
                 .body(new ApiResponseWrapper<>(book,"입력하신 도서가 정상적으로 등록되었습니다."));
     }
 
-    /* 독서 포기 API */
+    /**
+     * 독서 포기 API
+     *
+     * @param customUserDetails
+     * @return
+     */
+    @Operation(summary = "독서 포기 API", description = "독서 포기 버튼 클릭 시, DB에서 해당 도서의 status 칼럼이 (독서_포기)로 전환된다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "요청하신 도서에 대하여 포기 처리가 완료되었습니다.")
+            })
+    @PatchMapping("")
+    public ResponseEntity<ApiResponseWrapper<String>> giveUpReading(@AuthenticationPrincipal CustomUserDetails customUserDetails){
+
+        //독서 포기 서비스 레이어 호출
+        bookService.giveUpReading(customUserDetails);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponseWrapper<>(null, "요청하신 도서에 대하여 포기 처리가 완료되었습니다."));
+    }
 
 
 }

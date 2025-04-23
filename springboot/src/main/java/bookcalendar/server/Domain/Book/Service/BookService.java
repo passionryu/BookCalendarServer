@@ -32,4 +32,11 @@ public interface BookService {
      */
     Book registerBook(BookRegisterRequest bookRegisterRequest,CustomUserDetails customUserDetails);
 
+    /**
+     * 독서 포기 인터페이스
+     *
+     * @param customUserDetails
+     */
+    void giveUpReading(CustomUserDetails customUserDetails);
+
 }

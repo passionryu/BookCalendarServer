@@ -16,9 +16,6 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
      */
     boolean existsByMemberIdAndStatus(Integer memberId, Book.Status status);
 
-    // 수정된 메서드 선언
-    //boolean existsByMember_MemberIdAndStatus(Integer memberId, Book.Status status);
-
     /**
      * 현재 독서중인 도서 반환
      *
@@ -27,5 +24,7 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
      * @return 현재 유저가 독서중인 도서
      */
     Optional<Book> findByMemberIdAndStatus(Integer memberId, Book.Status status);
+
+
 
 }

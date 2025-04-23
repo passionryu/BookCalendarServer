@@ -7,11 +7,13 @@ import bookcalendar.server.Domain.Member.Entity.Member;
 import bookcalendar.server.Domain.Member.Exception.MemberException;
 import bookcalendar.server.Domain.Member.Repository.MemberRepository;
 import bookcalendar.server.Domain.Question.Entity.Question;
+import bookcalendar.server.Domain.Question.Exception.QuestionException;
 import bookcalendar.server.Domain.Question.Repository.QuestionRepository;
 import bookcalendar.server.Domain.Review.DTO.Request.ReviewRequest;
 import bookcalendar.server.Domain.Review.DTO.Response.QuestionNumberOneResponse;
 import bookcalendar.server.Domain.Review.DTO.Response.QuestionNumberTwoThreeResponse;
 import bookcalendar.server.Domain.Review.DTO.Response.QuestionResponse;
+import bookcalendar.server.Domain.Review.DTO.Response.ReviewByDateResponse;
 import bookcalendar.server.Domain.Review.Entity.Review;
 import bookcalendar.server.Domain.Review.Exception.ReviewException;
 import bookcalendar.server.Domain.Review.Repository.ReviewRepository;
@@ -123,6 +125,39 @@ public class ReviewServiceImpl implements ReviewService {
                 questionNumberOneResponse.question1(),
                 questionNumberTwoThreeResponse.question2(),
                 questionNumberTwoThreeResponse.question3());
+    }
+
+    // ======================= 캘린더에서 날짜 선택 후 독후감 기록 조회 로직 =========================
+
+    /**
+     * 캘린더에서 날짜 선택 후 독후감 조회 메서드
+     *
+     * @param customUserDetails
+     * @param date
+     * @return
+     */
+    @Override
+    public ReviewByDateResponse getReviewByDate(CustomUserDetails customUserDetails, LocalDate date) {
+
+        // 해당 날짜의 독후감 조회
+        Review review = reviewRepository.findByMember_MemberIdAndDate(customUserDetails.getMemberId(), date)
+                .orElseThrow(()->new ReviewException(ErrorCode.REVIEW_NOT_FOUND));
+
+        // reviewId로 question객체 반환
+        Question question = questionRepository.findByReview_ReviewId(review.getReviewId())
+                .orElseThrow(()->new QuestionException(ErrorCode.QUESTION_NOT_FOUND));
+
+        // ReviewByDateResponse 객체 반환
+        return ReviewByDateResponse.builder()
+                .contents(review.getContents())
+                .question1(question.getQuestion1())
+                .answer1(question.getAnswer1())
+                .question2(question.getQuestion2())
+                .answer2(question.getAnswer2())
+                .question3(question.getQuestion3())
+                .answer3(question.getAnswer3())
+                .aiResponse(review.getAiResponse())
+                .build();
     }
 
     // ======================= AI 모델 임시 대체 private 메서드 =========================

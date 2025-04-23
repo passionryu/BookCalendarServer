@@ -15,4 +15,12 @@ public interface QuestionRepository extends JpaRepository<Question, Integer> {
      * @return
      */
     Optional<Question> findByQuestionId(Integer questionId);
+
+    /**
+     * reviewId로 Question 조회
+     *
+     * @param reviewId
+     * @return
+     */
+    Optional<Question> findByReview_ReviewId(Integer reviewId);
 }

@@ -93,6 +93,7 @@ public class ReviewServiceImpl implements ReviewService {
                         .contents(contents)
                         .progress(progress)
                         .pages(previousPages+pages)
+                        .emotion(questionNumberOneResponse.emotion())
                         .member(member)
                         .book(book)
                         .date(LocalDate.now())

@@ -2,8 +2,11 @@ package bookcalendar.server.Domain.Book.Service;
 
 import bookcalendar.server.Domain.Book.DTO.Request.BookRegisterRequest;
 import bookcalendar.server.Domain.Book.DTO.Response.BookResponse;
+import bookcalendar.server.Domain.Book.DTO.Response.CompleteResponse;
 import bookcalendar.server.Domain.Book.Entity.Book;
 import bookcalendar.server.global.Security.CustomUserDetails;
+
+import java.util.List;
 
 public interface BookService {
 
@@ -38,5 +41,13 @@ public interface BookService {
      * @param customUserDetails
      */
     void giveUpReading(CustomUserDetails customUserDetails);
+
+    /**
+     * 독서 완료 인터페이스
+     *
+     * @param customUserDetails
+     * @return
+     */
+    List<CompleteResponse>  completeReading(CustomUserDetails customUserDetails);
 
 }

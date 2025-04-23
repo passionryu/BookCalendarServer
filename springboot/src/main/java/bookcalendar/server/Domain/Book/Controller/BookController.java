@@ -1,6 +1,7 @@
 package bookcalendar.server.Domain.Book.Controller;
 
 import bookcalendar.server.Domain.Book.DTO.Request.BookRegisterRequest;
+import bookcalendar.server.Domain.Book.DTO.Response.CompleteResponse;
 import bookcalendar.server.Domain.Book.Entity.Book;
 import bookcalendar.server.Domain.Book.Service.BookService;
 import bookcalendar.server.global.Security.CustomUserDetails;
@@ -14,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @Tag(name = "Book", description = "도서 관리 API")
@@ -106,6 +109,25 @@ public class BookController {
                 .body(new ApiResponseWrapper<>(null, "요청하신 도서에 대하여 포기 처리가 완료되었습니다."));
     }
 
+    /**
+     * 독서 완료 API
+     *
+     * @param customUserDetails
+     * @return
+     */
+    @Operation(summary = "독서 완료 API", description = "독서 완료 버튼 클릭 시 , 도서 추천 5권 및 DB에서 해당 도서의 (status= 독서 완료)로 수정 ",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "요청하신 도서에 대하여 독서 완료 처리가 완료되었습니다.")
+            })
+    @PostMapping("/complete")
+    public ResponseEntity<ApiResponseWrapper<List<CompleteResponse>>> completeReading(@AuthenticationPrincipal CustomUserDetails customUserDetails){
+
+        // 독서 완료 서비스 레이어 호출
+        List<CompleteResponse> completeResponses = bookService.completeReading(customUserDetails);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponseWrapper<>(completeResponses,"요청하신 도서에 대하여 독서 완료 처리가 완료되었습니다."));
+    }
 
 }
 

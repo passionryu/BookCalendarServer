@@ -37,6 +37,8 @@ public class Review {
 
     private Integer pages;
 
+    private String emotion;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "memberId", nullable = false, foreignKey = @ForeignKey(name = "fk_review_member"))
     private Member member;

@@ -29,6 +29,7 @@ public enum ErrorCode {
     /* Question Exception 7XX */
     QUESTION_NOT_FOUND("QUESTION_700","요청하신 질문 객체가 존재하지 않습니다.",HttpStatus.NOT_FOUND),;
 
+
     private final String errorCode;
     private final String message;
     private final HttpStatus httpStatus;

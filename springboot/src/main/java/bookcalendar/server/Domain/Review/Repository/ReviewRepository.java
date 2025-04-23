@@ -36,4 +36,12 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
      */
     List<Review> findByMember_MemberIdAndBook_BookId(Integer memberId, Integer bookId);
 
+    /**
+     * BookId로 review 객체 반환
+     *
+     * @param bookId
+     * @return
+     */
+    List<Review> findByBook_BookId(Integer bookId);
+
 }

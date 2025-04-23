@@ -1,6 +1,7 @@
 package bookcalendar.server.Domain.Review.Service;
 
 import bookcalendar.server.Domain.Review.DTO.Request.ReviewRequest;
+import bookcalendar.server.Domain.Review.DTO.Response.MainPageResponse;
 import bookcalendar.server.Domain.Review.DTO.Response.QuestionResponse;
 import bookcalendar.server.Domain.Review.DTO.Response.ReviewByDateResponse;
 import bookcalendar.server.global.Security.CustomUserDetails;
@@ -26,4 +27,12 @@ public interface ReviewService {
      * @return
      */
     ReviewByDateResponse getReviewByDate(CustomUserDetails customUserDetails, LocalDate date);
+
+     /* 메인 페이지 독후감 진행률 & 남은 독서일 조회 인터페이스
+     *
+     * @param customUserDetails
+     * @return
+     */
+    MainPageResponse mainPage(CustomUserDetails customUserDetails);
+     
 }

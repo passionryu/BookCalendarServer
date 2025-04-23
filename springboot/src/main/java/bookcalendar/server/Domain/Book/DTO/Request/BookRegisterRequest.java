@@ -22,7 +22,7 @@ public record BookRegisterRequest(
                 .startDate(startDate)
                 .finishDate(finishDate)
                 .status(Book.Status.독서중) // 기본값 지정
-                .member(Member.builder().memberId(memberId).build())
+                .memberId(memberId)
                 .build();
     }
 }

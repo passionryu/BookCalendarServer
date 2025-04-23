@@ -48,7 +48,7 @@ public class BookServiceImpl implements BookService {
 
             // 독서중인 도서 객체 반환
             Book book = bookRepository.findByMemberIdAndStatus(customUserDetails.getMemberId(), Book.Status.독서중)
-                    .orElseThrow(()->new MemberException(ErrorCode.USER_NOT_FOUND) );
+                    .orElseThrow(()->new MemberException(ErrorCode.BOOK_NOT_FOUND) );
 
             // 도서 정보 조회 페이지에 필요한 정보 DTO 패키징 후 반환
             return new BookResponse(
@@ -83,5 +83,27 @@ public class BookServiceImpl implements BookService {
 
         // 저장 및 book 객체 반환
         return bookRepository.save(book);
+    }
+
+    // ======================= 독서 포기 로직 =========================
+
+    /**
+     * 독서 포기 메서드
+     *
+     * @param customUserDetails
+     */
+    @Override
+    @Transactional
+    public void giveUpReading(CustomUserDetails customUserDetails) {
+
+        // 1. 독서중인 도서 객체 반환
+        Book book = bookRepository.findByMemberIdAndStatus(customUserDetails.getMemberId(), Book.Status.독서중)
+                .orElseThrow(()->new MemberException(ErrorCode.BOOK_NOT_FOUND) );
+
+        // 2. 상태를 '독서포기'로 변경
+        book.setStatus(Book.Status.독서포기);
+
+        // 3. 변경 사항 저장
+        bookRepository.save(book);
     }
 }

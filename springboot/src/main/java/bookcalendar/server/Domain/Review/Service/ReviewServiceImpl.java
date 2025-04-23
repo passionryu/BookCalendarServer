@@ -2,6 +2,7 @@ package bookcalendar.server.Domain.Review.Service;
 
 
 import bookcalendar.server.Domain.Book.Entity.Book;
+import bookcalendar.server.Domain.Book.Exception.BookException;
 import bookcalendar.server.Domain.Book.Repository.BookRepository;
 import bookcalendar.server.Domain.Member.Entity.Member;
 import bookcalendar.server.Domain.Member.Exception.MemberException;
@@ -10,6 +11,7 @@ import bookcalendar.server.Domain.Question.Entity.Question;
 import bookcalendar.server.Domain.Question.Exception.QuestionException;
 import bookcalendar.server.Domain.Question.Repository.QuestionRepository;
 import bookcalendar.server.Domain.Review.DTO.Request.ReviewRequest;
+import bookcalendar.server.Domain.Review.DTO.Response.MainPageResponse;
 import bookcalendar.server.Domain.Review.DTO.Response.QuestionNumberOneResponse;
 import bookcalendar.server.Domain.Review.DTO.Response.QuestionNumberTwoThreeResponse;
 import bookcalendar.server.Domain.Review.DTO.Response.QuestionResponse;
@@ -26,6 +28,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
 import java.util.List;
 
 @Slf4j
@@ -127,6 +131,7 @@ public class ReviewServiceImpl implements ReviewService {
                 questionNumberTwoThreeResponse.question3());
     }
 
+
     // ======================= 캘린더에서 날짜 선택 후 독후감 기록 조회 로직 =========================
 
     /**
@@ -158,6 +163,37 @@ public class ReviewServiceImpl implements ReviewService {
                 .answer3(question.getAnswer3())
                 .aiResponse(review.getAiResponse())
                 .build();
+    }
+
+    // ======================= 메인 페이지 독후감 진행률 & 남은 독서일 조회 메서드 =========================
+
+    /**
+     * 메인 페이지 독후감 진행률 & 남은 독서일 조회 메서드
+     *
+     * @param customUserDetails
+     * @return
+     */
+    @Override
+    public MainPageResponse mainPage(CustomUserDetails customUserDetails) {
+
+        // 현재 독서중인 도서 객체 반환
+        Book book = bookRepository.findByMemberIdAndStatus(customUserDetails.getMemberId(), Book.Status.독서중)
+                .orElseThrow(()->new BookException(ErrorCode.BOOK_NOT_FOUND));
+
+        // 도서 id로 독후감 리스트 조회
+        List<Review> reviews = reviewRepository.findByBook_BookId(book.getBookId());
+
+        // 리스트 중 가장 최근 독후감 반환
+        Review latestReview = reviews.stream()
+                .max(Comparator.comparing(Review::getDate)) // getDate는 LocalDate 혹은 LocalDateTime 필드
+                .orElse(null); // 비어있을 경우 null 반환
+        log.info("latestReview : {}", latestReview);
+        log.info("latestReview.getProgress() : {}", latestReview.getProgress());
+        Integer remainDate = Math.toIntExact(ChronoUnit.DAYS.between(LocalDate.now(), book.getFinishDate()));
+        log.info("remainDate : {}", remainDate);
+
+        return new MainPageResponse(latestReview.getProgress(), remainDate);
+
     }
 
     // ======================= AI 모델 임시 대체 private 메서드 =========================

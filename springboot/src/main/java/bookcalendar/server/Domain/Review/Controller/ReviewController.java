@@ -3,6 +3,7 @@ package bookcalendar.server.Domain.Review.Controller;
 import bookcalendar.server.Domain.Book.Entity.Book;
 import bookcalendar.server.Domain.Book.Repository.BookRepository;
 import bookcalendar.server.Domain.Review.DTO.Request.ReviewRequest;
+import bookcalendar.server.Domain.Review.DTO.Response.CalendarResponse;
 import bookcalendar.server.Domain.Review.DTO.Response.MainPageResponse;
 import bookcalendar.server.Domain.Review.DTO.Response.QuestionResponse;
 import bookcalendar.server.Domain.Review.DTO.Response.ReviewByDateResponse;
@@ -20,6 +21,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
+import java.util.List;
 
 @Slf4j
 @Tag(name = "Review", description = "독후감 관리 API")
@@ -77,17 +79,34 @@ public class ReviewController {
 
         //현재 도서 중인 독서가 없으면 0 반환
         if (!bookRepository.existsByMemberIdAndStatus(customUserDetails.getMemberId(), Book.Status.독서중)) {
-            return ResponseEntity.ok(
-                    new ApiResponseWrapper<>(MainPageResponse.empty(), "현재 독서중인 도서가 없습니다.")
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(new ApiResponseWrapper<>(MainPageResponse.empty(), "현재 독서중인 도서가 없습니다.")
             );
         }
 
         //현재 도서 중인 독서가 있으면 서비스 레이어 호출
         MainPageResponse response = reviewService.mainPage(customUserDetails);
-        return ResponseEntity.ok(
-                new ApiResponseWrapper<>(response, "메인페이지 독후감 진행률 & 남은 독서일이 정상적으로 반환되었습니다.")
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponseWrapper<>(response, "메인페이지 독후감 진행률 & 남은 독서일이 정상적으로 반환되었습니다.")
         );
-
     }
+
+    @Operation(summary = "캘린더에 독후감 진행률 표시 API", description = "메인페이지 로딩시 캘린더에 독후감 진행률 표시",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "메인페이지 독후감 진행률이 정상적으로 표시 되었습니다."),
+                    @ApiResponse(responseCode = "401", description = "엑세스 토큰이 만료되었습니다."),
+                    @ApiResponse(responseCode = "500", description = "서버 내부에서 오류가 발생했습니다.")
+            })
+    @GetMapping("/calendar")
+    public ResponseEntity<ApiResponseWrapper<List<CalendarResponse>>> calendar(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+                                                                         @RequestParam(name = "month", required = false) Integer month){
+
+        // 캘린더에 독후감 진행률 표시 서비스 레이어 호룿
+        List<CalendarResponse> calendarResponses = reviewService.calendar(customUserDetails,month);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponseWrapper<>(calendarResponses,"메인페이지 독후감 진행률이 정상적으로 표시 되었습니다."));
+    }
+
 }
 

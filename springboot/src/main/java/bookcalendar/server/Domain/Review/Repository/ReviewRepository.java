@@ -19,6 +19,15 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
     Optional<Review> findByMember_MemberIdAndDate(Integer memberId, LocalDate date);
 
     /**
+     * memberId와 날짜를 통해 이날에 독후감이 있는지 없는지 반환
+     *
+     * @param memberId
+     * @param date
+     * @return
+     */
+    boolean existsByMember_MemberIdAndDate(Integer memberId, LocalDate date);
+
+    /**
      * memberId & bookId로 review List 반환
      *
      * @param memberId

@@ -3,6 +3,7 @@ package bookcalendar.server.Domain.Book.Service;
 import bookcalendar.server.Domain.Book.DTO.Request.BookRegisterRequest;
 import bookcalendar.server.Domain.Book.DTO.Response.BookResponse;
 import bookcalendar.server.Domain.Book.Entity.Book;
+import bookcalendar.server.Domain.Book.Exception.BookException;
 import bookcalendar.server.Domain.Book.Repository.BookRepository;
 import bookcalendar.server.Domain.Member.Exception.MemberException;
 import bookcalendar.server.global.Security.CustomUserDetails;
@@ -70,6 +71,12 @@ public class BookServiceImpl implements BookService {
     @Override
     @Transactional
     public Book registerBook(BookRegisterRequest bookRegisterRequest,CustomUserDetails customUserDetails) {
+
+        /* 만약 DB에 "독서중"인 도서 조회시 에러 메시지 반환*/
+        if(bookRepository.existsByMemberIdAndStatus(
+                customUserDetails.getMemberId(),
+                Book.Status.독서중))
+            throw new BookException(ErrorCode.READING_BOOK_ALREADY_EXIST);
 
         // 입력 DTO를 Entity로 전환
         Book book = bookRegisterRequest.toEntity(customUserDetails.getMemberId());

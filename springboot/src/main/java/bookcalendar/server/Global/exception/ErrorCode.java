@@ -19,6 +19,7 @@ public enum ErrorCode {
     REFRESH_TOKEN_NOT_MATCHED("MEMBER_604", "제출하신 리프레시 토큰이 세션에 저장된 리프레시 토큰과 일치하지 않습니다.", HttpStatus.UNAUTHORIZED),
 
     /* Book Exception 7XX */
+    READING_BOOK_ALREADY_EXIST("BOO_700","이미 도서중인 책이 있습니다. 해당 책을 완독 혹은 포기 후 다시 도서를 등록하시오",HttpStatus.CONFLICT),
 
     /* Review Exception 8XX */
 

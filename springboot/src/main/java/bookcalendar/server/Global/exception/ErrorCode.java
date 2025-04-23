@@ -23,6 +23,7 @@ public enum ErrorCode {
     BOOK_NOT_FOUND("BOOK_701", "해당 아이디로 등록된 도서를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 
     /* Review Exception 8XX */
+    ALREADY_EXIST_REVIEW("REVIEW_800", "오늘 이미 작성한 독후감이 존재합니다.", HttpStatus.CONFLICT),
 
     /* Question Exception 7XX */
     QUESTION_NOT_FOUND("QUESTION_700","존재하지 않는 질문지 정보입니다.",HttpStatus.NOT_FOUND),;

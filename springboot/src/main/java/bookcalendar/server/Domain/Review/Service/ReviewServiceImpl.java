@@ -13,6 +13,7 @@ import bookcalendar.server.Domain.Review.DTO.Response.QuestionNumberOneResponse;
 import bookcalendar.server.Domain.Review.DTO.Response.QuestionNumberTwoThreeResponse;
 import bookcalendar.server.Domain.Review.DTO.Response.QuestionResponse;
 import bookcalendar.server.Domain.Review.Entity.Review;
+import bookcalendar.server.Domain.Review.Exception.ReviewException;
 import bookcalendar.server.Domain.Review.Repository.ReviewRepository;
 import bookcalendar.server.global.Security.CustomUserDetails;
 import bookcalendar.server.global.exception.ErrorCode;
@@ -51,9 +52,13 @@ public class ReviewServiceImpl implements ReviewService {
         String contents = reviewRequest.contents();
         Integer pages = reviewRequest.pages();
 
+        // 오늘 독후감이 존재하는지 확인
+        if(reviewRepository.existsByMember_MemberIdAndDate(customUserDetails.getMemberId(), LocalDate.now()))
+         throw new ReviewException(ErrorCode.ALREADY_EXIST_REVIEW);
+
         // 현재 유저의 독서중인 도서 객체 반환
         Book book = bookRepository.findByMemberIdAndStatus( customUserDetails.getMemberId(), Book.Status.독서중)
-                .orElseThrow(()->new MemberException(ErrorCode.USER_NOT_FOUND) );
+                .orElseThrow(()->new MemberException(ErrorCode.BOOK_NOT_FOUND) );
 
         // 현재 유저의 멤버 객체 반환
         Member member = memberRepository.findByMemberId(customUserDetails.getMemberId())

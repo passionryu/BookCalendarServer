@@ -185,7 +185,7 @@ public class ReviewServiceImpl implements ReviewService {
                 .max(Comparator.comparing(Review::getDate)) // getDate는 LocalDate 혹은 LocalDateTime 필드
                 .orElse(null); // 비어있을 경우 null 반환
         log.info("latestReview : {}", latestReview);
-        log.info("latestReview.getProgress() : {}", latestReview.getProgress());
+        // log.info("latestReview.getProgress() : {}", latestReview.getProgress());
         Integer remainDate = Math.toIntExact(ChronoUnit.DAYS.between(LocalDate.now(), book.getFinishDate()));
         log.info("remainDate : {}", remainDate);
 

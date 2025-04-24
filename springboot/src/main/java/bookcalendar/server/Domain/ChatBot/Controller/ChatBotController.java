@@ -70,10 +70,11 @@ public class ChatBotController {
     @PostMapping("/recommend")
     public ResponseEntity<ApiResponseWrapper<List<CompleteResponse>>> chat(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
-
+        // 도서 추천 서비스 레이어 호출
+        List<CompleteResponse> completeResponseList = chatbotService.recommend(customUserDetails);
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(new ApiResponseWrapper<>(null, "도서 추천이 정상적으로 반환되었습니다."));
+                .body(new ApiResponseWrapper<>(completeResponseList, "도서 추천이 정상적으로 반환되었습니다."));
     }
 
 }

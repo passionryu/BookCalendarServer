@@ -1,8 +1,18 @@
 package bookcalendar.server.Domain.ChatBot.Service;
 
 import bookcalendar.server.Domain.Book.DTO.Response.CompleteResponse;
+import bookcalendar.server.Domain.Book.Entity.Book;
+import bookcalendar.server.Domain.Book.Exception.BookException;
 import bookcalendar.server.Domain.ChatBot.DTO.Request.ChatRequest;
+import bookcalendar.server.Domain.Member.Entity.Member;
+import bookcalendar.server.Domain.Member.Exception.MemberException;
+import bookcalendar.server.Domain.Member.Repository.MemberRepository;
+import bookcalendar.server.Domain.Review.Entity.Review;
 import bookcalendar.server.global.Security.CustomUserDetails;
+import bookcalendar.server.global.exception.ErrorCode;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.ChatClient;
@@ -10,8 +20,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -23,6 +37,7 @@ public class ChatbotServiceImpl implements ChatbotService{
     private RedisTemplate<String, String> sessionRedisTemplate;
 
     private final ChatClient chatClient;
+    private final MemberRepository memberRepository;
 
     // ======================= 챗봇 채팅 로직 =========================
 
@@ -59,14 +74,66 @@ public class ChatbotServiceImpl implements ChatbotService{
     // ======================= 챗봇 도서 추천 로직 =========================
 
     /**
-     *
+     * 챗봇 도서 추천 메서드
      *
      * @param customUserDetails
      * @return
      */
     @Override
+    @Transactional
     public List<CompleteResponse> recommend(CustomUserDetails customUserDetails) {
-        return List.of();
+
+        // 현재 멤버 객체 반환
+        Member member = memberRepository.findByMemberId(customUserDetails.getMemberId())
+                .orElseThrow(()-> new MemberException(ErrorCode.USER_NOT_FOUND) );
+
+        // 현재 유저의 나의 계산
+        int age = Period.between(member.getBirth(), LocalDate.now()).getYears();
+
+        // 모든 메시지 반환
+        String everyMessages = getAllMessage(customUserDetails.getMemberId());
+        log.info("everyMessages : {}",everyMessages);
+
+        // AI 프롬프트 (반드시 JSON 배열로 반환하도록 지시)
+        String aiPromptMessage = String.format(
+                """
+                너는 이 도서 추천 서비스의 유능한 AI 도서 추천 사서이다.
+                다음은 너가 사용자와의 챗봇 서비스에서 나눈 대화 내용이다
+                다음은 내용들을 참고하여 사용자에게 도서 5권을 추천해w:
+    
+                - 너(AI 도서 추천 사서 와 사용자와의 지난 모든 대화): "%s"
+    
+                아래 JSON 형식으로 꼭 반환해줘:
+    
+                [
+                  {
+                    "bookName": "책 제목",
+                    "author": "저자 이름",
+                    "reason": "이 도서를 추천하는 이유2~3줄"
+                  },
+                  ...
+                ]
+                """,
+                everyMessages
+        );
+
+        String aiResponse = chatClient.call(aiPromptMessage);
+
+        // 🛠 JSON 문자열을 CompleteResponse 리스트로 파싱
+        ObjectMapper objectMapper = new ObjectMapper();
+        List<CompleteResponse> recommendations;
+
+        try {
+            recommendations = objectMapper.readValue(
+                    aiResponse,
+                    new TypeReference<>() {}
+            );
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("AI 응답 파싱 실패: " + e.getMessage(), e);
+        }
+
+        return recommendations;
+
     }
 
     // ======================= Chatbot Helper Code =========================
@@ -101,7 +168,7 @@ public class ChatbotServiceImpl implements ChatbotService{
      */
     public String makePromptMessage(String message,String previousMessage){
 
-        return "당신의 역할은 심리 상담사이다. 당신이 이전에 사용자와 나눈 내용은 다음과 같다"
+        return "당신의 역할은 AI 도서 추천 전문가이다. 당신이 이전에 사용자와 나눈 내용은 다음과 같다"
                 + previousMessage
                 + "이를 참고하여 사용자의 다음 메시지를 보고 적절히 답변하라."
                 + message;
@@ -158,7 +225,7 @@ public class ChatbotServiceImpl implements ChatbotService{
 
         return
                 "다음은 유저와 너가 대화한 채팅 내용이다."
-                        + "다음 모든 대화 내용을 보고, 따뜻한 말투로 10~15줄 가량 공감과 격려의 편지를 써줘 "
+
                         + everyMessages;
     }
 

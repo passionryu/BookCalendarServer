@@ -15,7 +15,7 @@ services:
     depends_on:
       - springboot
     extra_hosts:
-      - "host.docker.internal:host-gateway"
+      - "host.docker.internal:192.9.202.17"
     networks:
       - bookcalendar_network
 

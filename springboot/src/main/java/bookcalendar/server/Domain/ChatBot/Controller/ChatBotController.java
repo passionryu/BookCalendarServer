@@ -17,10 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -67,7 +64,7 @@ public class ChatBotController {
                     @ApiResponse(responseCode = "200", description = "도서 추천이 정상적으로 반환되었습니다."),
                     @ApiResponse(responseCode = "409", description = "")
             })
-    @PostMapping("/recommend")
+    @GetMapping("/recommend")
     public ResponseEntity<ApiResponseWrapper<List<CompleteResponse>>> chat(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
         // 도서 추천 서비스 레이어 호출

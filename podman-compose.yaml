@@ -14,11 +14,11 @@ services:
       - "8443:443" # 호스트의 8443 포트 → 컨테이너의 443 포트 (HTTPS)
     depends_on:
       - springboot
-    extra_hosts:
-      - "host.docker.internal:192.9.202.17"
     networks:
       - bookcalendar_network
 
+    #extra_hosts:
+    # - "host.docker.internal:192.9.202.17"
     # 실행 순서 정리 (다만, 서비스 시작 순서 보장 X)
     # 예시로 springboot가 뜨기 전에 nginx가 reverse proxy를 시도하면 502 오류 가능
 

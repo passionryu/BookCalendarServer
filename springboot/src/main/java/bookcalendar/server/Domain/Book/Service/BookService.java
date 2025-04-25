@@ -1,8 +1,10 @@
 package bookcalendar.server.Domain.Book.Service;
 
 import bookcalendar.server.Domain.Book.DTO.Request.BookRegisterRequest;
+import bookcalendar.server.Domain.Book.DTO.Request.PeriodRequest;
 import bookcalendar.server.Domain.Book.DTO.Response.BookResponse;
 import bookcalendar.server.Domain.Book.DTO.Response.CompleteResponse;
+import bookcalendar.server.Domain.Book.DTO.Response.PeriodResponse;
 import bookcalendar.server.Domain.Book.Entity.Book;
 import bookcalendar.server.global.Security.CustomUserDetails;
 
@@ -49,5 +51,14 @@ public interface BookService {
      * @return
      */
     List<CompleteResponse>  completeReading(CustomUserDetails customUserDetails);
+
+    /**
+     * 등록된 도서들을 캘린더에 선으로 표시하는 인터페이스
+     *
+     * @param customUserDetails
+     * @param periodRequest
+     * @return
+     */
+    List<PeriodResponse> getPeriodList(CustomUserDetails customUserDetails, PeriodRequest periodRequest);
 
 }

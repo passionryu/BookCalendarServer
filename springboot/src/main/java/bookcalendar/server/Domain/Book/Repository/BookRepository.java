@@ -2,7 +2,11 @@ package bookcalendar.server.Domain.Book.Repository;
 
 import bookcalendar.server.Domain.Book.Entity.Book;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 public interface BookRepository extends JpaRepository<Book, Integer> {
@@ -25,6 +29,10 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
      */
     Optional<Book> findByMemberIdAndStatus(Integer memberId, Book.Status status);
 
-
+    @Query("SELECT b FROM Book b WHERE b.memberId = :memberId AND " +
+            "b.startDate <= :endOfMonth AND b.finishDate >= :startOfMonth")
+    List<Book> findBooksInMonth(@Param("memberId") Integer memberId,
+                                @Param("startOfMonth") LocalDate startOfMonth,
+                                @Param("endOfMonth") LocalDate endOfMonth);
 
 }

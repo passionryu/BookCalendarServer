@@ -1,4 +1,11 @@
 package bookcalendar.server.Domain.Book.DTO.Response;
 
-public record PeriodResponse() {
+import java.time.LocalDate;
+
+public record PeriodResponse(
+        Integer BookId,
+        String BookName,
+        LocalDate startDate,
+        LocalDate finishDate
+) {
 }

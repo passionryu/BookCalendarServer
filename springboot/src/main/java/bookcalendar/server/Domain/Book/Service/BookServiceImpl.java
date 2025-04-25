@@ -1,8 +1,10 @@
 package bookcalendar.server.Domain.Book.Service;
 
 import bookcalendar.server.Domain.Book.DTO.Request.BookRegisterRequest;
+import bookcalendar.server.Domain.Book.DTO.Request.PeriodRequest;
 import bookcalendar.server.Domain.Book.DTO.Response.BookResponse;
 import bookcalendar.server.Domain.Book.DTO.Response.CompleteResponse;
+import bookcalendar.server.Domain.Book.DTO.Response.PeriodResponse;
 import bookcalendar.server.Domain.Book.Entity.Book;
 import bookcalendar.server.Domain.Book.Exception.BookException;
 import bookcalendar.server.Domain.Book.Repository.BookRepository;
@@ -209,5 +211,35 @@ public class BookServiceImpl implements BookService {
 
         return recommendations;
 
+    }
+
+    // ======================= 등록된 도서의 독서 기간을 캘린더에 선으로 표시하는 로직 =========================
+
+    /**
+     * 등록된 도서들을 캘린더에 선으로 표시하는 메서드
+     *
+     * @param customUserDetails
+     * @param periodRequest
+     * @return
+     */
+    @Override
+    public List<PeriodResponse> getPeriodList(CustomUserDetails customUserDetails, PeriodRequest periodRequest) {
+
+        int month = periodRequest.month();
+        int year = LocalDate.now().getYear(); // 현재 연도 기준 (필요하면 요청 값으로 분리 가능)
+
+        LocalDate startOfMonth = LocalDate.of(year, month, 1);
+        LocalDate endOfMonth = startOfMonth.withDayOfMonth(startOfMonth.lengthOfMonth());
+
+        // 현재 사용자 ID 가져오기
+        Integer memberId = customUserDetails.getMemberId();
+
+        // 도서 기간이 해당 월과 겹치는 모든 도서 조회
+        List<Book> books = bookRepository.findBooksInMonth(memberId, startOfMonth, endOfMonth);
+
+        // Entity → DTO 매핑
+        return books.stream()
+                .map(book -> new PeriodResponse(book.getBookId() ,book.getBookName(), book.getStartDate(), book.getFinishDate()))
+                .toList();
     }
 }

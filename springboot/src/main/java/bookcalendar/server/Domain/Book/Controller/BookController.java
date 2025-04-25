@@ -1,7 +1,9 @@
 package bookcalendar.server.Domain.Book.Controller;
 
 import bookcalendar.server.Domain.Book.DTO.Request.BookRegisterRequest;
+import bookcalendar.server.Domain.Book.DTO.Request.PeriodRequest;
 import bookcalendar.server.Domain.Book.DTO.Response.CompleteResponse;
+import bookcalendar.server.Domain.Book.DTO.Response.PeriodResponse;
 import bookcalendar.server.Domain.Book.Entity.Book;
 import bookcalendar.server.Domain.Book.Service.BookService;
 import bookcalendar.server.global.Security.CustomUserDetails;
@@ -127,6 +129,28 @@ public class BookController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponseWrapper<>(completeResponses,"요청하신 도서에 대하여 독서 완료 처리가 완료되었습니다."));
+    }
+
+    /**
+     * 등록된 도서들을 캘린더에 선으로 표시하는 API
+     *
+     * @param customUserDetails
+     * @param periodRequest
+     * @return
+     */
+    @Operation(summary = "등록된 도서 캘린더에 선으로 표시하는 API", description = "등록한 모든 도서 캘린더에 선으로 표시하는 api이다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "이번 달에 등록된 모든 도서의 기간이 반환되었습니다.")
+            })
+    @PostMapping("/period")
+    public ResponseEntity<ApiResponseWrapper<List<PeriodResponse>>> getPeriodList(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+                                                                                  @RequestBody PeriodRequest periodRequest){
+
+        // 등록된 도서들의 도서 기간을 캘린더에 반환하는 서비스 레이어 호출
+        List<PeriodResponse> periodResponseList = bookService.getPeriodList(customUserDetails,periodRequest);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponseWrapper<>(periodResponseList,"이번 달에 등록된 모든 도서의 기간이 반환되었습니다."));
     }
 
 }

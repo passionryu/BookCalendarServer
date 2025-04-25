@@ -132,6 +132,8 @@ public class ChatbotServiceImpl implements ChatbotService{
             throw new RuntimeException("AI 응답 파싱 실패: " + e.getMessage(), e);
         }
 
+        deleteAllMessages(customUserDetails.getMemberId());
+
         return recommendations;
 
     }

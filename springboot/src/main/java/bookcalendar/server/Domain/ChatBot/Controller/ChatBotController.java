@@ -4,14 +4,11 @@ package bookcalendar.server.Domain.ChatBot.Controller;
 import bookcalendar.server.Domain.Book.DTO.Response.CompleteResponse;
 import bookcalendar.server.Domain.ChatBot.DTO.Request.ChatRequest;
 import bookcalendar.server.Domain.ChatBot.Service.ChatbotService;
-import bookcalendar.server.Domain.Member.DTO.Request.RegisterRequest;
-import bookcalendar.server.Domain.Member.Entity.Member;
 import bookcalendar.server.global.Security.CustomUserDetails;
 import bookcalendar.server.global.response.ApiResponseWrapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -33,14 +30,15 @@ public class ChatBotController {
     /**
      * 챗봇 채팅 API
      *
-     * @param customUserDetails
-     * @param chatRequest
-     * @return
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param chatRequest 유저의 채팅 메시지
+     * @return AI 챗봇의 반환 메시지
      */
     @Operation(summary = "챗봇 채팅 API", description = "String값으로 채팅 데이터를 전송받고 AI답변을 반환",
             responses = {
                     @ApiResponse(responseCode = "200", description = "채팅 메시지가 정상적으로 전송/반환되었습니다."),
-                    @ApiResponse(responseCode = "409", description = "")
+                    @ApiResponse(responseCode = "409", description = ""),
+                    @ApiResponse(responseCode = "500", description = "서버 내부 오류")
             })
     @PostMapping("/chat")
     public ResponseEntity<ApiResponseWrapper<String>> chat(@AuthenticationPrincipal CustomUserDetails customUserDetails,
@@ -56,13 +54,14 @@ public class ChatBotController {
     /**
      * 도서 추천 API
      *
-     * @param customUserDetails
+     * @param customUserDetails 인증된 유저의 정보 객체
      * @return
      */
-    @Operation(summary = "도서 추천 API", description = "",
+    @Operation(summary = "도서 추천 API", description = "챗봇 대화 데이터를 기반으로 추천 도서 리스트 5권을 반환합니다.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "도서 추천이 정상적으로 반환되었습니다."),
-                    @ApiResponse(responseCode = "409", description = "")
+                    @ApiResponse(responseCode = "409", description = ""),
+                    @ApiResponse(responseCode = "500", description = "서버 내부 오류")
             })
     @GetMapping("/recommend")
     public ResponseEntity<ApiResponseWrapper<List<CompleteResponse>>> chat(@AuthenticationPrincipal CustomUserDetails customUserDetails) {

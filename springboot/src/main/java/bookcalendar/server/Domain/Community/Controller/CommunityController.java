@@ -13,10 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @Tag(name = "Community", description = "커뮤니티 관리 API")
@@ -49,6 +46,31 @@ public class CommunityController {
 
         return ResponseEntity.status(201)
                 .body(new ApiResponseWrapper<>("저장된 게시글의 postId : " + postId,"게시글이 정상적으로 포스팅 되었습니다."));
+    }
+
+    /**
+     * 게시글 삭제 API
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param postId 삭제할 게시글 고유 번호
+     * @return 삭제 성공 메시지 반환
+     */
+    @Operation(summary = "게시글 삭제 API",description = " ",
+            responses = {
+                    @ApiResponse(responseCode = "200",description = "해당 게시글이 정상적으로 삭제 되었습니다."),
+                    @ApiResponse(responseCode = "401",description = "엑세스 토큰 만료"),
+                    @ApiResponse(responseCode = "403",description = "해당 게시글에 대한 삭제 권한이 없습니다."),
+                    @ApiResponse(responseCode = "500",description = "서버 내부 오류 발생")
+            })
+    @DeleteMapping("/posts/{postId}")
+    public ResponseEntity<ApiResponseWrapper<String>> deletePost(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+                                                                 @PathVariable Integer postId){
+
+        // 게시글 삭제 서비스 레이어 호출
+        communityService.deletePost(customUserDetails, postId);
+
+        return ResponseEntity.status(200)
+                .body(new ApiResponseWrapper<>("삭제된 게시글의 postId : " + postId,"해당 게시글이 정상적으로 삭제 되었습니다."));
     }
 
 }

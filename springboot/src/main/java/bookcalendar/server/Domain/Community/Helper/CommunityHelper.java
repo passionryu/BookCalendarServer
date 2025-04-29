@@ -3,6 +3,9 @@ package bookcalendar.server.Domain.Community.Helper;
 import bookcalendar.server.Domain.Community.DTO.Request.PostRequest;
 import bookcalendar.server.Domain.Community.Entity.Post;
 import bookcalendar.server.Domain.Member.Entity.Member;
+import bookcalendar.server.Domain.Member.Exception.MemberException;
+import bookcalendar.server.global.Security.CustomUserDetails;
+import bookcalendar.server.global.exception.ErrorCode;
 
 import java.time.LocalDateTime;
 
@@ -24,5 +27,17 @@ public class CommunityHelper {
                 .contents(postRequest.contents())
                 .reportCount(0)
                 .build();
+    }
+
+    /**
+     * 리소스 작성자가 현재 사용자와 동일한지 검증하는 메서드
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param post 게시글 객체
+     */
+    public static void checkOwnership(CustomUserDetails customUserDetails, Post post){
+        if (!post.getMember().getMemberId().equals(customUserDetails.getMemberId())) {
+            throw new MemberException(ErrorCode.NO_AUTH);
+        }
     }
 }

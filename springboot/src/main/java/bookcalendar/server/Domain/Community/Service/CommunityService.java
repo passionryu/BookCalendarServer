@@ -14,4 +14,11 @@ public interface CommunityService {
      */
     Integer writePost(CustomUserDetails customUserDetails, PostRequest postRequest);
 
+    /**
+     * 게시글 삭제 인터페이스
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param postId 게시글의 고유 번호
+     */
+    void deletePost(CustomUserDetails customUserDetails, Integer postId);
 }

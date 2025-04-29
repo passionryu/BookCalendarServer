@@ -42,4 +42,23 @@ public class CommunityServiceImpl implements CommunityService {
         Post post = postRepository.save(CommunityHelper.postEntityBuilder(member, postRequest));
         return post.getPostId();
     }
+
+    /**
+     * 게시글 삭제 메서드
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param postId 삭제할 게시글 고유 번호
+     */
+    @Override
+    public void deletePost(CustomUserDetails customUserDetails, Integer postId) {
+
+        // 게시글 ID를 통한 게시글 객체 반환
+        Post post = communityManager.getPost(postId);
+
+        // 삭제 권한이 있는지 확인 - 본인 인증
+        CommunityHelper.checkOwnership(customUserDetails, post);
+
+        // 해당 post 객체 삭제
+        postRepository.delete(post);
+    }
 }

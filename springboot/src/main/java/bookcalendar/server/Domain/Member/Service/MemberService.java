@@ -34,11 +34,5 @@ public interface MemberService {
      */
     TokenResponse refreshToken(TokenRequest refreshRequest);
 
-    /**
-     * 유저 메달 및 랭킹 반환 인터페이스
-     *
-     * @param customUserDetails 인증된 유저의 정보 객체
-     * @return
-     */
-    RankResponse getRank(CustomUserDetails customUserDetails);
+
 }

@@ -159,37 +159,4 @@ public class MemberServiceImpl implements MemberService {
         return new TokenResponse(newAccessToken,newRefreshToken);
     }
 
-    // ======================= 유저 메달 및 랭킹 반환 로직 =========================
-
-    /**
-     * 유저 메달 및 랭킹 반환 메서드
-     *
-     * @param customUserDetails 인증된 유저의 정보 객체
-     * @return 유저 메달 & 랭킹 정보 반환
-     *
-     * description : 독서 완료 시 캐싱 데이터 무효화
-     * description : 랭킹 변동 시 캐싱 데이터 무효화
-     */
-    @Override
-    @Cacheable(value = "rankCache", key = "#customUserDetails.memberId")
-    public RankResponse getRank(CustomUserDetails customUserDetails) {
-
-        Member member;
-
-        try {
-            member = memberRepository.findByMemberId(customUserDetails.getMemberId())
-                        .orElseThrow(() -> new MemberException(ErrorCode.USER_NOT_FOUND));
-            } catch (NoSuchElementException e) {
-                throw new MemberException(ErrorCode.USER_NOT_FOUND);
-            } catch (DataAccessException e) {
-                throw new MemberException(ErrorCode.DATABASE_ERROR);
-            }
-
-        // 유저 메달 정보 & 랭킹 반환
-        Integer reviewCount = member.getReviewCount();
-        Integer rank = member.getRank();
-
-        return new RankResponse(rank,reviewCount);
-    }
-
 }

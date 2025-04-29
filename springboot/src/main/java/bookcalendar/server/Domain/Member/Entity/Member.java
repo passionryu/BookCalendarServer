@@ -1,7 +1,9 @@
 package bookcalendar.server.Domain.Member.Entity;
 
 import bookcalendar.server.Domain.Book.Entity.Book;
+import bookcalendar.server.Domain.Community.Entity.Post;
 import bookcalendar.server.Domain.Review.Entity.Review;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -27,12 +29,14 @@ public class Member {
     private String nickName;
 
     @Column(nullable = false, length = 255)
+    @JsonIgnore
     private String password;
 
     @Column(nullable = false)
     private LocalDate birth;
 
     @Column(nullable = false, unique = true, length = 20)
+    @JsonIgnore
     private String phoneNumber;
 
     @Column(length = 100)
@@ -76,11 +80,17 @@ public class Member {
      */
     @Builder.Default
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore // Book 리스트를 JSON 직렬화에서 제외
     private List<Book> books = new ArrayList<>();
 
     @Builder.Default
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Review> reviews = new ArrayList<>();
 
+    @Builder.Default
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore // Post 리스트를 JSON 직렬화에서 제외
+    private List<Post> posts = new ArrayList<>();
 
 }

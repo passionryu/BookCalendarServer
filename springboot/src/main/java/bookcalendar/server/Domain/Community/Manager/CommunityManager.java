@@ -7,9 +7,15 @@ import bookcalendar.server.Domain.Member.Entity.Member;
 import bookcalendar.server.Domain.Member.Exception.MemberException;
 import bookcalendar.server.Domain.Member.Repository.MemberRepository;
 import bookcalendar.server.global.exception.ErrorCode;
-import groovy.util.logging.Slf4j;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Slf4j
 @Component
@@ -29,5 +35,27 @@ public class CommunityManager {
                 .orElseThrow(()-> new CommunityException(ErrorCode.POST_NOT_FOUND));
     }
 
+    /**
+     * 랭킹 재배치 스케줄러
+     */
+    @Scheduled(cron = "0 0/10 * * * ?")  // 매 10분마다 실행
+    @Transactional
+    @CacheEvict(value = "rankCache", allEntries = true)
+    public void recalculateAllRanks() {
+        log.info("✅ 랭킹 재계산 작업 시작");
+
+        // 리뷰 수를 기준으로 내림차순으로 모든 멤버를 가져옴
+        List<Member> members = memberRepository.findAll(Sort.by(Sort.Direction.DESC, "reviewCount"));
+        int total = members.size();
+
+        // 각 멤버의 랭킹을 계산
+        for (int i = 0; i < total; i++) {
+            Member m = members.get(i);
+            int percentile = (int) Math.floor((double) i / total * 100);
+            m.setRank(percentile);  // 각 멤버의 랭킹을 설정
+        }
+
+        log.info("✅ 랭킹 재계산 작업 완료");
+    }
 
 }

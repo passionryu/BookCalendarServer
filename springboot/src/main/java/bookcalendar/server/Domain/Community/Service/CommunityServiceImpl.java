@@ -5,17 +5,14 @@ import bookcalendar.server.Domain.Community.Entity.Post;
 import bookcalendar.server.Domain.Community.Helper.CommunityHelper;
 import bookcalendar.server.Domain.Community.Manager.CommunityManager;
 import bookcalendar.server.Domain.Community.Repository.PostRepository;
+import bookcalendar.server.Domain.Member.DTO.Response.RankResponse;
 import bookcalendar.server.Domain.Member.Entity.Member;
-import bookcalendar.server.Domain.Member.Exception.MemberException;
-import bookcalendar.server.Domain.Member.Repository.MemberRepository;
 import bookcalendar.server.global.Security.CustomUserDetails;
-import bookcalendar.server.global.exception.ErrorCode;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
 
 @Slf4j
 @Service
@@ -61,4 +58,26 @@ public class CommunityServiceImpl implements CommunityService {
         // 해당 post 객체 삭제
         postRepository.delete(post);
     }
+
+    /**
+     * 유저 메달 및 랭킹 반환 메서드
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @return 유저 메달 & 랭킹 정보 반환
+     *
+     * description : 독서 완료 시 캐싱 데이터 무효화
+     * description : 랭킹 변동 시 캐싱 데이터 무효화
+     */
+    @Override
+    @Cacheable(value = "rankCache", key = "#customUserDetails.memberId")
+    public RankResponse getRank(CustomUserDetails customUserDetails) {
+
+        // 인증된 유저 객체의를 활용한 Member 객체 반환
+        Member member = communityManager.getMember(customUserDetails.getMemberId());
+
+        // 유저 메달 정보 & 랭킹 반환
+        return new RankResponse(member.getRank(), member.getReviewCount());
+    }
+
+
 }

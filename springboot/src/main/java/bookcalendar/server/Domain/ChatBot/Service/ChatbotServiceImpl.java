@@ -1,9 +1,9 @@
 package bookcalendar.server.Domain.ChatBot.Service;
 
 import bookcalendar.server.Domain.Book.DTO.Response.CompleteResponse;
-import bookcalendar.server.Domain.ChatBot.Component.RedisManager;
+import bookcalendar.server.Domain.ChatBot.Manager.RedisManager;
 import bookcalendar.server.Domain.ChatBot.DTO.Request.ChatRequest;
-import bookcalendar.server.Domain.ChatBot.Static.RedisHelper;
+import bookcalendar.server.Domain.ChatBot.Helper.RedisHelper;
 import bookcalendar.server.global.Security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

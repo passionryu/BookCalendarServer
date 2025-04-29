@@ -1,4 +1,4 @@
-package bookcalendar.server.Domain.ChatBot.Static;
+package bookcalendar.server.Domain.ChatBot.Helper;
 
 import bookcalendar.server.Domain.Book.DTO.Response.CompleteResponse;
 import bookcalendar.server.Domain.ChatBot.Exception.ChatBotException;

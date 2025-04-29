@@ -2,6 +2,7 @@ package bookcalendar.server.global.exception;
 
 import bookcalendar.server.Domain.Book.Exception.BookException;
 import bookcalendar.server.Domain.ChatBot.Exception.ChatBotException;
+import bookcalendar.server.Domain.Community.Exception.CommunityException;
 import bookcalendar.server.Domain.Member.Exception.MemberException;
 import bookcalendar.server.Domain.Question.Exception.QuestionException;
 import bookcalendar.server.Domain.Review.ReviewException;
@@ -75,6 +76,18 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(ChatBotException.class)
     public ResponseEntity<ApiResponseWrapper<String>> chatBotExceptions(ChatBotException ex) {
+        ApiResponseWrapper<String> response = new ApiResponseWrapper<>(ex.getErrorcode().getErrorCode(),ex.getErrorcode().getMessage());
+        return new ResponseEntity<>(response, ex.getErrorcode().getHttpStatus());
+    }
+
+    /**
+     * ChatBot Domain Global Exception Method
+     *
+     * @param ex
+     * @return
+     */
+    @ExceptionHandler(CommunityException.class)
+    public ResponseEntity<ApiResponseWrapper<String>> communityExceptions(CommunityException ex) {
         ApiResponseWrapper<String> response = new ApiResponseWrapper<>(ex.getErrorcode().getErrorCode(),ex.getErrorcode().getMessage());
         return new ResponseEntity<>(response, ex.getErrorcode().getHttpStatus());
     }

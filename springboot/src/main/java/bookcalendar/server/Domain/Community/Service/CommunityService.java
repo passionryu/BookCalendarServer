@@ -69,4 +69,6 @@ public interface CommunityService {
      */
     List<CommentResponse> getCommentList(Integer postId);
 
+    void deleteComment(CustomUserDetails customUserDetails, Integer commentId);
+
 }

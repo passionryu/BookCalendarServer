@@ -17,10 +17,12 @@ import bookcalendar.server.Domain.Member.DTO.Response.RankResponse;
 import bookcalendar.server.Domain.Member.Entity.Member;
 import bookcalendar.server.global.Security.CustomUserDetails;
 import bookcalendar.server.global.exception.ErrorCode;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -65,8 +67,8 @@ public class CommunityServiceImpl implements CommunityService {
         // 게시글 ID를 통한 게시글 객체 반환
         Post post = communityManager.getPost(postId);
 
-        // 삭제 권한이 있는지 확인 - 본인 인증
-        CommunityHelper.checkOwnership(customUserDetails, post);
+        // 현재 유저가 삭제하려는 게시글에 삭제 권한이 있는지 확인
+        CommunityHelper.checkOwnership_post(customUserDetails, post);
 
         // 해당 post 객체 삭제
         postRepository.delete(post);
@@ -151,6 +153,25 @@ public class CommunityServiceImpl implements CommunityService {
 
         // 게시글에서 댓글 리스트 반환 매퍼 호출
         return communityMapper.getCommentsByPostId(postId);
+    }
+
+    /**
+     * 내 댓글 삭제 메서드
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param commentId 삭제하고자 하는 댓글의 고유 번호
+     */
+    @Override
+    public void deleteComment(CustomUserDetails customUserDetails, Integer commentId) {
+
+       // 댓글 고유 번호로 댓글 객체 반환
+       Comment comment = communityManager.getComment(commentId);
+
+       // 현재 유저가 삭제하려는 댓글에 삭제 권한이 있는지 확인
+       CommunityHelper.checkOwnership_comment(customUserDetails, comment);
+
+       // 권한이 있으면 댓글 삭제
+       commentRepository.delete(comment);
     }
 
 }

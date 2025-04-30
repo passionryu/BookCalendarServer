@@ -1,7 +1,9 @@
 package bookcalendar.server.Domain.Community.Manager;
 
+import bookcalendar.server.Domain.Community.Entity.Comment;
 import bookcalendar.server.Domain.Community.Entity.Post;
 import bookcalendar.server.Domain.Community.Exception.CommunityException;
+import bookcalendar.server.Domain.Community.Repository.CommentRepository;
 import bookcalendar.server.Domain.Community.Repository.PostRepository;
 import bookcalendar.server.Domain.Member.Entity.Member;
 import bookcalendar.server.Domain.Member.Exception.MemberException;
@@ -24,6 +26,7 @@ public class CommunityManager {
 
     private final MemberRepository memberRepository;
     private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
 
     /**
      * 멤버 객체 반환 메서드
@@ -45,6 +48,17 @@ public class CommunityManager {
     public Post getPost(Integer postId){
         return postRepository.findByPostId(postId)
                 .orElseThrow(()-> new CommunityException(ErrorCode.POST_NOT_FOUND));
+    }
+
+    /**
+     * 댓글 객체 반환 메서드
+     *
+     * @param commentId 댓글 고유 번호
+     * @return 댓글 객체
+     */
+    public Comment getComment(Integer commentId){
+        return commentRepository.findByCommentId(commentId)
+                .orElseThrow(()-> new CommunityException(ErrorCode.COMMENT_NOT_FOUND));
     }
 
     // TODO : 스케줄러를 사용하는 것이 좋을까 아니면 독후감을 작성할때마다 리셋 하는 것이 좋을까....

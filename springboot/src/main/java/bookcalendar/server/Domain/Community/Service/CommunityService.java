@@ -2,6 +2,7 @@ package bookcalendar.server.Domain.Community.Service;
 
 import bookcalendar.server.Domain.Community.DTO.Request.CommentRequest;
 import bookcalendar.server.Domain.Community.DTO.Request.PostRequest;
+import bookcalendar.server.Domain.Community.DTO.Response.CommentResponse;
 import bookcalendar.server.Domain.Community.DTO.Response.PostListResponse;
 import bookcalendar.server.Domain.Community.DTO.Response.PostResponse;
 import bookcalendar.server.Domain.Member.DTO.Response.RankResponse;
@@ -58,6 +59,14 @@ public interface CommunityService {
      * @param commentRequest 댓글 요청 데이터
      * @return 작성된 데이터 객체의 고유 번호
      */
-    Integer createComment(CustomUserDetails customUserDetails, Integer postId, CommentRequest commentRequest);
+    void createComment(CustomUserDetails customUserDetails, Integer postId, CommentRequest commentRequest);
+
+    /**
+     * 게시물에서 댓글 리스트 조회 인터페이스
+     *
+     * @param postId 댓글이 달린 게시물 고유 번호
+     * @return 해당 게시글의 댓글 리스트
+     */
+    List<CommentResponse> getCommentList(Integer postId);
 
 }

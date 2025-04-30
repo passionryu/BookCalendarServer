@@ -2,6 +2,7 @@ package bookcalendar.server.Domain.Community.Controller;
 
 import bookcalendar.server.Domain.Community.DTO.Request.CommentRequest;
 import bookcalendar.server.Domain.Community.DTO.Request.PostRequest;
+import bookcalendar.server.Domain.Community.DTO.Response.CommentResponse;
 import bookcalendar.server.Domain.Community.DTO.Response.PostListResponse;
 import bookcalendar.server.Domain.Community.DTO.Response.PostResponse;
 import bookcalendar.server.Domain.Community.Service.CommunityService;
@@ -160,14 +161,36 @@ public class CommunityController {
                     @ApiResponse(responseCode = "500", description = "서버 내부 오류")
             })
     @PostMapping("/posts/{postId}/comments")
-    public ResponseEntity<ApiResponseWrapper<Integer>> createComment(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+    public ResponseEntity<ApiResponseWrapper<Void>> createComment(@AuthenticationPrincipal CustomUserDetails customUserDetails,
                                                          @PathVariable Integer postId, @Valid @RequestBody CommentRequest commentRequest){
 
         // 댓글 작성 서비스 레이어 호출
-        Integer commentId = communityService.createComment(customUserDetails, postId, commentRequest);
+        communityService.createComment(customUserDetails, postId, commentRequest);
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(new ApiResponseWrapper<>(commentId,"댓글이 정상적으로 포스팅 되었습니다."));
+                .body(new ApiResponseWrapper<>(null,"댓글이 정상적으로 포스팅 되었습니다."));
+    }
+
+    /**
+     * 게시물에서 댓글들 조회 API
+     *
+     * @param postId 댓글이 달린 게시글 고유 번호
+     * @return 댓글 리스트
+     */
+    @Operation(summary = " 게시물에서 댓글들 조회 API ",description = "커뮤니티에서 한 게시글을 조회할 떄, 그때 댓글을 조회할 기능이다.",
+    responses = {
+            @ApiResponse(responseCode = "200", description = "게시물에 댓글이 정상적으로 조회되었습니다."),
+            @ApiResponse(responseCode = "401",description = "엑세스 토큰 만료"),
+            @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+    })
+    @GetMapping("/posts/{postId}/comments")
+    public ResponseEntity<ApiResponseWrapper<List<CommentResponse>>> getComments(@PathVariable Integer postId){
+
+        // 게시물에서 댓글 리스트 반환 서비스 레이어 호출
+        List<CommentResponse> commentResponseList = communityService.getCommentList(postId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponseWrapper<>(commentResponseList, "게시물에 댓글이 정상적으로 조회되었습니다."));
     }
 
 }

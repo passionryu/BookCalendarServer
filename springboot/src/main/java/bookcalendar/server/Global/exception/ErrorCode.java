@@ -36,7 +36,8 @@ public enum ErrorCode {
     FAILED_TO_PARSE("CHATBOT_1000", "AI 응답 파싱 실패", HttpStatus.NOT_FOUND),
 
     /* Community Exception 11XX */
-    POST_NOT_FOUND("COMMUNITY_1100", "해당 게시글을 찾을 수 없습니다." , HttpStatus.NOT_FOUND);
+    POST_NOT_FOUND("COMMUNITY_1100", "해당 게시글을 찾을 수 없습니다." , HttpStatus.NOT_FOUND),
+    COMMENT_NOT_FOUND("COMMUNITY_1101", "해당 댓글을 찾을 수 없습니다." , HttpStatus.NOT_FOUND);
 
     private final String errorCode;
     private final String message;

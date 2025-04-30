@@ -32,18 +32,6 @@ public class CommunityHelper {
     }
 
     /**
-     * 리소스 작성자가 현재 사용자와 동일한지 검증하는 메서드
-     *
-     * @param customUserDetails 인증된 유저의 정보 객체
-     * @param post 게시글 객체
-     */
-    public static void checkOwnership(CustomUserDetails customUserDetails, Post post){
-        if (!post.getMember().getMemberId().equals(customUserDetails.getMemberId())) {
-            throw new MemberException(ErrorCode.NO_AUTH);
-        }
-    }
-
-    /**
      * 댓글 객체 빌더
      *
      * @param member 댓글을 달 멤버 객체
@@ -59,5 +47,29 @@ public class CommunityHelper {
                 .date(LocalDateTime.now())
                 .reportCount(0)
                 .build();
+    }
+
+    /**
+     * 게시글 작성자가 현재 사용자와 동일한지 검증하는 메서드
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param post 게시글 객체
+     */
+    public static void checkOwnership_post(CustomUserDetails customUserDetails, Post post){
+        if (!post.getMember().getMemberId().equals(customUserDetails.getMemberId())) {
+            throw new MemberException(ErrorCode.NO_AUTH);
+        }
+    }
+
+    /**
+     * 댓글 작성자가 현재 사용자와 동일한지 검증하는 메서드
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param comment 댓글 객체
+     */
+    public static void checkOwnership_comment(CustomUserDetails customUserDetails, Comment comment){
+        if (!comment.getMember().getMemberId().equals(customUserDetails.getMemberId())) {
+            throw new MemberException(ErrorCode.NO_AUTH);
+        }
     }
 }

@@ -69,6 +69,20 @@ public interface CommunityService {
      */
     List<CommentResponse> getCommentList(Integer postId);
 
+    /**
+     * 내 댓글 삭제 인터페이스
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param commentId 삭제할 댓글 고유 번호
+     */
     void deleteComment(CustomUserDetails customUserDetails, Integer commentId);
 
+    /**
+     * 게시글 작성자의 본인 게시글 내의 댓글 삭제 인터페이스
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param postId 삭제할 댓글의 게시글 고유 번호
+     * @param commentId 삭제할 댓글의 고유 번호
+     */
+    void deleteCommentByPostOwner(CustomUserDetails customUserDetails, Integer postId, Integer commentId);
 }

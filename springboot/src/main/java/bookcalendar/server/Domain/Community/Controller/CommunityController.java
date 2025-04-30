@@ -2,6 +2,7 @@ package bookcalendar.server.Domain.Community.Controller;
 
 import bookcalendar.server.Domain.Community.DTO.Request.PostRequest;
 import bookcalendar.server.Domain.Community.DTO.Response.PostListResponse;
+import bookcalendar.server.Domain.Community.DTO.Response.PostResponse;
 import bookcalendar.server.Domain.Community.Service.CommunityService;
 import bookcalendar.server.Domain.Member.DTO.Response.RankResponse;
 import bookcalendar.server.global.Security.CustomUserDetails;
@@ -105,7 +106,7 @@ public class CommunityController {
      *
      * @return 커뮤니티 게시글 리스트
      */
-    @Operation(summary = " 커뮤니티 게시글 리스트 반환 API", description = "커뮤니티에 입장하면 자동으로 해당 API를 작동하여, 유저에게 게시글 리스트를 보여준다..",
+    @Operation(summary = " 커뮤니티 게시글 리스트 반환 API", description = "커뮤니티에 입장하면 자동으로 해당 API를 작동하여, 유저에게 게시글 리스트를 보여준다.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "커뮤니티 게시글 리스트가 정상적으로 조회되었습니다."),
                     @ApiResponse(responseCode = "401",description = "엑세스 토큰 만료"),
@@ -119,6 +120,28 @@ public class CommunityController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponseWrapper<>(postList,"커뮤니티 게시글 리스트가 정상적으로 조회되었습니다."));
+    }
+
+    /**
+     * 선택한 게시글 상세조회 API
+     *
+     * @param postId 게시글 고유 번호
+     * @return 게시글 정보 반환
+     */
+    @Operation(summary = " 선택한 게시글 상세조회 API", description = "postId를 입력받아 해당 게시글의 페이지 정보를 반환한다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "커뮤니티 게시글이 정상적으로 조회되었습니다."),
+                    @ApiResponse(responseCode = "401",description = "엑세스 토큰 만료"),
+                    @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            })
+    @GetMapping("/lists/{postId}")
+    public ResponseEntity<ApiResponseWrapper<PostResponse>> getPostDetail(@PathVariable Integer postId){
+
+        // 선택한 게시글 정보 반환 서비스 레이어 호출
+        PostResponse postResponse = communityService.getPostDetail(postId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponseWrapper<>(postResponse,"커뮤니티 게시글이 정상적으로 조회되었습니다."));
     }
 
 }

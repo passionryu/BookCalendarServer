@@ -2,13 +2,16 @@ package bookcalendar.server.Domain.Community.Service;
 
 import bookcalendar.server.Domain.Community.DTO.Request.PostRequest;
 import bookcalendar.server.Domain.Community.DTO.Response.PostListResponse;
+import bookcalendar.server.Domain.Community.DTO.Response.PostResponse;
 import bookcalendar.server.Domain.Community.Entity.Post;
+import bookcalendar.server.Domain.Community.Exception.CommunityException;
 import bookcalendar.server.Domain.Community.Helper.CommunityHelper;
 import bookcalendar.server.Domain.Community.Manager.CommunityManager;
 import bookcalendar.server.Domain.Community.Repository.PostRepository;
 import bookcalendar.server.Domain.Member.DTO.Response.RankResponse;
 import bookcalendar.server.Domain.Member.Entity.Member;
 import bookcalendar.server.global.Security.CustomUserDetails;
+import bookcalendar.server.global.exception.ErrorCode;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -94,6 +97,20 @@ public class CommunityServiceImpl implements CommunityService {
 
         // 게시글 리스트 DTO 반환
         return postRepository.findAllPostSummaries();
+    }
+
+    /**
+     * 선택한 게시글 상세 조회 메서드
+     *
+     * @param postId 게시글 고유 번호
+     * @return 게시글 정보
+     */
+    @Override
+    public PostResponse getPostDetail(Integer postId) {
+
+        // 선택한 게시글 상세 내용 반환
+        return postRepository.getPostDetail(postId)
+                .orElseThrow(()-> new CommunityException(ErrorCode.POST_NOT_FOUND));
     }
 
 }

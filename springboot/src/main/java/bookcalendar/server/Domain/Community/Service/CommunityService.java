@@ -2,6 +2,7 @@ package bookcalendar.server.Domain.Community.Service;
 
 import bookcalendar.server.Domain.Community.DTO.Request.PostRequest;
 import bookcalendar.server.Domain.Community.DTO.Response.PostListResponse;
+import bookcalendar.server.Domain.Community.DTO.Response.PostResponse;
 import bookcalendar.server.Domain.Member.DTO.Response.RankResponse;
 import bookcalendar.server.global.Security.CustomUserDetails;
 
@@ -39,5 +40,13 @@ public interface CommunityService {
      * @return 커뮤니티 게시글 리스트
      */
     List<PostListResponse> getPostList();
+
+    /**
+     * 커뮤니티에서 게시글 반환 인터페이스
+     *
+     * @param postId 게시글 고유 번호
+     * @return 게시글 정보
+     */
+    PostResponse getPostDetail(Integer postId);
 
 }

@@ -1,15 +1,19 @@
 package bookcalendar.server.Domain.Community.Service;
 
+import bookcalendar.server.Domain.Community.DTO.Request.CommentRequest;
 import bookcalendar.server.Domain.Community.DTO.Request.PostRequest;
 import bookcalendar.server.Domain.Community.DTO.Response.PostListResponse;
 import bookcalendar.server.Domain.Community.DTO.Response.PostResponse;
+import bookcalendar.server.Domain.Community.Entity.Comment;
 import bookcalendar.server.Domain.Community.Entity.Post;
 import bookcalendar.server.Domain.Community.Exception.CommunityException;
 import bookcalendar.server.Domain.Community.Helper.CommunityHelper;
 import bookcalendar.server.Domain.Community.Manager.CommunityManager;
+import bookcalendar.server.Domain.Community.Repository.CommentRepository;
 import bookcalendar.server.Domain.Community.Repository.PostRepository;
 import bookcalendar.server.Domain.Member.DTO.Response.RankResponse;
 import bookcalendar.server.Domain.Member.Entity.Member;
+import bookcalendar.server.Domain.Member.Repository.MemberRepository;
 import bookcalendar.server.global.Security.CustomUserDetails;
 import bookcalendar.server.global.exception.ErrorCode;
 import jakarta.transaction.Transactional;
@@ -26,6 +30,7 @@ import java.util.List;
 public class CommunityServiceImpl implements CommunityService {
 
     private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
     private final CommunityManager communityManager;
 
     /**
@@ -111,6 +116,29 @@ public class CommunityServiceImpl implements CommunityService {
         // 선택한 게시글 상세 내용 반환
         return postRepository.getPostDetail(postId)
                 .orElseThrow(()-> new CommunityException(ErrorCode.POST_NOT_FOUND));
+    }
+
+    /**
+     * 댓글 작성 메서드
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param postId 댓글이 달리는 게시글 고유 번호
+     * @param commentRequest 댓글 요청 데이터
+     * @return 작성된 댓글 객체의 고유 번호
+     */
+    @Override
+    public Integer createComment(CustomUserDetails customUserDetails, Integer postId, CommentRequest commentRequest) {
+
+        // member,post 객체와 댓글 데이터를 입력하여 댓글 객체 생성
+        Comment comment = CommunityHelper.commentEntityBuilder( communityManager.getMember(customUserDetails.getMemberId()),
+                                                                communityManager.getPost(postId),
+                                                                commentRequest);
+
+        // 댓글 객체 저장
+        Comment savedComment = commentRepository.save(comment);
+
+        // 생성된 댓글 객체의 고유 번호를 반환
+        return savedComment.getCommentId();
     }
 
 }

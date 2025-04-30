@@ -1,6 +1,8 @@
 package bookcalendar.server.Domain.Community.Helper;
 
+import bookcalendar.server.Domain.Community.DTO.Request.CommentRequest;
 import bookcalendar.server.Domain.Community.DTO.Request.PostRequest;
+import bookcalendar.server.Domain.Community.Entity.Comment;
 import bookcalendar.server.Domain.Community.Entity.Post;
 import bookcalendar.server.Domain.Member.Entity.Member;
 import bookcalendar.server.Domain.Member.Exception.MemberException;
@@ -39,5 +41,23 @@ public class CommunityHelper {
         if (!post.getMember().getMemberId().equals(customUserDetails.getMemberId())) {
             throw new MemberException(ErrorCode.NO_AUTH);
         }
+    }
+
+    /**
+     * 댓글 객체 빌더
+     *
+     * @param member 댓글을 달 멤버 객체
+     * @param post 댓글이 달릴 게시글 객체
+     * @param commentRequest 댓글 정보
+     * @return 댓글 객체
+     */
+    public static Comment commentEntityBuilder(Member member, Post post, CommentRequest commentRequest){
+        return Comment.builder()
+                .member(member)
+                .post(post)
+                .contents(commentRequest.contents())
+                .date(LocalDateTime.now())
+                .reportCount(0)
+                .build();
     }
 }

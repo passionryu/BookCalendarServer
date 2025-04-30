@@ -1,5 +1,6 @@
 package bookcalendar.server.Domain.Community.Controller;
 
+import bookcalendar.server.Domain.Community.DTO.Request.CommentRequest;
 import bookcalendar.server.Domain.Community.DTO.Request.PostRequest;
 import bookcalendar.server.Domain.Community.DTO.Response.PostListResponse;
 import bookcalendar.server.Domain.Community.DTO.Response.PostResponse;
@@ -142,6 +143,31 @@ public class CommunityController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponseWrapper<>(postResponse,"커뮤니티 게시글이 정상적으로 조회되었습니다."));
+    }
+
+    /**
+     * 댓글 작성 API
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param postId 게시글 고유 번호
+     * @param commentRequest 댓글 요청 데이터
+     * @return commentId를 반환해서 작성 후 바로 페이지에 랜딩될 수 있도록 함
+     */
+    @Operation(summary = " 댓글 작성 API", description = "postId를 입력받고 해당 게시글에 댓글을 저장하며 작성과 동시에 페이지에 바로 랜딩 될 수 있도록 한다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "댓글이 정상적으로 포스팅 되었습니다."),
+                    @ApiResponse(responseCode = "401",description = "엑세스 토큰 만료"),
+                    @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            })
+    @PostMapping("/posts/{postId}/comments")
+    public ResponseEntity<ApiResponseWrapper<Integer>> createComment(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+                                                         @PathVariable Integer postId, @Valid @RequestBody CommentRequest commentRequest){
+
+        // 댓글 작성 서비스 레이어 호출
+        Integer commentId = communityService.createComment(customUserDetails, postId, commentRequest);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ApiResponseWrapper<>(commentId,"댓글이 정상적으로 포스팅 되었습니다."));
     }
 
 }

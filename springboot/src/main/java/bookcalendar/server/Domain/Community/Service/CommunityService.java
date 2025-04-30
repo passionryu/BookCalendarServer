@@ -1,5 +1,6 @@
 package bookcalendar.server.Domain.Community.Service;
 
+import bookcalendar.server.Domain.Community.DTO.Request.CommentRequest;
 import bookcalendar.server.Domain.Community.DTO.Request.PostRequest;
 import bookcalendar.server.Domain.Community.DTO.Response.PostListResponse;
 import bookcalendar.server.Domain.Community.DTO.Response.PostResponse;
@@ -48,5 +49,15 @@ public interface CommunityService {
      * @return 게시글 정보
      */
     PostResponse getPostDetail(Integer postId);
+
+    /**
+     * 댓글 작성 인터페이스
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param postId 댓글이 달리는 게시글 고유 번호
+     * @param commentRequest 댓글 요청 데이터
+     * @return 작성된 데이터 객체의 고유 번호
+     */
+    Integer createComment(CustomUserDetails customUserDetails, Integer postId, CommentRequest commentRequest);
 
 }

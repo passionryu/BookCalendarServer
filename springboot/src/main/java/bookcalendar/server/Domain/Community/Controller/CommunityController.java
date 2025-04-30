@@ -216,4 +216,31 @@ public class CommunityController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponseWrapper<>(null, "내 댓글이 성공적으로 삭제되었습니다."));
     }
+
+    /**
+     * 게시글 작성자 본인 게시글의 댓글 삭제 API
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param postId 삭제할 댓글의 게시글 고유 번호
+     * @param commentId 삭제할 댓글의 고유 번호
+     * @return 댓글 삭제 성공 메시지
+     */
+    @Operation(summary = " 게시글 작성자의 본인 게시글 내의 댓글 삭제 API ",description = "본인이 작성한 게시글일 경우 해당 게시글의 댓글들은 삭제할 권한이 있다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "댓글이 성공적으로 삭제되었습니다."),
+                    @ApiResponse(responseCode = "401",description = "엑세스 토큰 만료"),
+                    @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            })
+    @DeleteMapping("/posts/{postId}/comments/{commentId}")
+    public ResponseEntity<ApiResponseWrapper<Void>> deleteCommentByPostOwner(@AuthenticationPrincipal CustomUserDetails customUserDetails ,
+                                                                             @PathVariable Integer postId ,
+                                                                             @PathVariable Integer commentId){
+
+        // 게시글 작성자 본인 게시글 내의 댓글 삭제 서비스 레이어 호출
+        communityService.deleteCommentByPostOwner(customUserDetails, postId, commentId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponseWrapper<>(null, "댓글이 성공적으로 삭제되었습니다."));
+    }
+
 }

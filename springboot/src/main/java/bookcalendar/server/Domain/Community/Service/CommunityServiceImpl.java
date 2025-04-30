@@ -17,12 +17,10 @@ import bookcalendar.server.Domain.Member.DTO.Response.RankResponse;
 import bookcalendar.server.Domain.Member.Entity.Member;
 import bookcalendar.server.global.Security.CustomUserDetails;
 import bookcalendar.server.global.exception.ErrorCode;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -172,6 +170,27 @@ public class CommunityServiceImpl implements CommunityService {
 
        // 권한이 있으면 댓글 삭제
        commentRepository.delete(comment);
+    }
+
+    /**
+     * 게시글 작성자의 본인 게시글 내의 댓글 삭제 메서드
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param postId 삭제할 댓글의 게시글 고유 번호
+     * @param commentId 삭제할 댓글의 고유 번호
+     */
+    @Override
+    public void deleteCommentByPostOwner(CustomUserDetails customUserDetails, Integer postId, Integer commentId) {
+
+        // 삭제하려는 댓글을 포함하는 게시글 객체 반환
+        Comment comment = communityManager.getComment(commentId);
+        Post post = communityManager.getPost(comment.getPost().getPostId());
+
+        // 위 게시글의 작성자가 현재 유저와 동일한지 검증 - 삭제 권한 확인
+        CommunityHelper.checkOwnership_post(customUserDetails, post);
+
+        // 권한이 있으면 댓글 삭제
+        commentRepository.delete(comment);
     }
 
 }

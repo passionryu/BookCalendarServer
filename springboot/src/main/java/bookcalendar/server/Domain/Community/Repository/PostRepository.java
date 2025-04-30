@@ -1,8 +1,11 @@
 package bookcalendar.server.Domain.Community.Repository;
 
+import bookcalendar.server.Domain.Community.DTO.Response.PostListResponse;
 import bookcalendar.server.Domain.Community.Entity.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface PostRepository extends JpaRepository<Post,Integer> {
@@ -14,4 +17,17 @@ public interface PostRepository extends JpaRepository<Post,Integer> {
      * @return 게시글 객체
      */
     Optional<Post> findByPostId(Integer postId);
+
+
+    /**
+     * 게시글 리스트 반환
+     *
+     * @return 게시글 리스트
+     */
+    @Query("SELECT new bookcalendar.server.Domain.Community.DTO.Response.PostListResponse(p.postId, p.title, m.nickName, p.date) " +
+            "FROM Post p JOIN p.member m")
+    List<PostListResponse> findAllPostSummaries();
+
+
+
 }

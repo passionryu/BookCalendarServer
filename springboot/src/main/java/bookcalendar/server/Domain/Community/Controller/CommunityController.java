@@ -1,6 +1,7 @@
 package bookcalendar.server.Domain.Community.Controller;
 
 import bookcalendar.server.Domain.Community.DTO.Request.PostRequest;
+import bookcalendar.server.Domain.Community.DTO.Response.PostListResponse;
 import bookcalendar.server.Domain.Community.Service.CommunityService;
 import bookcalendar.server.Domain.Member.DTO.Response.RankResponse;
 import bookcalendar.server.global.Security.CustomUserDetails;
@@ -15,6 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @Tag(name = "Community", description = "커뮤니티 관리 API")
@@ -85,7 +88,7 @@ public class CommunityController {
                     @ApiResponse(responseCode = "200", description = "유저의 메달 및 랭킹 정상적으로 반환"),
                     @ApiResponse(responseCode = "401",description = "엑세스 토큰 만료"),
                     @ApiResponse(responseCode = "404", description = "해당 유저를 찾을 수 없습니다."),
-                    @ApiResponse(responseCode = "500", description = "데이터 베이스 연결에 문제가 발생했습니다.")
+                    @ApiResponse(responseCode = "500", description = "서버 내부 오류")
             })
     @GetMapping("/rank")
     public ResponseEntity<ApiResponseWrapper<RankResponse>> getRank(@AuthenticationPrincipal CustomUserDetails customUserDetails){
@@ -97,5 +100,25 @@ public class CommunityController {
                 .body(new ApiResponseWrapper<>(rankResponse,"유저 메달 및 랭킹에 대한 정보가 정상적으로 반환되었습니다."));
     }
 
+    /**
+     * 커뮤니티 게시글 리스트 반환 API
+     *
+     * @return 커뮤니티 게시글 리스트
+     */
+    @Operation(summary = " 커뮤니티 게시글 리스트 반환 API", description = "커뮤니티에 입장하면 자동으로 해당 API를 작동하여, 유저에게 게시글 리스트를 보여준다..",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "커뮤니티 게시글 리스트가 정상적으로 조회되었습니다."),
+                    @ApiResponse(responseCode = "401",description = "엑세스 토큰 만료"),
+                    @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            })
+    @GetMapping("/lists")
+    public ResponseEntity<ApiResponseWrapper<List<PostListResponse>>> getPostList(){
+
+        // 게시글 리스트 반환 서비스 레이어 호출
+        List<PostListResponse> postList = communityService.getPostList();
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponseWrapper<>(postList,"커뮤니티 게시글 리스트가 정상적으로 조회되었습니다."));
+    }
 
 }

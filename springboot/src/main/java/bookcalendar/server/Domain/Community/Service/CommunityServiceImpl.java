@@ -1,6 +1,7 @@
 package bookcalendar.server.Domain.Community.Service;
 
 import bookcalendar.server.Domain.Community.DTO.Request.PostRequest;
+import bookcalendar.server.Domain.Community.DTO.Response.PostListResponse;
 import bookcalendar.server.Domain.Community.Entity.Post;
 import bookcalendar.server.Domain.Community.Helper.CommunityHelper;
 import bookcalendar.server.Domain.Community.Manager.CommunityManager;
@@ -13,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -79,5 +82,18 @@ public class CommunityServiceImpl implements CommunityService {
         return new RankResponse(member.getRank(), member.getReviewCount());
     }
 
+    /**
+     * 커뮤니티 게시글 리스트 반환 메서드
+     *
+     * @return 커뮤니티 게시글 리스트
+     *
+     * todo : 캐싱 시스템 적용하기 - 누군가 올리면 캐싱 무효화
+     */
+    @Override
+    public List<PostListResponse> getPostList() {
+
+        // 게시글 리스트 DTO 반환
+        return postRepository.findAllPostSummaries();
+    }
 
 }

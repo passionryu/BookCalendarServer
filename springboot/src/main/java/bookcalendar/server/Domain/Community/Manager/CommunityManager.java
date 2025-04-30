@@ -25,16 +25,29 @@ public class CommunityManager {
     private final MemberRepository memberRepository;
     private final PostRepository postRepository;
 
+    /**
+     * 멤버 객체 반환 메서드
+     *
+     * @param memberId 유저의 고유 번호
+     * @return 멤버 객체
+     */
     public Member getMember(Integer memberId) {
         return memberRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new MemberException(ErrorCode.USER_NOT_FOUND));
     }
 
+    /**
+     * 게시글 객체 반환 메서드
+     *
+     * @param postId 게시글 고유 반환
+     * @return 게시글 객체
+     */
     public Post getPost(Integer postId){
         return postRepository.findByPostId(postId)
                 .orElseThrow(()-> new CommunityException(ErrorCode.POST_NOT_FOUND));
     }
 
+    // TODO : 스케줄러를 사용하는 것이 좋을까 아니면 독후감을 작성할때마다 리셋 하는 것이 좋을까....
     /**
      * 랭킹 재배치 스케줄러
      */

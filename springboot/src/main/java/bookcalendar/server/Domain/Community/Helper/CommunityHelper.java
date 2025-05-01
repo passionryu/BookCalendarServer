@@ -72,4 +72,13 @@ public class CommunityHelper {
             throw new MemberException(ErrorCode.NO_AUTH);
         }
     }
+
+    public static void increaseReportCount(Post post){
+        int reportCount = post.getReportCount();
+        reportCount++;
+
+
+    }
+
+
 }

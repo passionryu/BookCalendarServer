@@ -2,6 +2,7 @@ package bookcalendar.server.Domain.Member.Entity;
 
 import bookcalendar.server.Domain.Book.Entity.Book;
 import bookcalendar.server.Domain.Community.Entity.Post;
+import bookcalendar.server.Domain.Community.Entity.Scrap;
 import bookcalendar.server.Domain.Review.Entity.Review;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -92,5 +93,10 @@ public class Member {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore // Post 리스트를 JSON 직렬화에서 제외
     private List<Post> posts = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Scrap> scraps = new ArrayList<>();
 
 }

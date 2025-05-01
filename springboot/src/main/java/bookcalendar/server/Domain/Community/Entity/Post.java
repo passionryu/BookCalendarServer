@@ -36,9 +36,18 @@ public class Post {
     @Column(nullable = false)
     private String contents;
 
+//    @Column
+//    @org.hibernate.annotations.ColumnDefault("0")
+//    private Integer reportCount;
+
+    @Builder.Default
     @Column
-    @org.hibernate.annotations.ColumnDefault("0")
-    private Integer reportCount;
+    private Integer reportCount = 0;
+
+    // 게시글 신고 기능 사용시 호출 되는 메서드
+    public void increaseReportCount() {
+        this.reportCount += 1;
+    }
 
     @Builder.Default
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -48,8 +57,14 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
+    @Builder.Default
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Scrap> scraps = new ArrayList<>();
+
     @PrePersist
     protected void onCreate() {
         if (this.date == null) this.date = LocalDateTime.now();
     }
+
+
 }

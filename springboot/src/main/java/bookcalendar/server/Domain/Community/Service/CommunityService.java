@@ -85,4 +85,14 @@ public interface CommunityService {
      * @param commentId 삭제할 댓글의 고유 번호
      */
     void deleteCommentByPostOwner(CustomUserDetails customUserDetails, Integer postId, Integer commentId);
+
+    /**
+     * 게시글 신고 인터페이스
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param postId 신고하고자 하는 게시글 고유 번호
+     */
+    void reportPost(CustomUserDetails customUserDetails, Integer postId);
+
+
 }

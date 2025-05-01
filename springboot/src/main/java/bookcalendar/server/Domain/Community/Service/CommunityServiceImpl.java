@@ -193,4 +193,23 @@ public class CommunityServiceImpl implements CommunityService {
         commentRepository.delete(comment);
     }
 
+    /**
+     * 게시글 신고 메서드
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param postId 신고하고자 하는 게시글 고유 번호
+     */
+    @Override
+    @Transactional
+    public void reportPost(CustomUserDetails customUserDetails, Integer postId) {
+
+        // postId로 신고하려는 Post 객체 반환
+        Post post = communityManager.getPost(postId);
+
+        // TODO : 추후 신고 테이블 만들어서 (동일 인물 && 동일 게시물)에 중복 신고 불가 로직 추가하기
+
+        // 도메인 객체에서 신고 수 1 증가
+        post.increaseReportCount();
+    }
+
 }

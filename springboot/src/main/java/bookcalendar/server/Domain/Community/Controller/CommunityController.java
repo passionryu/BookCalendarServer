@@ -243,4 +243,28 @@ public class CommunityController {
                 .body(new ApiResponseWrapper<>(null, "댓글이 성공적으로 삭제되었습니다."));
     }
 
+    /**
+     * 게시글 신고 API
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param postId 게시글 고유 번호
+     * @return 신고 성공 메시지
+     */
+    @Operation(summary = "게시글 신고 API",description = "게시글 신고 버튼을 누르면, DB에 신고 count가 1 증가함, 다만 동일인이 중복 신고는 불가능",
+    responses  ={
+        @ApiResponse(responseCode = "200", description = "게시글이 성공적으로 신고되었습니다."),
+        @ApiResponse(responseCode = "401",description = "엑세스 토큰 만료"),
+        @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+    })
+    @PostMapping("/posts/{postId}/report")
+    public ResponseEntity<ApiResponseWrapper<String>> reportPost(@AuthenticationPrincipal CustomUserDetails customUserDetails ,
+                                                               @PathVariable Integer postId){
+
+        // 게시글 신고 서비스 레이어 호출
+        communityService.reportPost(customUserDetails, postId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponseWrapper<>("신고한 게시글 고유 번호 : " + postId, "게시글이 성공적으로 신고되었습니다."));
+    }
+
 }

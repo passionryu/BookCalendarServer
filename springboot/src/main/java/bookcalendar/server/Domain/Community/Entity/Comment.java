@@ -34,9 +34,18 @@ public class Comment {
     @Column(columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime date;
 
+//    @Column
+//    @org.hibernate.annotations.ColumnDefault("0")
+//    private Integer reportCount;
+
+    @Builder.Default
     @Column
-    @org.hibernate.annotations.ColumnDefault("0")
-    private Integer reportCount;
+    private Integer reportCount = 0;
+
+    // 댓글 신고 기능 사용시 호출 되는 메서드
+    public void increaseReportCount() {
+        this.reportCount += 1;
+    }
 
     @PrePersist
     protected void onCreate() {

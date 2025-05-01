@@ -256,7 +256,7 @@ public class CommunityController {
         @ApiResponse(responseCode = "401",description = "엑세스 토큰 만료"),
         @ApiResponse(responseCode = "500", description = "서버 내부 오류")
     })
-    @PostMapping("/posts/{postId}/report")
+    @PostMapping("/posts/{postId}/reports")
     public ResponseEntity<ApiResponseWrapper<String>> reportPost(@AuthenticationPrincipal CustomUserDetails customUserDetails ,
                                                                @PathVariable Integer postId){
 
@@ -265,6 +265,30 @@ public class CommunityController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponseWrapper<>("신고한 게시글 고유 번호 : " + postId, "게시글이 성공적으로 신고되었습니다."));
+    }
+
+    /**
+     * 댓글 신고 API
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param commentId
+     * @return 댓글 신고 성공 메시지
+     */
+    @Operation(summary = "댓글 신고 API",description = "댓글 신고 버튼을 누르면, DB에 신고 count가 1 증가함, 다만 동일인이 중복 신고는 불가능",
+            responses  ={
+                    @ApiResponse(responseCode = "200", description = "댓글이 성공적으로 신고되었습니다."),
+                    @ApiResponse(responseCode = "401",description = "엑세스 토큰 만료"),
+                    @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            })
+    @PostMapping("/comments/{commentId}/reports")
+    public ResponseEntity<ApiResponseWrapper<String>> reportComment(@AuthenticationPrincipal CustomUserDetails customUserDetails ,
+                                                                 @PathVariable Integer commentId){
+
+        // 댓글 신고 서비스 레이어 호출
+        communityService.reportComment(customUserDetails, commentId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponseWrapper<>("신고한 댓글 고유 번호 : " + commentId, "댓글이 성공적으로 신고되었습니다."));
     }
 
 }

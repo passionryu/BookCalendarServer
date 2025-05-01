@@ -94,5 +94,13 @@ public interface CommunityService {
      */
     void reportPost(CustomUserDetails customUserDetails, Integer postId);
 
+    /**
+     * 댓글 신고 인터페이스
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param commentId 신고하고자 하는 댓글의 고유 번호
+     */
+    void reportComment(CustomUserDetails customUserDetails, Integer commentId);
+
 
 }

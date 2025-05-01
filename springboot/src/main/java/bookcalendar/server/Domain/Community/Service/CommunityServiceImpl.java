@@ -206,10 +206,29 @@ public class CommunityServiceImpl implements CommunityService {
         // postId로 신고하려는 Post 객체 반환
         Post post = communityManager.getPost(postId);
 
-        // TODO : 추후 신고 테이블 만들어서 (동일 인물 && 동일 게시물)에 중복 신고 불가 로직 추가하기
+        // TODO : 추후 게시글 신고 테이블 만들어서 (동일 인물 && 동일 게시물)에 중복 신고 불가 로직 추가하기
 
         // 도메인 객체에서 신고 수 1 증가
         post.increaseReportCount();
+    }
+
+    /**
+     * 댓글 신고 인터페이스
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param commentId 신고하고자 하는 댓글의 고유 번호
+     */
+    @Override
+    @Transactional
+    public void reportComment(CustomUserDetails customUserDetails, Integer commentId) {
+
+        // commentId로 신고하려는 Comment 객체 반환
+        Comment comment = communityManager.getComment(commentId);
+
+        // TODO : 추후 댓글 신고 테이블 만들어서 (동일 인물 && 동일 댓글)에 중복 신고 불가 로직 추가하기
+
+        // 도메인 객체에서 신고수 1 증가
+        comment.increaseReportCount();
     }
 
 }

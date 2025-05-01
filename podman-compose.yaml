@@ -8,7 +8,7 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf # 로컬의 ./nginx/nginx.conf 파일을 컨테이너 내의 설정 파일 경로 /etc/nginx/nginx.conf에 바인딩
       - ./nginx/html:/usr/share/nginx/html
-      - /home/t25101/v0.5/admin/login:/home/t25101/v0.5/admin/login:ro
+      - /home/t25101/v0.5/admin/login:/home/t25101/v0.5/admin/login:ro # host PC의 로그인 페이지 마운팅 / 현재 컨테이너 환경과 hostPC의 로그인 페이지는 분리되어 있음
     ports:
       - "60001:60001"
       - "8080:80" # 호스트의 8080번 포트 → 컨테이너의 80번 포트 (HTTP 기본)

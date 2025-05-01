@@ -48,6 +48,10 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
+    @Builder.Default
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Scrap> scraps = new ArrayList<>();
+
     @PrePersist
     protected void onCreate() {
         if (this.date == null) this.date = LocalDateTime.now();

@@ -102,5 +102,13 @@ public interface CommunityService {
      */
     void reportComment(CustomUserDetails customUserDetails, Integer commentId);
 
+    /**
+     * 게시글 스크랩 인터페이스
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param postId 스크랩 하고자 하는 게시글의 고유 번호
+     */
+    void scrapPost(CustomUserDetails customUserDetails, Integer postId);
+
 
 }

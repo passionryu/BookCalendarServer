@@ -7,12 +7,14 @@ import bookcalendar.server.Domain.Community.DTO.Response.PostListResponse;
 import bookcalendar.server.Domain.Community.DTO.Response.PostResponse;
 import bookcalendar.server.Domain.Community.Entity.Comment;
 import bookcalendar.server.Domain.Community.Entity.Post;
+import bookcalendar.server.Domain.Community.Entity.Scrap;
 import bookcalendar.server.Domain.Community.Exception.CommunityException;
 import bookcalendar.server.Domain.Community.Helper.CommunityHelper;
 import bookcalendar.server.Domain.Community.Manager.CommunityManager;
 import bookcalendar.server.Domain.Community.Mapper.CommunityMapper;
 import bookcalendar.server.Domain.Community.Repository.CommentRepository;
 import bookcalendar.server.Domain.Community.Repository.PostRepository;
+import bookcalendar.server.Domain.Community.Repository.ScrapRepository;
 import bookcalendar.server.Domain.Member.DTO.Response.RankResponse;
 import bookcalendar.server.Domain.Member.Entity.Member;
 import bookcalendar.server.global.Security.CustomUserDetails;
@@ -32,6 +34,7 @@ public class CommunityServiceImpl implements CommunityService {
 
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
+    private final ScrapRepository scrapRepository;
     private final CommunityManager communityManager;
     private final CommunityMapper communityMapper;
 
@@ -231,4 +234,28 @@ public class CommunityServiceImpl implements CommunityService {
         comment.increaseReportCount();
     }
 
+    /**
+     * 게시글 스크랩 메서드
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param postId 스크랩 하고자 하는 게시글의 고유 번호
+     */
+    @Override
+    @Transactional
+    public void scrapPost(CustomUserDetails customUserDetails, Integer postId) {
+
+        // 스크랩 하고자 하는 멤버 객체 반환
+        Member member = communityManager.getMember(customUserDetails.getMemberId());
+
+        // 스크랩 하고자 하는 대상 객체 반환
+        Post post = communityManager.getPost(postId);
+
+        // TODO : 동일 인물 && 동일 게시물 중복 스크랩 불가 로직 추가하기
+
+        // Helper 클래스에서 스크랩 객체 생성 레이어 호출
+        Scrap scrap = CommunityHelper.scrapEntityBuilder(member,post);
+
+        // Scrap 객체 저장
+        scrapRepository.save(scrap);
+    }
 }

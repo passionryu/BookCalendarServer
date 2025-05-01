@@ -32,7 +32,6 @@ public class Scrap {
     @JoinColumn(name = "memberId", nullable = false)
     private Member member;
 
-    @Column(columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime date;
 
     @PrePersist

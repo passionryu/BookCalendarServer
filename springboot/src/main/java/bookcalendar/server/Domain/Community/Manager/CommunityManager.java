@@ -5,6 +5,7 @@ import bookcalendar.server.Domain.Community.Entity.Post;
 import bookcalendar.server.Domain.Community.Exception.CommunityException;
 import bookcalendar.server.Domain.Community.Repository.CommentRepository;
 import bookcalendar.server.Domain.Community.Repository.PostRepository;
+import bookcalendar.server.Domain.Community.Repository.ScrapRepository;
 import bookcalendar.server.Domain.Member.Entity.Member;
 import bookcalendar.server.Domain.Member.Exception.MemberException;
 import bookcalendar.server.Domain.Member.Repository.MemberRepository;
@@ -60,6 +61,9 @@ public class CommunityManager {
         return commentRepository.findByCommentId(commentId)
                 .orElseThrow(()-> new CommunityException(ErrorCode.COMMENT_NOT_FOUND));
     }
+
+
+    // ======================= 스캐줄러 코드 =========================
 
     // TODO : 스케줄러를 사용하는 것이 좋을까 아니면 독후감을 작성할때마다 리셋 하는 것이 좋을까....
     /**

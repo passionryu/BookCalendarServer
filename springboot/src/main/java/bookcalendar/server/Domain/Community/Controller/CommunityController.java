@@ -291,4 +291,22 @@ public class CommunityController {
                 .body(new ApiResponseWrapper<>("신고한 댓글 고유 번호 : " + commentId, "댓글이 성공적으로 신고되었습니다."));
     }
 
+    @Operation(summary = "게시글 스크랩 API",description = "게시글 스크랩 버튼을 누르면 해당 post의 postId가 scrap DB테이블에 저장된다.",
+            responses  ={
+                    @ApiResponse(responseCode = "200", description = "게시글이 성공적으로 스크랩되었습니다."),
+                    @ApiResponse(responseCode = "401",description = "엑세스 토큰 만료"),
+                    @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            })
+    @PostMapping("/posts/{postId}/scraps")
+    public ResponseEntity<ApiResponseWrapper<String>> scrapPost(@AuthenticationPrincipal CustomUserDetails customUserDetails ,
+                                                               @PathVariable Integer postId){
+
+        // 게시글 스크랩 서비스 레이어 호출
+        communityService.scrapPost(customUserDetails, postId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponseWrapper<>("스크랩한 게시글 고유 번호 : " + postId, "게시글이 성공적으로 스크랩되었습니다."));
+    }
+
+
 }

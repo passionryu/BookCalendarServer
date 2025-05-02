@@ -271,7 +271,7 @@ public class CommunityController {
      * 댓글 신고 API
      *
      * @param customUserDetails 인증된 유저의 정보 객체
-     * @param commentId
+     * @param commentId 신고하고자 하는 댓글 고유 번호
      * @return 댓글 신고 성공 메시지
      */
     @Operation(summary = "댓글 신고 API",description = "댓글 신고 버튼을 누르면, DB에 신고 count가 1 증가함, 다만 동일인이 중복 신고는 불가능",
@@ -291,6 +291,13 @@ public class CommunityController {
                 .body(new ApiResponseWrapper<>("신고한 댓글 고유 번호 : " + commentId, "댓글이 성공적으로 신고되었습니다."));
     }
 
+    /**
+     * 게시글 스크랩 API
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param postId 스크랩 하고자 하는 게시글 고유 번호
+     * @return
+     */
     @Operation(summary = "게시글 스크랩 API",description = "게시글 스크랩 버튼을 누르면 해당 post의 postId가 scrap DB테이블에 저장된다.",
             responses  ={
                     @ApiResponse(responseCode = "200", description = "게시글이 성공적으로 스크랩되었습니다."),
@@ -308,5 +315,25 @@ public class CommunityController {
                 .body(new ApiResponseWrapper<>("스크랩한 게시글 고유 번호 : " + postId, "게시글이 성공적으로 스크랩되었습니다."));
     }
 
+    /**
+     * 게시글 검색 API
+     *
+     * @param keyword 검색 키워드
+     * @return 검색된 게시글 리스트
+     */
+    @Operation(summary = "게시글 검색 API",description = "커뮤니티 메인 페이지 상단의 검색창의 게시글 검색 기능이다. 아직은 기본적인 기능만 구현하였으며 추후 게시글 || 작성자 검색 + 자동완성 기능까지 연장할 계획이다.",
+            responses  ={
+                    @ApiResponse(responseCode = "200", description = "게시글이 성공적으로 검색되었습니다."),
+                    @ApiResponse(responseCode = "401",description = "엑세스 토큰 만료"),
+                    @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            })
+    @PostMapping("/search")
+    public ResponseEntity<ApiResponseWrapper<List<PostListResponse>>> searchPost(@RequestParam String keyword){
+
+        List<PostListResponse> postList = communityService.searchPost(keyword);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponseWrapper<>(postList, "게시글이 성공적으로 검색되었습니다."));
+    }
 
 }

@@ -42,7 +42,7 @@ public class CommunityServiceImpl implements CommunityService {
      * 게시글 작성 메서드
      *
      * @param customUserDetails 인증된 유저의 정보 객체
-     * @param postRequest 포스팅할 게시글 정보 DTO
+     * @param postRequest       포스팅할 게시글 정보 DTO
      */
     @Override
     @Transactional
@@ -60,7 +60,7 @@ public class CommunityServiceImpl implements CommunityService {
      * 게시글 삭제 메서드
      *
      * @param customUserDetails 인증된 유저의 정보 객체
-     * @param postId 삭제할 게시글 고유 번호
+     * @param postId            삭제할 게시글 고유 번호
      */
     @Override
     public void deletePost(CustomUserDetails customUserDetails, Integer postId) {
@@ -81,8 +81,8 @@ public class CommunityServiceImpl implements CommunityService {
      * @param customUserDetails 인증된 유저의 정보 객체
      * @return 유저 메달 & 랭킹 정보 반환
      *
-     * description : 독서 완료 시 캐싱 데이터 무효화
-     * description : 랭킹 변동 시 캐싱 데이터 무효화
+     *         description : 독서 완료 시 캐싱 데이터 무효화
+     *         description : 랭킹 변동 시 캐싱 데이터 무효화
      */
     @Override
     @Cacheable(value = "rankCache", key = "#customUserDetails.memberId")
@@ -100,7 +100,7 @@ public class CommunityServiceImpl implements CommunityService {
      *
      * @return 커뮤니티 게시글 리스트
      *
-     * todo : 캐싱 시스템 적용하기 - 누군가 올리면 캐싱 무효화
+     *         todo : 캐싱 시스템 적용하기 - 누군가 올리면 캐싱 무효화
      */
     @Override
     public List<PostListResponse> getPostList() {
@@ -120,24 +120,25 @@ public class CommunityServiceImpl implements CommunityService {
 
         // 선택한 게시글 상세 내용 반환
         return postRepository.getPostDetail(postId)
-                .orElseThrow(()-> new CommunityException(ErrorCode.POST_NOT_FOUND));
+                .orElseThrow(() -> new CommunityException(ErrorCode.POST_NOT_FOUND));
     }
 
     /**
      * 댓글 작성 메서드
      *
      * @param customUserDetails 인증된 유저의 정보 객체
-     * @param postId 댓글이 달리는 게시글 고유 번호
-     * @param commentRequest 댓글 요청 데이터
+     * @param postId            댓글이 달리는 게시글 고유 번호
+     * @param commentRequest    댓글 요청 데이터
      * @return 작성된 댓글 객체의 고유 번호
      */
     @Override
     public void createComment(CustomUserDetails customUserDetails, Integer postId, CommentRequest commentRequest) {
 
         // member,post 객체와 댓글 데이터를 입력하여 댓글 객체 생성
-        Comment comment = CommunityHelper.commentEntityBuilder( communityManager.getMember(customUserDetails.getMemberId()),
-                                                                communityManager.getPost(postId),
-                                                                commentRequest);
+        Comment comment = CommunityHelper.commentEntityBuilder(
+                communityManager.getMember(customUserDetails.getMemberId()),
+                communityManager.getPost(postId),
+                commentRequest);
 
         // 댓글 객체 저장
         commentRepository.save(comment);
@@ -160,27 +161,27 @@ public class CommunityServiceImpl implements CommunityService {
      * 내 댓글 삭제 메서드
      *
      * @param customUserDetails 인증된 유저의 정보 객체
-     * @param commentId 삭제하고자 하는 댓글의 고유 번호
+     * @param commentId         삭제하고자 하는 댓글의 고유 번호
      */
     @Override
     public void deleteComment(CustomUserDetails customUserDetails, Integer commentId) {
 
-       // 댓글 고유 번호로 댓글 객체 반환
-       Comment comment = communityManager.getComment(commentId);
+        // 댓글 고유 번호로 댓글 객체 반환
+        Comment comment = communityManager.getComment(commentId);
 
-       // 현재 유저가 삭제하려는 댓글에 삭제 권한이 있는지 확인
-       CommunityHelper.checkOwnership_comment(customUserDetails, comment);
+        // 현재 유저가 삭제하려는 댓글에 삭제 권한이 있는지 확인
+        CommunityHelper.checkOwnership_comment(customUserDetails, comment);
 
-       // 권한이 있으면 댓글 삭제
-       commentRepository.delete(comment);
+        // 권한이 있으면 댓글 삭제
+        commentRepository.delete(comment);
     }
 
     /**
      * 게시글 작성자의 본인 게시글 내의 댓글 삭제 메서드
      *
      * @param customUserDetails 인증된 유저의 정보 객체
-     * @param postId 삭제할 댓글의 게시글 고유 번호
-     * @param commentId 삭제할 댓글의 고유 번호
+     * @param postId            삭제할 댓글의 게시글 고유 번호
+     * @param commentId         삭제할 댓글의 고유 번호
      */
     @Override
     public void deleteCommentByPostOwner(CustomUserDetails customUserDetails, Integer postId, Integer commentId) {
@@ -200,7 +201,7 @@ public class CommunityServiceImpl implements CommunityService {
      * 게시글 신고 메서드
      *
      * @param customUserDetails 인증된 유저의 정보 객체
-     * @param postId 신고하고자 하는 게시글 고유 번호
+     * @param postId            신고하고자 하는 게시글 고유 번호
      */
     @Override
     @Transactional
@@ -219,7 +220,7 @@ public class CommunityServiceImpl implements CommunityService {
      * 댓글 신고 인터페이스
      *
      * @param customUserDetails 인증된 유저의 정보 객체
-     * @param commentId 신고하고자 하는 댓글의 고유 번호
+     * @param commentId         신고하고자 하는 댓글의 고유 번호
      */
     @Override
     @Transactional
@@ -238,7 +239,7 @@ public class CommunityServiceImpl implements CommunityService {
      * 게시글 스크랩 메서드
      *
      * @param customUserDetails 인증된 유저의 정보 객체
-     * @param postId 스크랩 하고자 하는 게시글의 고유 번호
+     * @param postId            스크랩 하고자 하는 게시글의 고유 번호
      */
     @Override
     @Transactional
@@ -253,9 +254,20 @@ public class CommunityServiceImpl implements CommunityService {
         // TODO : 동일 인물 && 동일 게시물 중복 스크랩 불가 로직 추가하기
 
         // Helper 클래스에서 스크랩 객체 생성 레이어 호출
-        Scrap scrap = CommunityHelper.scrapEntityBuilder(member,post);
+        Scrap scrap = CommunityHelper.scrapEntityBuilder(member, post);
 
         // Scrap 객체 저장
         scrapRepository.save(scrap);
+    }
+
+    /**
+     * 게시글 검색 메서드
+     *
+     * @param keyword 검색 키워드
+     * @return 검색 조건에 부합하는 게시글 리스트 반환
+     */
+    @Override
+    public List<PostListResponse> searchPost(String keyword) {
+        return postRepository.searchPostsByKeyword(keyword);
     }
 }

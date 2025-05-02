@@ -110,5 +110,12 @@ public interface CommunityService {
      */
     void scrapPost(CustomUserDetails customUserDetails, Integer postId);
 
+    /**
+     * 게시글 검색 API
+     *
+     * @param keyword 검색 키워드
+     * @return 검색된 게시글 리스트
+     */
+    List<PostListResponse> searchPost(String keyword);
 
 }

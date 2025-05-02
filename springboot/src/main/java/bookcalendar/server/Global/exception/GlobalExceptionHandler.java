@@ -81,7 +81,7 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * ChatBot Domain Global Exception Method
+     * Community Domain Global Exception Method
      *
      * @param ex
      * @return

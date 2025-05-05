@@ -3,6 +3,7 @@ package bookcalendar.server.Domain.Member.Entity;
 import bookcalendar.server.Domain.Book.Entity.Book;
 import bookcalendar.server.Domain.Community.Entity.Post;
 import bookcalendar.server.Domain.Community.Entity.Scrap;
+import bookcalendar.server.Domain.Mypage.Entity.Cart;
 import bookcalendar.server.Domain.Review.Entity.Review;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -98,5 +99,10 @@ public class Member {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<Scrap> scraps = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Cart> carts = new ArrayList<>();
 
 }

@@ -105,27 +105,15 @@ public class MypageManager {
     }
 
     /**
-     * 게시글 객체 반환 메서드
+     * 스크랩 고유 번호를 통해 스크랩 객체 반환
      *
-     * @param postId 게시글 고유 반환
-     * @return 게시글 객체
+     * @param scrapId 찾고자 하는 스크랩 고유 번호
+     * @return 스크랩 객체
      */
-    public Post getPost(Integer postId){
-        return postRepository.findByPostId(postId)
-                .orElseThrow(()-> new CommunityException(ErrorCode.POST_NOT_FOUND));
+    public Scrap getScrapByScrapId(Integer scrapId){
+
+        return scrapRepository.findByScrapId(scrapId)
+                .orElseThrow(()->new CommunityException(ErrorCode.POST_NOT_FOUND));
     }
-
-    /**
-     * 댓글 객체 반환 메서드
-     *
-     * @param commentId 댓글 고유 번호
-     * @return 댓글 객체
-     */
-    public Comment getComment(Integer commentId){
-        return commentRepository.findByCommentId(commentId)
-                .orElseThrow(()-> new CommunityException(ErrorCode.COMMENT_NOT_FOUND));
-    }
-
-
 
 }

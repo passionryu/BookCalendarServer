@@ -73,4 +73,11 @@ public interface MypageService {
      */
     PostResponse getScrapDetail(Integer scrapId);
 
+    /**
+     * 스크랩 취소 인터페이스
+     *
+     * @param scrapId 취소하고자 하는 스크랩 고유 번호
+     */
+    void deleteScrap(Integer scrapId);
+
 }

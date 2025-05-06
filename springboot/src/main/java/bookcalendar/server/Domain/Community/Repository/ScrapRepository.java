@@ -23,4 +23,12 @@ public interface ScrapRepository extends JpaRepository<Scrap,Integer> {
      * @return 스크랩 객체
      */
     Optional<Scrap> findByScrapId(Integer scrapId);
+
+    /**
+     * 해당 스크랩 고유 번호와 일치하는 스크랩 객체가 존재하는지 확인
+     *
+     * @param scrapId 스크랩 고유 번호
+     * @return 존재 유무
+     */
+    Boolean existsByScrapId(Integer scrapId);
 }

@@ -190,6 +190,12 @@ public class MypageController {
                 .body(new ApiResponseWrapper<>(myScrapList, "내 스크랩 리스트가 정상적으로 반환되었습니다"));
     }
 
+    /**
+     * 내 스크랩 상세 상세 조회 API
+     *
+     * @param scrapId 스크랩 하고자 하는 스크랩 객체 고유 번호
+     * @return 스크랩 한 게시글
+     */
     @Operation(summary = "내 스크랩 상세 조회 API", description = "스크랩 리스트 페이지에서 scrapId를 통해 상세 정보를 반환한다.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "스크랩 정보가 정상적으로 반환되었습니다."),
@@ -204,7 +210,27 @@ public class MypageController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponseWrapper<>(postResponse, "스크랩 정보가 정상적으로 반환되었습니다."));
-
     }
-    
+
+    /**
+     * 내 스크랩 취소 API
+     *
+     * @param scrapId 취소하고자 하는 스크랩의 고유 번호
+     * @return 삭제 성공 메시지
+     */
+    @Operation(summary = "내 스크랩 취소 API", description = "스크랩 리스트 페이지에서 scrapId를 통해 상세 정보를 반환한다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "스크랩이 정상적으로 취소 되었습니다."),
+                    @ApiResponse(responseCode = "401", description = "유저 인증 오류"),
+                    @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            })
+    @DeleteMapping("/scrap/{scrapId}")
+    public ResponseEntity<ApiResponseWrapper<String>> deleteScrap(@PathVariable("scrapId") Integer scrapId){
+
+        // 스크랩 취소 서비스 레이어 호출
+        mypageService.deleteScrap(scrapId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponseWrapper<>("취소한 스크랩 고유 번호 : " + scrapId, "스크랩이 정상적으로 취소 되었습니다."));
+    }
 }

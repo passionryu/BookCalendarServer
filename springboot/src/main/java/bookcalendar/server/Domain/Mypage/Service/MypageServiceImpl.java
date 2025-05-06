@@ -5,6 +5,7 @@ import bookcalendar.server.Domain.Community.Entity.Post;
 import bookcalendar.server.Domain.Community.Entity.Scrap;
 import bookcalendar.server.Domain.Community.Exception.CommunityException;
 import bookcalendar.server.Domain.Community.Repository.PostRepository;
+import bookcalendar.server.Domain.Community.Repository.ScrapRepository;
 import bookcalendar.server.Domain.Member.Entity.Member;
 import bookcalendar.server.Domain.Mypage.DTO.Request.UserInfoEditRequest;
 import bookcalendar.server.Domain.Mypage.DTO.Response.*;
@@ -31,6 +32,7 @@ public class MypageServiceImpl implements MypageService {
     private final MypageManager mypageManager;
     private final ReviewRepository reviewRepository;
     private final PostRepository postRepository;
+    private final ScrapRepository scrapRepository;
 
     // ======================= User Info Page =========================
 
@@ -186,7 +188,7 @@ public class MypageServiceImpl implements MypageService {
         List<Scrap> scrapList = mypageManager.getScrapListByMemberId(customUserDetails.getMemberId());
 
         // 스크랩 리스트에서 원하는 정보를 DTO로 생성하여 반환
-        List<MyScrapListResponse> responseList = scrapList.stream()
+        return scrapList.stream()
                 .map(scrap -> new MyScrapListResponse(
                         scrap.getScrapId(),                         // scrapId
                         scrap.getPost().getTitle(),            // title
@@ -194,15 +196,13 @@ public class MypageServiceImpl implements MypageService {
                         scrap.getDate() // scrap date
                 ))
                 .collect(Collectors.toList());
-
-        return responseList;
     }
 
     /**
      * 스크랩한 게시글 상세 조회 메서드
      *
      * @param scrapId 게시글 고유 번호
-     * @return
+     * @return 스크랩 한 게시글 정보 DTO
      */
     @Override
     public PostResponse getScrapDetail(Integer scrapId) {
@@ -212,5 +212,23 @@ public class MypageServiceImpl implements MypageService {
         // 선택한 게시글 상세 내용 반환
         return postRepository.getPostDetail(post.getPostId())
                 .orElseThrow(() -> new CommunityException(ErrorCode.POST_NOT_FOUND));
+    }
+
+    /**
+     * 스크랩 취소 메서드
+     *
+     * @param scrapId 취소하고자 하는 스크랩 고유 번호
+     */
+    @Override
+    @Transactional
+    public void deleteScrap(Integer scrapId) {
+
+        // 요청이 들어온 스크랩 객체가 있는지 확인 - 없으면 에러 반환
+        if(!scrapRepository.existsByScrapId(scrapId)){
+            throw new CommunityException(ErrorCode.POST_NOT_FOUND);
+        }
+        // 있으면 해당 스크랩 객체 취소(삭제)
+        Scrap scrap = mypageManager.getScrapByScrapId(scrapId);
+        scrapRepository.delete(scrap);
     }
 }

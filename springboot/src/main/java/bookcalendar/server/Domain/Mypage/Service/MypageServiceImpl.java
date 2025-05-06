@@ -1,18 +1,28 @@
 package bookcalendar.server.Domain.Mypage.Service;
 
+import bookcalendar.server.Domain.Community.DTO.Response.PostResponse;
+import bookcalendar.server.Domain.Community.Entity.Post;
+import bookcalendar.server.Domain.Community.Entity.Scrap;
+import bookcalendar.server.Domain.Community.Exception.CommunityException;
+import bookcalendar.server.Domain.Community.Repository.PostRepository;
+import bookcalendar.server.Domain.Community.Repository.ScrapRepository;
 import bookcalendar.server.Domain.Member.Entity.Member;
 import bookcalendar.server.Domain.Mypage.DTO.Request.UserInfoEditRequest;
 import bookcalendar.server.Domain.Mypage.DTO.Response.*;
 import bookcalendar.server.Domain.Mypage.Manager.MypageManager;
 import bookcalendar.server.Domain.Question.Entity.Question;
 import bookcalendar.server.Domain.Review.Entity.Review;
+import bookcalendar.server.Domain.Review.Repository.ReviewRepository;
+import bookcalendar.server.Domain.Review.ReviewException;
 import bookcalendar.server.global.Security.CustomUserDetails;
+import bookcalendar.server.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -20,6 +30,11 @@ import java.util.List;
 public class MypageServiceImpl implements MypageService {
 
     private final MypageManager mypageManager;
+    private final ReviewRepository reviewRepository;
+    private final PostRepository postRepository;
+    private final ScrapRepository scrapRepository;
+
+    // ======================= User Info Page =========================
 
     /**
      * 간단한 유저 정보 조회 메서드
@@ -91,6 +106,8 @@ public class MypageServiceImpl implements MypageService {
                 .build();
     }
 
+    // ======================= Review Page =========================
+
     /**
      * 내 독후감 리스트 일괄 조회 메서드
      *
@@ -138,5 +155,80 @@ public class MypageServiceImpl implements MypageService {
                 .aiResponse(review.getAiResponse())
                 .build();
 
+    }
+
+    /**
+     * 독후감 삭제 메서드
+     *
+     * @param reviewId 삭제하고자 하는 독후감 고유 번호
+     */
+    @Override
+    @Transactional
+    public void deleteReview(Integer reviewId) {
+
+        // 해당 독후감 고유 번호를 가진 독후감이 있는지 확인
+        if(!reviewRepository.existsByReviewId(reviewId)){
+            throw new ReviewException(ErrorCode.REVIEW_NOT_FOUND);
+        }
+        reviewRepository.deleteById(reviewId); // 독후감이 있으면 삭제
+    }
+
+    // ======================= Scrap Page =========================
+
+    /**
+     * 내 스크랩 리스트 조회 API
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @return 스크랩 정보 DTO 리스트
+     */
+    @Override
+    public List<MyScrapListResponse> getScrapList(CustomUserDetails customUserDetails) {
+
+        // 유저의 고유 번호를 통해서 스크랩 리스트 반환
+        List<Scrap> scrapList = mypageManager.getScrapListByMemberId(customUserDetails.getMemberId());
+
+        // 스크랩 리스트에서 원하는 정보를 DTO로 생성하여 반환
+        return scrapList.stream()
+                .map(scrap -> new MyScrapListResponse(
+                        scrap.getScrapId(),                         // scrapId
+                        scrap.getPost().getTitle(),            // title
+                        scrap.getPost().getMember().getNickName(),  // author
+                        scrap.getDate() // scrap date
+                ))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * 스크랩한 게시글 상세 조회 메서드
+     *
+     * @param scrapId 게시글 고유 번호
+     * @return 스크랩 한 게시글 정보 DTO
+     */
+    @Override
+    public PostResponse getScrapDetail(Integer scrapId) {
+
+        Post post = mypageManager.getPostByScrapId(scrapId);
+
+        // 선택한 게시글 상세 내용 반환
+        return postRepository.getPostDetail(post.getPostId())
+                .orElseThrow(() -> new CommunityException(ErrorCode.POST_NOT_FOUND));
+    }
+
+    /**
+     * 스크랩 취소 메서드
+     *
+     * @param scrapId 취소하고자 하는 스크랩 고유 번호
+     */
+    @Override
+    @Transactional
+    public void deleteScrap(Integer scrapId) {
+
+        // 요청이 들어온 스크랩 객체가 있는지 확인 - 없으면 에러 반환
+        if(!scrapRepository.existsByScrapId(scrapId)){
+            throw new CommunityException(ErrorCode.POST_NOT_FOUND);
+        }
+        // 있으면 해당 스크랩 객체 취소(삭제)
+        Scrap scrap = mypageManager.getScrapByScrapId(scrapId);
+        scrapRepository.delete(scrap);
     }
 }

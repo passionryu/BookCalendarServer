@@ -25,7 +25,7 @@ public enum ErrorCode {
 
     /* Review Exception 8XX */
     ALREADY_EXIST_REVIEW("REVIEW_ERROR_800", "오늘 이미 작성한 독후감이 존재합니다.", HttpStatus.CONFLICT),
-    REVIEW_NOT_FOUND("REVIEW_ERROR_801", "해당 날짜에 작성된 독후감을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    REVIEW_NOT_FOUND("REVIEW_ERROR_801", "요청하신 독후감을 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 
     /* Question Exception 9XX */
     QUESTION_NOT_FOUND("QUESTION_ERROR_900","요청하신 질문 객체가 존재하지 않습니다.",HttpStatus.NOT_FOUND),

@@ -1,5 +1,6 @@
 package bookcalendar.server.Domain.Mypage.Service;
 
+import bookcalendar.server.Domain.Community.DTO.Response.PostResponse;
 import bookcalendar.server.Domain.Mypage.DTO.Request.UserInfoEditRequest;
 import bookcalendar.server.Domain.Mypage.DTO.Response.*;
 import bookcalendar.server.global.Security.CustomUserDetails;
@@ -48,4 +49,35 @@ public interface MypageService {
      * @return 독후감 기록 DTO 반호나
      */
     ReviewByReviewIdResponse getReview(Integer reviewId);
+
+    /**
+     * 독후감 삭제 인터페이스
+     *
+     * @param reviewId 삭제하고자 하는 독후감의 고유 번호
+     */
+    void deleteReview(Integer reviewId);
+
+    /**
+     * 내 스크랩 리스트 반환 인터페이스
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @return 스크랩한 게시글 리스트 반환
+     */
+    List<MyScrapListResponse> getScrapList(CustomUserDetails customUserDetails);
+
+    /**
+     * 스크랩 한 게시글 반환 인터페이스
+     *
+     * @param scrapId 게시글 고유 번호
+     * @return 게시글 정보
+     */
+    PostResponse getScrapDetail(Integer scrapId);
+
+    /**
+     * 스크랩 취소 인터페이스
+     *
+     * @param scrapId 취소하고자 하는 스크랩 고유 번호
+     */
+    void deleteScrap(Integer scrapId);
+
 }

@@ -3,6 +3,7 @@ package bookcalendar.server.Domain.Community.Repository;
 import bookcalendar.server.Domain.Community.DTO.Response.PostListResponse;
 import bookcalendar.server.Domain.Community.DTO.Response.PostResponse;
 import bookcalendar.server.Domain.Community.Entity.Post;
+import bookcalendar.server.Domain.Community.Entity.Scrap;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -41,6 +42,7 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
                         "FROM Post p JOIN p.member m WHERE p.postId = :postId")
         Optional<PostResponse> getPostDetail(@Param("postId") Integer postId);
 
+
         /**
          * 키워드로 게시글 검색
          *
@@ -51,5 +53,7 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
                         +
                         "FROM Post p JOIN p.member m WHERE p.title LIKE %:keyword%")
         List<PostListResponse> searchPostsByKeyword(@Param("keyword") String keyword);
+
+
 
 }

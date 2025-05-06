@@ -70,4 +70,12 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
      * @return 독후감 객체
      */
     Optional<Review> findByReviewId(Integer reviewId);
+
+    /**
+     * 독후감 고유 번호를 통해 독후감이 존재하는지 확인
+     *
+     * @param reviewId 확인하고자 하는 독후감 고유 번호
+     * @return 참 & 거짓
+     */
+    Boolean existsByReviewId(Integer reviewId);
 }

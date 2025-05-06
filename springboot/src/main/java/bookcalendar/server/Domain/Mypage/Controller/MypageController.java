@@ -1,5 +1,6 @@
 package bookcalendar.server.Domain.Mypage.Controller;
 
+import bookcalendar.server.Domain.Community.DTO.Response.PostResponse;
 import bookcalendar.server.Domain.Mypage.DTO.Request.UserInfoEditRequest;
 import bookcalendar.server.Domain.Mypage.DTO.Response.*;
 import bookcalendar.server.Domain.Mypage.Service.MypageService;
@@ -111,7 +112,7 @@ public class MypageController {
                     @ApiResponse(responseCode = "401", description = "유저 인증 오류"),
                     @ApiResponse(responseCode = "500", description = "서버 내부 오류")
             })
-    @GetMapping("/review/list")
+    @GetMapping("/reviews")
     public ResponseEntity<ApiResponseWrapper<List<MyReviewList>>> getReviewList(@AuthenticationPrincipal CustomUserDetails customUserDetails){
 
         // 내 독후감 리스트 일괄 조회 서비스 레이어 호출
@@ -133,8 +134,8 @@ public class MypageController {
                     @ApiResponse(responseCode = "401", description = "유저 인증 오류"),
                     @ApiResponse(responseCode = "500", description = "서버 내부 오류")
             })
-    @GetMapping("/review")
-    public ResponseEntity<ApiResponseWrapper<ReviewByReviewIdResponse>> getReview(@RequestParam("reviewId") Integer reviewId){
+    @GetMapping("/review/{reviewId}")
+    public ResponseEntity<ApiResponseWrapper<ReviewByReviewIdResponse>> getReview(@PathVariable("reviewId") Integer reviewId){
 
         // 내 독후감 상세 조회 서비스 레이어 호출
         ReviewByReviewIdResponse reviewByReviewIdResponse = mypageService.getReview(reviewId);
@@ -142,5 +143,94 @@ public class MypageController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponseWrapper<>(reviewByReviewIdResponse, "내 독후감이 정상적으로 조회되었습니다."));
     }
-    
+
+    /**
+     * 내 독후감 삭제 API
+     *
+     * @param reviewId 삭제할 독후감의 고유 번호
+     * @return 독후감 삭제 성공 메시지
+     */
+    @Operation(summary = "내 독후감 삭제 API", description = "독후감 리스트 페이지에서 삭제 버튼을 누르면 해당 독후감 기록은 reviewId 값을 받아서 Delete 메서드를 실행시킨다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "해당 독후감 기록이 정상적으로 삭제되었습니다."),
+                    @ApiResponse(responseCode = "401", description = "유저 인증 오류"),
+                    @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            })
+    @DeleteMapping("/review/{reviewId}")
+    public ResponseEntity<ApiResponseWrapper<String>> deleteReview(@PathVariable("reviewId") Integer reviewId){
+
+        // 독후감 삭제 서비스 레이어 호출
+        mypageService.deleteReview(reviewId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponseWrapper<>("삭제한 독후감의 고유 번호 : " +reviewId , "내 독후감이 정상적으로 조회되었습니다."));
+    }
+
+    // ======================= Scrap Page =========================
+
+    /**
+     * 내 스크랩 리스트 조회 API
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @return 스크랩 정보 DTO 리스트
+     */
+    @Operation(summary = "내 스크랩 리스트 조회 API", description = "마이페이지에서 스크랩 모음을 리스트로 반환한다. 해당 페이지에서는 스크랩 리스트를 최신순으로 정렬한다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "내 스크랩 리스트가 정상적으로 반환되었습니다."),
+                    @ApiResponse(responseCode = "401", description = "유저 인증 오류"),
+                    @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            })
+    @GetMapping("/scraps")
+    public ResponseEntity<ApiResponseWrapper<List<MyScrapListResponse>>> getScrapList(@AuthenticationPrincipal CustomUserDetails customUserDetails){
+
+        // 내 스크랩 리스트 조회 서비스 레이어 호출
+        List<MyScrapListResponse> myScrapList = mypageService.getScrapList(customUserDetails);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponseWrapper<>(myScrapList, "내 스크랩 리스트가 정상적으로 반환되었습니다"));
+    }
+
+    /**
+     * 내 스크랩 상세 상세 조회 API
+     *
+     * @param scrapId 스크랩 하고자 하는 스크랩 객체 고유 번호
+     * @return 스크랩 한 게시글
+     */
+    @Operation(summary = "내 스크랩 상세 조회 API", description = "스크랩 리스트 페이지에서 scrapId를 통해 상세 정보를 반환한다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "스크랩 정보가 정상적으로 반환되었습니다."),
+                    @ApiResponse(responseCode = "401", description = "유저 인증 오류"),
+                    @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            })
+    @GetMapping("/scrap/{scrapId}")
+    public ResponseEntity<ApiResponseWrapper<PostResponse>> getScrap(@PathVariable("scrapId") Integer scrapId){
+
+        // 스크랩 한 게시글 정보 반환 서비스 레이어 호출
+        PostResponse postResponse = mypageService.getScrapDetail(scrapId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponseWrapper<>(postResponse, "스크랩 정보가 정상적으로 반환되었습니다."));
+    }
+
+    /**
+     * 내 스크랩 취소 API
+     *
+     * @param scrapId 취소하고자 하는 스크랩의 고유 번호
+     * @return 삭제 성공 메시지
+     */
+    @Operation(summary = "내 스크랩 취소 API", description = "스크랩 리스트 페이지에서 scrapId를 통해 상세 정보를 반환한다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "스크랩이 정상적으로 취소 되었습니다."),
+                    @ApiResponse(responseCode = "401", description = "유저 인증 오류"),
+                    @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            })
+    @DeleteMapping("/scrap/{scrapId}")
+    public ResponseEntity<ApiResponseWrapper<String>> deleteScrap(@PathVariable("scrapId") Integer scrapId){
+
+        // 스크랩 취소 서비스 레이어 호출
+        mypageService.deleteScrap(scrapId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponseWrapper<>("취소한 스크랩 고유 번호 : " + scrapId, "스크랩이 정상적으로 취소 되었습니다."));
+    }
 }

@@ -75,6 +75,8 @@ public class Member {
     @Column(nullable = false, length = 20)
     private String role;
 
+    // ======================= 테이블 관계 정의 영역 =========================
+
     /**
      * Member와 Book 간의 일대다 관계
      * mappedBy: Book 엔티티의 member 필드가 관계의 주인임을 나타냄
@@ -105,4 +107,24 @@ public class Member {
     @JsonIgnore
     private List<Cart> carts = new ArrayList<>();
 
+    // ======================= 메서드 영역 =========================
+
+    /**
+     * 내 프로필 수정 메서드
+     *
+     * @param nickName 닉네임
+     * @param phoneNumber 전화번호
+     * @param genre 좋아하는 장르
+     * @param job 직업
+     * @param birth 생년월일
+     *
+     * null을 사용하여, 일부만 요청이 들어와도 안전하게 반영
+     */
+    public void updateProfile(String nickName, String phoneNumber, String genre, String job, LocalDate birth) {
+        if (nickName != null) this.nickName = nickName;
+        if (phoneNumber != null) this.phoneNumber = phoneNumber;
+        if (genre != null) this.genre = genre;
+        if (job != null) this.job = job;
+        if (birth != null) this.birth = birth;
+    }
 }

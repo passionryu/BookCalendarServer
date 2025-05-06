@@ -1,6 +1,8 @@
 package bookcalendar.server.Domain.Mypage.Service;
 
+import bookcalendar.server.Domain.Mypage.DTO.Request.UserInfoEditRequest;
 import bookcalendar.server.Domain.Mypage.DTO.Response.UserAllInfoResponse;
+import bookcalendar.server.Domain.Mypage.DTO.Response.UserInfoEditResponse;
 import bookcalendar.server.Domain.Mypage.DTO.Response.UserSimpleInfoResponse;
 import bookcalendar.server.global.Security.CustomUserDetails;
 
@@ -21,6 +23,15 @@ public interface MypageService {
      * @return 유저의 모든 정보 DTO
      */
     UserAllInfoResponse getUserAllInfo(CustomUserDetails customUserDetails);
+
+    /**
+     * 내 프로필 수정 인터페이스
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param userAllInfoResponse 내 프로필 데이터 수정 요청 DTO
+     * @return 수정된 프로필 정보 DTO
+     */
+    UserInfoEditResponse updateUserAllInfo(CustomUserDetails customUserDetails, UserInfoEditRequest userAllInfoResponse);
 
 
 }

@@ -1,6 +1,8 @@
 package bookcalendar.server.Domain.Mypage.Controller;
 
+import bookcalendar.server.Domain.Mypage.DTO.Request.UserInfoEditRequest;
 import bookcalendar.server.Domain.Mypage.DTO.Response.UserAllInfoResponse;
+import bookcalendar.server.Domain.Mypage.DTO.Response.UserInfoEditResponse;
 import bookcalendar.server.Domain.Mypage.DTO.Response.UserSimpleInfoResponse;
 import bookcalendar.server.Domain.Mypage.Service.MypageService;
 import bookcalendar.server.global.Security.CustomUserDetails;
@@ -8,15 +10,13 @@ import bookcalendar.server.global.response.ApiResponseWrapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @Tag(name = "Mypage", description = "마이페이지 API")
@@ -71,6 +71,13 @@ public class MypageController {
                 .body(new ApiResponseWrapper<>(userAllInfoResponse,"유저의 정보가 정상적으로 조회했습니다."));
     }
 
+    /**
+     * 내 프로필 수정 API
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param userInfoEditRequest 내 프로필 데이터 수정 요청 DTO
+     * @return 수정된 프로필 정보 DTO
+     */
     @Operation(summary = "내 프로필 수정 API", description = "마이페이지의 내 프로필 상세 조회 페이지에서 프로필 수정 기능을 제공",
             responses = {
                     @ApiResponse(responseCode = "200", description = "프로필이 정상적으로 수정되었습니다."),
@@ -78,9 +85,13 @@ public class MypageController {
                     @ApiResponse(responseCode = "500", description = "서버 내부 오류")
             })
     @PatchMapping("/info")
-    public ResponseEntity<ApiResponseWrapper<String>> updateUserAllInfo(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+    public ResponseEntity<ApiResponseWrapper<UserInfoEditResponse>> updateUserAllInfo(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+                                                                                      @Valid @RequestBody UserInfoEditRequest userInfoEditRequest) {
+
+        // 내 프로필 수정 서비스 레이어 호출
+        UserInfoEditResponse userInfoEditResponse = mypageService.updateUserAllInfo(customUserDetails, userInfoEditRequest);
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(new ApiResponseWrapper<>(null,"프로필이 정상적으로 수정되었습니다."));
+                .body(new ApiResponseWrapper<>(userInfoEditResponse,"프로필이 정상적으로 수정되었습니다."));
     }
 }

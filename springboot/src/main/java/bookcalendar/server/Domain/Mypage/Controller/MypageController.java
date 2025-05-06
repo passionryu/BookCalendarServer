@@ -1,6 +1,7 @@
 package bookcalendar.server.Domain.Mypage.Controller;
 
 import bookcalendar.server.Domain.Mypage.DTO.Request.UserInfoEditRequest;
+import bookcalendar.server.Domain.Mypage.DTO.Response.MyReviewList;
 import bookcalendar.server.Domain.Mypage.DTO.Response.UserAllInfoResponse;
 import bookcalendar.server.Domain.Mypage.DTO.Response.UserInfoEditResponse;
 import bookcalendar.server.Domain.Mypage.DTO.Response.UserSimpleInfoResponse;
@@ -18,6 +19,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Slf4j
 @Tag(name = "Mypage", description = "마이페이지 API")
 @RestController
@@ -27,6 +30,8 @@ public class MypageController {
 
     private final MypageService mypageService;
 
+    // ======================= User Info Page =========================
+    
     /**
      * 간단한 유저 정보 조회 API
      *
@@ -94,4 +99,29 @@ public class MypageController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponseWrapper<>(userInfoEditResponse,"프로필이 정상적으로 수정되었습니다."));
     }
+    
+    // ======================= Review Page =========================
+
+    /**
+     * 내 독후감 리스트 일괄 조회 API
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @return 독후감 리스트 반환
+     */
+    @Operation(summary = "내 독후감 리스트 일괄조회 API", description = "내 독후감들을 리스트 형식으로 일괄조회하는 기능이다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "내 독후감 리스트가 정상적으로 조회되었습니다."),
+                    @ApiResponse(responseCode = "401", description = "유저 인증 오류"),
+                    @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            })
+    @GetMapping("/review/list")
+    public ResponseEntity<ApiResponseWrapper<List<MyReviewList>>> getReviewList(@AuthenticationPrincipal CustomUserDetails customUserDetails){
+
+        // 내 독후감 리스트 일괄 조회 서비스 레이어 호출
+        List<MyReviewList> myReviewList = mypageService.getReviewList(customUserDetails);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponseWrapper<>(myReviewList, "내 독후감 리스트가 정상적으로 조회되었습니다."));
+    }
+    
 }

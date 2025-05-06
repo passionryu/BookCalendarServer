@@ -2,15 +2,19 @@ package bookcalendar.server.Domain.Mypage.Service;
 
 import bookcalendar.server.Domain.Member.Entity.Member;
 import bookcalendar.server.Domain.Mypage.DTO.Request.UserInfoEditRequest;
+import bookcalendar.server.Domain.Mypage.DTO.Response.MyReviewList;
 import bookcalendar.server.Domain.Mypage.DTO.Response.UserAllInfoResponse;
 import bookcalendar.server.Domain.Mypage.DTO.Response.UserInfoEditResponse;
 import bookcalendar.server.Domain.Mypage.DTO.Response.UserSimpleInfoResponse;
 import bookcalendar.server.Domain.Mypage.Manager.MypageManager;
+import bookcalendar.server.Domain.Review.Entity.Review;
 import bookcalendar.server.global.Security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -87,5 +91,27 @@ public class MypageServiceImpl implements MypageService {
                 .job(member.getJob())
                 .birth(member.getBirth())
                 .build();
+    }
+
+    /**
+     * 내 독후감 리스트 일괄 조회 메서드
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @return 독후감 리스트 반환
+     */
+    @Override
+    public List<MyReviewList> getReviewList(CustomUserDetails customUserDetails) {
+
+        // 해당 유저가 지금까지 작성한 모든 독후감 객체 반환
+        List<Review> myReviewLists = mypageManager.getReviewListByMemberId(customUserDetails.getMemberId());
+
+        // Review → MyReviewList DTO 변환
+        return myReviewLists.stream()
+                .map(review -> new MyReviewList(
+                        review.getReviewId(),
+                        review.getBook().getBookName(), // Book 엔티티에서 책 제목
+                        review.getDate()
+                ))
+                .toList();
     }
 }

@@ -1,5 +1,7 @@
 package bookcalendar.server.Domain.Mypage.Manager;
 
+import bookcalendar.server.Domain.Book.Entity.Book;
+import bookcalendar.server.Domain.Book.Repository.BookRepository;
 import bookcalendar.server.Domain.Community.Entity.Comment;
 import bookcalendar.server.Domain.Community.Entity.Post;
 import bookcalendar.server.Domain.Community.Exception.CommunityException;
@@ -8,10 +10,14 @@ import bookcalendar.server.Domain.Community.Repository.PostRepository;
 import bookcalendar.server.Domain.Member.Entity.Member;
 import bookcalendar.server.Domain.Member.Exception.MemberException;
 import bookcalendar.server.Domain.Member.Repository.MemberRepository;
+import bookcalendar.server.Domain.Review.Entity.Review;
+import bookcalendar.server.Domain.Review.Repository.ReviewRepository;
 import bookcalendar.server.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 @Slf4j
 @Component
@@ -19,6 +25,8 @@ import org.springframework.stereotype.Component;
 public class MypageManager {
 
     private final MemberRepository memberRepository;
+    private final BookRepository bookRepository;
+    private final ReviewRepository reviewRepository;
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
 
@@ -31,6 +39,17 @@ public class MypageManager {
     public Member getMember(Integer memberId) {
         return memberRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new MemberException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    /**
+     * 멤버 고유 번호를 통한 독후감 객체 반환 메서드
+     *
+     * @param memberId 유저의 고유 번호
+     * @return 도서 객체
+     */
+    public List<Review> getReviewListByMemberId(Integer memberId){
+
+        return reviewRepository.findByMember_MemberId(memberId);
     }
 
     /**

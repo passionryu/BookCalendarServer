@@ -1,5 +1,6 @@
 package bookcalendar.server.Domain.Mypage.Service;
 
+import bookcalendar.server.Domain.Community.DTO.Response.PostResponse;
 import bookcalendar.server.Domain.Mypage.DTO.Request.UserInfoEditRequest;
 import bookcalendar.server.Domain.Mypage.DTO.Response.*;
 import bookcalendar.server.global.Security.CustomUserDetails;
@@ -64,5 +65,12 @@ public interface MypageService {
      */
     List<MyScrapListResponse> getScrapList(CustomUserDetails customUserDetails);
 
+    /**
+     * 스크랩 한 게시글 반환 인터페이스
+     *
+     * @param scrapId 게시글 고유 번호
+     * @return 게시글 정보
+     */
+    PostResponse getScrapDetail(Integer scrapId);
 
 }

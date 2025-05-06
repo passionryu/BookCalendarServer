@@ -1,5 +1,6 @@
 package bookcalendar.server.Domain.Mypage.Controller;
 
+import bookcalendar.server.Domain.Community.DTO.Response.PostResponse;
 import bookcalendar.server.Domain.Mypage.DTO.Request.UserInfoEditRequest;
 import bookcalendar.server.Domain.Mypage.DTO.Response.*;
 import bookcalendar.server.Domain.Mypage.Service.MypageService;
@@ -133,8 +134,8 @@ public class MypageController {
                     @ApiResponse(responseCode = "401", description = "유저 인증 오류"),
                     @ApiResponse(responseCode = "500", description = "서버 내부 오류")
             })
-    @GetMapping("/review")
-    public ResponseEntity<ApiResponseWrapper<ReviewByReviewIdResponse>> getReview(@RequestParam("reviewId") Integer reviewId){
+    @GetMapping("/review/{reviewId}")
+    public ResponseEntity<ApiResponseWrapper<ReviewByReviewIdResponse>> getReview(@PathVariable("reviewId") Integer reviewId){
 
         // 내 독후감 상세 조회 서비스 레이어 호출
         ReviewByReviewIdResponse reviewByReviewIdResponse = mypageService.getReview(reviewId);
@@ -155,8 +156,8 @@ public class MypageController {
                     @ApiResponse(responseCode = "401", description = "유저 인증 오류"),
                     @ApiResponse(responseCode = "500", description = "서버 내부 오류")
             })
-    @DeleteMapping("/review")
-    public ResponseEntity<ApiResponseWrapper<String>> deleteReview(@RequestParam("reviewId") Integer reviewId){
+    @DeleteMapping("/review/{reviewId}")
+    public ResponseEntity<ApiResponseWrapper<String>> deleteReview(@PathVariable("reviewId") Integer reviewId){
 
         // 독후감 삭제 서비스 레이어 호출
         mypageService.deleteReview(reviewId);
@@ -187,6 +188,23 @@ public class MypageController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponseWrapper<>(myScrapList, "내 스크랩 리스트가 정상적으로 반환되었습니다"));
+    }
+
+    @Operation(summary = "내 스크랩 상세 조회 API", description = "스크랩 리스트 페이지에서 scrapId를 통해 상세 정보를 반환한다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "스크랩 정보가 정상적으로 반환되었습니다."),
+                    @ApiResponse(responseCode = "401", description = "유저 인증 오류"),
+                    @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            })
+    @GetMapping("/scrap/{scrapId}")
+    public ResponseEntity<ApiResponseWrapper<PostResponse>> getScrap(@PathVariable("scrapId") Integer scrapId){
+
+        // 스크랩 한 게시글 정보 반환 서비스 레이어 호출
+        PostResponse postResponse = mypageService.getScrapDetail(scrapId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponseWrapper<>(postResponse, "스크랩 정보가 정상적으로 반환되었습니다."));
+
     }
     
 }

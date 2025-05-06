@@ -1,6 +1,10 @@
 package bookcalendar.server.Domain.Mypage.Service;
 
+import bookcalendar.server.Domain.Community.DTO.Response.PostResponse;
+import bookcalendar.server.Domain.Community.Entity.Post;
 import bookcalendar.server.Domain.Community.Entity.Scrap;
+import bookcalendar.server.Domain.Community.Exception.CommunityException;
+import bookcalendar.server.Domain.Community.Repository.PostRepository;
 import bookcalendar.server.Domain.Member.Entity.Member;
 import bookcalendar.server.Domain.Mypage.DTO.Request.UserInfoEditRequest;
 import bookcalendar.server.Domain.Mypage.DTO.Response.*;
@@ -26,6 +30,7 @@ public class MypageServiceImpl implements MypageService {
 
     private final MypageManager mypageManager;
     private final ReviewRepository reviewRepository;
+    private final PostRepository postRepository;
 
     // ======================= User Info Page =========================
 
@@ -191,5 +196,21 @@ public class MypageServiceImpl implements MypageService {
                 .collect(Collectors.toList());
 
         return responseList;
+    }
+
+    /**
+     * 스크랩한 게시글 상세 조회 메서드
+     *
+     * @param scrapId 게시글 고유 번호
+     * @return
+     */
+    @Override
+    public PostResponse getScrapDetail(Integer scrapId) {
+
+        Post post = mypageManager.getPostByScrapId(scrapId);
+
+        // 선택한 게시글 상세 내용 반환
+        return postRepository.getPostDetail(post.getPostId())
+                .orElseThrow(() -> new CommunityException(ErrorCode.POST_NOT_FOUND));
     }
 }

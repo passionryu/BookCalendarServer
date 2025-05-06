@@ -89,6 +89,21 @@ public class MypageManager {
     public List<Scrap> getScrapListByMemberId(Integer memberId){
         return scrapRepository.findByMember_MemberId(memberId);
     }
+
+    /**
+     * 스크랩 고유 번호를 통한 게시글 반환
+     *
+     * @param scrapId 스크랩 고유 번호
+     * @return 게시글 객체
+     */
+    public Post getPostByScrapId(Integer scrapId){
+
+        Scrap scrap = scrapRepository.findByScrapId(scrapId)
+                .orElseThrow(()->new CommunityException(ErrorCode.POST_NOT_FOUND));
+
+        return scrap.getPost();
+    }
+
     /**
      * 게시글 객체 반환 메서드
      *

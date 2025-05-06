@@ -52,9 +52,17 @@ public interface MypageService {
     /**
      * 독후감 삭제 인터페이스
      *
-     * @param reviewId
+     * @param reviewId 삭제하고자 하는 독후감의 고유 번호
      */
     void deleteReview(Integer reviewId);
+
+    /**
+     * 내 스크랩 리스트 반환 인터페이스
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @return 스크랩한 게시글 리스트 반환
+     */
+    List<MyScrapListResponse> getScrapList(CustomUserDetails customUserDetails);
 
 
 }

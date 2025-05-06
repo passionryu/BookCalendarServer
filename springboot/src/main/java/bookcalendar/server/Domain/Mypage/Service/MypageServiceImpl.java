@@ -1,5 +1,6 @@
 package bookcalendar.server.Domain.Mypage.Service;
 
+import bookcalendar.server.Domain.Community.Entity.Scrap;
 import bookcalendar.server.Domain.Member.Entity.Member;
 import bookcalendar.server.Domain.Mypage.DTO.Request.UserInfoEditRequest;
 import bookcalendar.server.Domain.Mypage.DTO.Response.*;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -24,6 +26,8 @@ public class MypageServiceImpl implements MypageService {
 
     private final MypageManager mypageManager;
     private final ReviewRepository reviewRepository;
+
+    // ======================= User Info Page =========================
 
     /**
      * 간단한 유저 정보 조회 메서드
@@ -95,6 +99,8 @@ public class MypageServiceImpl implements MypageService {
                 .build();
     }
 
+    // ======================= Review Page =========================
+
     /**
      * 내 독후감 리스트 일괄 조회 메서드
      *
@@ -158,5 +164,32 @@ public class MypageServiceImpl implements MypageService {
             throw new ReviewException(ErrorCode.REVIEW_NOT_FOUND);
         }
         reviewRepository.deleteById(reviewId); // 독후감이 있으면 삭제
+    }
+
+    // ======================= Scrap Page =========================
+
+    /**
+     * 내 스크랩 리스트 조회 API
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @return 스크랩 정보 DTO 리스트
+     */
+    @Override
+    public List<MyScrapListResponse> getScrapList(CustomUserDetails customUserDetails) {
+
+        // 유저의 고유 번호를 통해서 스크랩 리스트 반환
+        List<Scrap> scrapList = mypageManager.getScrapListByMemberId(customUserDetails.getMemberId());
+
+        // 스크랩 리스트에서 원하는 정보를 DTO로 생성하여 반환
+        List<MyScrapListResponse> responseList = scrapList.stream()
+                .map(scrap -> new MyScrapListResponse(
+                        scrap.getScrapId(),                         // scrapId
+                        scrap.getPost().getTitle(),            // title
+                        scrap.getPost().getMember().getNickName(),  // author
+                        scrap.getDate() // scrap date
+                ))
+                .collect(Collectors.toList());
+
+        return responseList;
     }
 }

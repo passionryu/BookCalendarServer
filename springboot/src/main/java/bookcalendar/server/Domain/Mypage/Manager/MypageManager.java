@@ -3,9 +3,11 @@ package bookcalendar.server.Domain.Mypage.Manager;
 import bookcalendar.server.Domain.Book.Repository.BookRepository;
 import bookcalendar.server.Domain.Community.Entity.Comment;
 import bookcalendar.server.Domain.Community.Entity.Post;
+import bookcalendar.server.Domain.Community.Entity.Scrap;
 import bookcalendar.server.Domain.Community.Exception.CommunityException;
 import bookcalendar.server.Domain.Community.Repository.CommentRepository;
 import bookcalendar.server.Domain.Community.Repository.PostRepository;
+import bookcalendar.server.Domain.Community.Repository.ScrapRepository;
 import bookcalendar.server.Domain.Member.Entity.Member;
 import bookcalendar.server.Domain.Member.Exception.MemberException;
 import bookcalendar.server.Domain.Member.Repository.MemberRepository;
@@ -31,6 +33,7 @@ public class MypageManager {
     private final ReviewRepository reviewRepository;
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
+    private final ScrapRepository scrapRepository;
 
     /**
      * 멤버 객체 반환 메서드
@@ -77,6 +80,15 @@ public class MypageManager {
                 .orElseThrow(()-> new CommunityException(ErrorCode.QUESTION_NOT_FOUND));
     }
 
+    /**
+     * 유저의 고유 번호로 scrap리스트 반환
+     *
+     * @param memberId 유저의 고유 번호
+     * @return 스크랩 리스트 반환
+     */
+    public List<Scrap> getScrapListByMemberId(Integer memberId){
+        return scrapRepository.findByMember_MemberId(memberId);
+    }
     /**
      * 게시글 객체 반환 메서드
      *

@@ -111,7 +111,7 @@ public class MypageController {
                     @ApiResponse(responseCode = "401", description = "유저 인증 오류"),
                     @ApiResponse(responseCode = "500", description = "서버 내부 오류")
             })
-    @GetMapping("/review/list")
+    @GetMapping("/reviews")
     public ResponseEntity<ApiResponseWrapper<List<MyReviewList>>> getReviewList(@AuthenticationPrincipal CustomUserDetails customUserDetails){
 
         // 내 독후감 리스트 일괄 조회 서비스 레이어 호출
@@ -163,6 +163,30 @@ public class MypageController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponseWrapper<>("삭제한 독후감의 고유 번호 : " +reviewId , "내 독후감이 정상적으로 조회되었습니다."));
+    }
+
+    // ======================= Scrap Page =========================
+
+    /**
+     * 내 스크랩 리스트 조회 API
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @return 스크랩 정보 DTO 리스트
+     */
+    @Operation(summary = "내 스크랩 리스트 조회 API", description = "마이페이지에서 스크랩 모음을 리스트로 반환한다. 해당 페이지에서는 스크랩 리스트를 최신순으로 정렬한다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "내 스크랩 리스트가 정상적으로 반환되었습니다."),
+                    @ApiResponse(responseCode = "401", description = "유저 인증 오류"),
+                    @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            })
+    @GetMapping("/scraps")
+    public ResponseEntity<ApiResponseWrapper<List<MyScrapListResponse>>> getScrapList(@AuthenticationPrincipal CustomUserDetails customUserDetails){
+
+        // 내 스크랩 리스트 조회 서비스 레이어 호출
+        List<MyScrapListResponse> myScrapList = mypageService.getScrapList(customUserDetails);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponseWrapper<>(myScrapList, "내 스크랩 리스트가 정상적으로 반환되었습니다"));
     }
     
 }

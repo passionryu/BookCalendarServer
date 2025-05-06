@@ -1,10 +1,7 @@
 package bookcalendar.server.Domain.Mypage.Service;
 
 import bookcalendar.server.Domain.Mypage.DTO.Request.UserInfoEditRequest;
-import bookcalendar.server.Domain.Mypage.DTO.Response.MyReviewList;
-import bookcalendar.server.Domain.Mypage.DTO.Response.UserAllInfoResponse;
-import bookcalendar.server.Domain.Mypage.DTO.Response.UserInfoEditResponse;
-import bookcalendar.server.Domain.Mypage.DTO.Response.UserSimpleInfoResponse;
+import bookcalendar.server.Domain.Mypage.DTO.Response.*;
 import bookcalendar.server.global.Security.CustomUserDetails;
 
 import java.util.List;
@@ -43,4 +40,12 @@ public interface MypageService {
      * @return 독후감 리스트 반환
      */
     List<MyReviewList> getReviewList(CustomUserDetails customUserDetails);
+
+    /**
+     * 내 독후감 상세 조회 인터페이스
+     *
+     * @param reviewId 독후감 고유 번호
+     * @return 독후감 기록 DTO 반호나
+     */
+    ReviewByReviewIdResponse getReview(Integer reviewId);
 }

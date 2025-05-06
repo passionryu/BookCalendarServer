@@ -2,11 +2,9 @@ package bookcalendar.server.Domain.Mypage.Service;
 
 import bookcalendar.server.Domain.Member.Entity.Member;
 import bookcalendar.server.Domain.Mypage.DTO.Request.UserInfoEditRequest;
-import bookcalendar.server.Domain.Mypage.DTO.Response.MyReviewList;
-import bookcalendar.server.Domain.Mypage.DTO.Response.UserAllInfoResponse;
-import bookcalendar.server.Domain.Mypage.DTO.Response.UserInfoEditResponse;
-import bookcalendar.server.Domain.Mypage.DTO.Response.UserSimpleInfoResponse;
+import bookcalendar.server.Domain.Mypage.DTO.Response.*;
 import bookcalendar.server.Domain.Mypage.Manager.MypageManager;
+import bookcalendar.server.Domain.Question.Entity.Question;
 import bookcalendar.server.Domain.Review.Entity.Review;
 import bookcalendar.server.global.Security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
@@ -109,9 +107,36 @@ public class MypageServiceImpl implements MypageService {
         return myReviewLists.stream()
                 .map(review -> new MyReviewList(
                         review.getReviewId(),
-                        review.getBook().getBookName(), // Book 엔티티에서 책 제목
+                        review.getBook().getBookName(),
                         review.getDate()
                 ))
                 .toList();
+    }
+
+    /**
+     * 내 독후감 상세 조회 메서드
+     *
+     * @param reviewId 독후감 고유 번호
+     * @return 독후감 기록 DTO 반환
+     */
+    @Override
+    public ReviewByReviewIdResponse getReview(Integer reviewId) {
+
+        // 입력받은 review 고유 번호를 통해 독후감 - 질문지 객체 반환
+        Review review = mypageManager.getReview(reviewId);
+        Question question = mypageManager.getQuestion(reviewId);
+
+        // 독후감 기록 DTO 빌더 패턴으로 반환
+        return ReviewByReviewIdResponse.builder()
+                .contents(review.getContents())
+                .question1(question.getQuestion1())
+                .answer1(question.getAnswer1())
+                .question2(question.getQuestion2())
+                .answer2(question.getAnswer2())
+                .question3(question.getQuestion3())
+                .answer3(question.getAnswer3())
+                .aiResponse(review.getAiResponse())
+                .build();
+
     }
 }

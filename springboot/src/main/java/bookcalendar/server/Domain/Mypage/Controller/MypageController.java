@@ -1,10 +1,7 @@
 package bookcalendar.server.Domain.Mypage.Controller;
 
 import bookcalendar.server.Domain.Mypage.DTO.Request.UserInfoEditRequest;
-import bookcalendar.server.Domain.Mypage.DTO.Response.MyReviewList;
-import bookcalendar.server.Domain.Mypage.DTO.Response.UserAllInfoResponse;
-import bookcalendar.server.Domain.Mypage.DTO.Response.UserInfoEditResponse;
-import bookcalendar.server.Domain.Mypage.DTO.Response.UserSimpleInfoResponse;
+import bookcalendar.server.Domain.Mypage.DTO.Response.*;
 import bookcalendar.server.Domain.Mypage.Service.MypageService;
 import bookcalendar.server.global.Security.CustomUserDetails;
 import bookcalendar.server.global.response.ApiResponseWrapper;
@@ -122,6 +119,28 @@ public class MypageController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponseWrapper<>(myReviewList, "내 독후감 리스트가 정상적으로 조회되었습니다."));
+    }
+
+    /**
+     * 내 독후감 상세 조회 API
+     *
+     * @param reviewId 조회하고자 하는 독후감의 고유 번호
+     * @return 독후감 기록 DTO
+     */
+    @Operation(summary = "내 독후감 상세조회 API", description = "독후감 리스트에서 한 독후감을 클릭하면, reviewId를 받아서 상세하게 독후감 기록을 조회하는 기능이다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "내 독후감이 정상적으로 조회되었습니다."),
+                    @ApiResponse(responseCode = "401", description = "유저 인증 오류"),
+                    @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            })
+    @GetMapping("/review")
+    public ResponseEntity<ApiResponseWrapper<ReviewByReviewIdResponse>> getReview(@RequestParam("reviewId") Integer reviewId){
+
+        // 내 독후감 상세 조회 서비스 레이어 호출
+        ReviewByReviewIdResponse reviewByReviewIdResponse = mypageService.getReview(reviewId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponseWrapper<>(reviewByReviewIdResponse, "내 독후감이 정상적으로 조회되었습니다."));
     }
     
 }

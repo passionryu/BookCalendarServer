@@ -62,4 +62,12 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
      * @return 록후감 리스트 반환
      */
     List<Review> findByMember_MemberId(Integer memberId);
+
+    /**
+     * 독후감 고유 번호를 통해 독후감 반환
+     *
+     * @param reviewId 독후감 고유 번호
+     * @return 독후감 객체
+     */
+    Optional<Review> findByReviewId(Integer reviewId);
 }

@@ -142,5 +142,27 @@ public class MypageController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponseWrapper<>(reviewByReviewIdResponse, "내 독후감이 정상적으로 조회되었습니다."));
     }
+
+    /**
+     * 내 독후감 삭제 API
+     *
+     * @param reviewId 삭제할 독후감의 고유 번호
+     * @return 독후감 삭제 성공 메시지
+     */
+    @Operation(summary = "내 독후감 삭제 API", description = "독후감 리스트 페이지에서 삭제 버튼을 누르면 해당 독후감 기록은 reviewId 값을 받아서 Delete 메서드를 실행시킨다.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "해당 독후감 기록이 정상적으로 삭제되었습니다."),
+                    @ApiResponse(responseCode = "401", description = "유저 인증 오류"),
+                    @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            })
+    @DeleteMapping("/review")
+    public ResponseEntity<ApiResponseWrapper<String>> deleteReview(@RequestParam("reviewId") Integer reviewId){
+
+        // 독후감 삭제 서비스 레이어 호출
+        mypageService.deleteReview(reviewId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponseWrapper<>("삭제한 독후감의 고유 번호 : " +reviewId , "내 독후감이 정상적으로 조회되었습니다."));
+    }
     
 }

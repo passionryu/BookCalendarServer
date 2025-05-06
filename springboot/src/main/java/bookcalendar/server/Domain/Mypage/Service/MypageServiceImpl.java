@@ -6,7 +6,10 @@ import bookcalendar.server.Domain.Mypage.DTO.Response.*;
 import bookcalendar.server.Domain.Mypage.Manager.MypageManager;
 import bookcalendar.server.Domain.Question.Entity.Question;
 import bookcalendar.server.Domain.Review.Entity.Review;
+import bookcalendar.server.Domain.Review.Repository.ReviewRepository;
+import bookcalendar.server.Domain.Review.ReviewException;
 import bookcalendar.server.global.Security.CustomUserDetails;
+import bookcalendar.server.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,6 +23,7 @@ import java.util.List;
 public class MypageServiceImpl implements MypageService {
 
     private final MypageManager mypageManager;
+    private final ReviewRepository reviewRepository;
 
     /**
      * 간단한 유저 정보 조회 메서드
@@ -138,5 +142,21 @@ public class MypageServiceImpl implements MypageService {
                 .aiResponse(review.getAiResponse())
                 .build();
 
+    }
+
+    /**
+     * 독후감 삭제 메서드
+     *
+     * @param reviewId 삭제하고자 하는 독후감 고유 번호
+     */
+    @Override
+    @Transactional
+    public void deleteReview(Integer reviewId) {
+
+        // 해당 독후감 고유 번호를 가진 독후감이 있는지 확인
+        if(!reviewRepository.existsByReviewId(reviewId)){
+            throw new ReviewException(ErrorCode.REVIEW_NOT_FOUND);
+        }
+        reviewRepository.deleteById(reviewId); // 독후감이 있으면 삭제
     }
 }

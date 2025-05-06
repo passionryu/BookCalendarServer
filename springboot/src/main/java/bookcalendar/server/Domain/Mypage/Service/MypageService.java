@@ -48,4 +48,13 @@ public interface MypageService {
      * @return 독후감 기록 DTO 반호나
      */
     ReviewByReviewIdResponse getReview(Integer reviewId);
+
+    /**
+     * 독후감 삭제 인터페이스
+     *
+     * @param reviewId
+     */
+    void deleteReview(Integer reviewId);
+
+
 }

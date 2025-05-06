@@ -55,4 +55,19 @@ public interface ReviewRepository extends JpaRepository<Review, Integer> {
             @Param("year") int year,
             @Param("month") int month);
 
+    /**
+     * 유저의 고유 번호를 통해 모든 독후감 리스트 반환
+     *
+     * @param memberId 유저의 고유 번호
+     * @return 록후감 리스트 반환
+     */
+    List<Review> findByMember_MemberId(Integer memberId);
+
+    /**
+     * 독후감 고유 번호를 통해 독후감 반환
+     *
+     * @param reviewId 독후감 고유 번호
+     * @return 독후감 객체
+     */
+    Optional<Review> findByReviewId(Integer reviewId);
 }

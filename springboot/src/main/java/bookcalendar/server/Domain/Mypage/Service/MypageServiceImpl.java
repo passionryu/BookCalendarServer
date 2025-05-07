@@ -196,9 +196,9 @@ public class MypageServiceImpl implements MypageService {
         // 스크랩 리스트에서 원하는 정보를 DTO로 생성하여 반환
         return scrapList.stream()
                 .map(scrap -> new MyScrapListResponse(
-                        scrap.getScrapId(),                         // scrapId
-                        scrap.getPost().getTitle(),            // title
-                        scrap.getPost().getMember().getNickName(),  // author
+                        scrap.getScrapId(),
+                        scrap.getPost().getTitle(),
+                        scrap.getPost().getMember().getNickName(),
                         scrap.getDate() // scrap date
                 ))
                 .collect(Collectors.toList());
@@ -301,6 +301,18 @@ public class MypageServiceImpl implements MypageService {
         }
         Cart cart = cartRepository.findByCartId(cartId);
         cartRepository.delete(cart);
-
     }
+
+    // ======================= Search Engine(검색 엔진) =========================
+
+    /**
+     * 독후감 검색 메서드
+     *
+     * @param keyword 검색 키워드
+     * @return 검색된 독후감 리스트
+     */
+//    @Override
+//    public List<MyReviewList> searchReview(String keyword) {
+//        return List.of();
+//    }
 }

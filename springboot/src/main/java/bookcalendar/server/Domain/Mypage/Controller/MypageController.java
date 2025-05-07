@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.vectorstore.SearchRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -305,6 +306,27 @@ public class MypageController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponseWrapper<>("장바구니 취소된 도서의 장바구니 고유 번호 : " + cartId,"장바구니의 책이 정상적으로 취소 되었습니다."));
-
     }
+
+    // ======================= Search Engine(검색 엔진) =========================
+
+    /**
+     * 독후감 검색 API
+     *
+     * @param keyword 검색 키워드
+     * @return 검색된 독후감 리스트
+     */
+//    @Operation(summary = "독후감 검색 API",description = "독후감 검색 기능이다.",
+//            responses  ={
+//                    @ApiResponse(responseCode = "200", description = "입력하신 키워드로 독후감이 성공적으로 검색되었습니다."),
+//                    @ApiResponse(responseCode = "401",description = "엑세스 토큰 만료"),
+//                    @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+//            })
+//    @PostMapping("/search/review")
+//    public ResponseEntity<ApiResponseWrapper<List<MyReviewList>>> searchReview(@RequestParam String keyword){
+//
+//
+//        return ResponseEntity.status(HttpStatus.OK)
+//                .body(new ApiResponseWrapper<>(null, "입력하신 키워드로 독후감이 성공적으로 검색되었습니다."));
+//    }
 }

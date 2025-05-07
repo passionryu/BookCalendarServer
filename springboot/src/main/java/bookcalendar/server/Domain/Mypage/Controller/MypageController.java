@@ -283,4 +283,28 @@ public class MypageController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponseWrapper<>(cartList,"장바구니의 책이 정상적으로 조회 되었습니다."));
     }
+
+    /**
+     * 저장된 장바구니 도서 취소 API
+     *
+     * @param cartId 장바구니 객체 고유 번호
+     * @return 장바구니 취소 성공 메시지
+     */
+    @Operation(summary = "저장된 장바구니 도서 취소 API", description = "마이페이지 > 장바구니에서 장바구니 리스트에서 삭제 버튼을 통해 도서 취소 ",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "장바구니의 책이 정상적으로 취소 되었습니다."),
+                    @ApiResponse(responseCode = "401", description = "유저 인증 오류"),
+                    @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            })
+    @DeleteMapping("/cart/{cartId}")
+    public ResponseEntity<ApiResponseWrapper<String>> deleteCart(@PathVariable("cartId") Integer cartId){
+
+
+        // 저장된 장바구니 도서 취소 서비스 레이어 호출
+        mypageService.deleteCart(cartId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponseWrapper<>("장바구니 취소된 도서의 장바구니 고유 번호 : " + cartId,"장바구니의 책이 정상적으로 취소 되었습니다."));
+
+    }
 }

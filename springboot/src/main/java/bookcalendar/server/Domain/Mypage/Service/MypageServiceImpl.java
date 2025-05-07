@@ -1,5 +1,6 @@
 package bookcalendar.server.Domain.Mypage.Service;
 
+import bookcalendar.server.Domain.Book.Exception.BookException;
 import bookcalendar.server.Domain.Community.DTO.Response.PostResponse;
 import bookcalendar.server.Domain.Community.Entity.Post;
 import bookcalendar.server.Domain.Community.Entity.Scrap;
@@ -277,5 +278,29 @@ public class MypageServiceImpl implements MypageService {
         List<Cart> cartList = cartRepository.findByMember_MemberId(customUserDetails.getMemberId());
 
         return cartList;
+    }
+
+    /**
+     * 저장된 장바구니 도서 취소 메서드
+     *
+     * @param cartId 장바구니 객체 고유 번호
+     */
+    @Override
+    @Transactional
+    public void deleteCart(Integer cartId) {
+
+        /**
+         * 요청한 장바구니 객체가 있는지 확인
+         *
+         * 1. 거짓 - 도서 없음 오류 반환
+         * 2. 참 - Cart DB 테이블에서 삭제
+         *
+         */
+        if(!cartRepository.existsByCartId(cartId)){
+            throw new BookException(ErrorCode.BOOK_NOT_FOUND);
+        }
+        Cart cart = cartRepository.findByCartId(cartId);
+        cartRepository.delete(cart);
+
     }
 }

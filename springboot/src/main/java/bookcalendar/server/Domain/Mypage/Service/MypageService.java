@@ -98,4 +98,11 @@ public interface MypageService {
      */
     List<Cart> getCartList(CustomUserDetails customUserDetails);
 
+    /**
+     * 저장된 장바구니 도서 취소 인터페이스
+     *
+     * @param cartId 장바구니 객체 고유 번호
+     */
+    void deleteCart(Integer cartId);
+
 }

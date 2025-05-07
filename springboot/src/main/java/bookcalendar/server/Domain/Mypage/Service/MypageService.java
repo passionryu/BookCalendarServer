@@ -106,11 +106,11 @@ public interface MypageService {
     void deleteCart(Integer cartId);
 
     /**
-     * 독후감 검색 인터페이스
+     * 독서 수 & 독후감 작성 수 조회 인터페이스
      *
-     * @param keyword 검색 키워드
-     * @return 검색된 독후감 리스트
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @return 독서 수 & 독후감 작성 수 DTO
      */
-    // List<MyReviewList> searchReview(String keyword);
+    StatisticResponse getStatistic(CustomUserDetails customUserDetails);
 
 }

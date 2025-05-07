@@ -3,7 +3,9 @@ package bookcalendar.server.Domain.ChatBot.Controller;
 
 import bookcalendar.server.Domain.Book.DTO.Response.CompleteResponse;
 import bookcalendar.server.Domain.ChatBot.DTO.Request.ChatRequest;
+import bookcalendar.server.Domain.ChatBot.DTO.Request.SaveBookAutoRequest;
 import bookcalendar.server.Domain.ChatBot.Service.ChatbotService;
+import bookcalendar.server.Domain.Mypage.Entity.Cart;
 import bookcalendar.server.global.Security.CustomUserDetails;
 import bookcalendar.server.global.response.ApiResponseWrapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -72,5 +74,31 @@ public class ChatBotController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponseWrapper<>(completeResponseList, "도서 추천이 정상적으로 반환되었습니다."));
     }
+
+    /**
+     * 독서 완료를 통한 도서 추천에서 장바구니에 책 저장 API
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param saveBookAutoRequest 도서 장바구니 저장 정보 DTO
+     * @return 도서 저장 성공 메시지
+     */
+    @Operation(summary = "독서 완료를 통한 도서 추천에서 장바구니에 책 저장 API", description = "독서 완료를 통한 도서 추천 시 장바구니에 저장할 수 있는 기능이다. ",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "해당 도서를 정상적으로 장바구니에 저장했습니다."),
+                    @ApiResponse(responseCode = "401", description = "유저 인증 오류"),
+                    @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            })
+    @PostMapping("/cart")
+    public ResponseEntity<ApiResponseWrapper<Cart>> saveBookToCartByAuto(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+                                                                         @RequestBody SaveBookAutoRequest saveBookAutoRequest){
+
+        // 추천받은 도서 자동 장바구니 저장 서비스 레이어 호출
+        Cart cart = chatbotService.saveBookToCartByAuto(customUserDetails,saveBookAutoRequest);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponseWrapper<>(cart,"해당 도서를 정상적으로 장바구니에 저장했습니다."));
+    }
+
+
 
 }

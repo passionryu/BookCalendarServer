@@ -2,10 +2,12 @@ package bookcalendar.server.Domain.Book.Service;
 
 import bookcalendar.server.Domain.Book.DTO.Request.BookRegisterRequest;
 import bookcalendar.server.Domain.Book.DTO.Request.PeriodRequest;
+import bookcalendar.server.Domain.Book.DTO.Request.SaveBookAutoRequest;
 import bookcalendar.server.Domain.Book.DTO.Response.BookResponse;
 import bookcalendar.server.Domain.Book.DTO.Response.CompleteResponse;
 import bookcalendar.server.Domain.Book.DTO.Response.PeriodResponse;
 import bookcalendar.server.Domain.Book.Entity.Book;
+import bookcalendar.server.Domain.Mypage.Entity.Cart;
 import bookcalendar.server.global.Security.CustomUserDetails;
 
 import java.util.List;
@@ -60,5 +62,14 @@ public interface BookService {
      * @return
      */
     List<PeriodResponse> getPeriodList(CustomUserDetails customUserDetails, PeriodRequest periodRequest);
+
+    /**
+     * 장바구니에 도서 자동 저장 인터페이스
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param saveBookAutoRequest 저장하고자 하는 도서의 정보 DTO
+     * @return 장바구니 객체
+     */
+    Cart saveBookToCartByAuto(CustomUserDetails customUserDetails, SaveBookAutoRequest saveBookAutoRequest);
 
 }

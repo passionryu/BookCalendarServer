@@ -2,10 +2,12 @@ package bookcalendar.server.Domain.Book.Controller;
 
 import bookcalendar.server.Domain.Book.DTO.Request.BookRegisterRequest;
 import bookcalendar.server.Domain.Book.DTO.Request.PeriodRequest;
+import bookcalendar.server.Domain.Book.DTO.Request.SaveBookAutoRequest;
 import bookcalendar.server.Domain.Book.DTO.Response.CompleteResponse;
 import bookcalendar.server.Domain.Book.DTO.Response.PeriodResponse;
 import bookcalendar.server.Domain.Book.Entity.Book;
 import bookcalendar.server.Domain.Book.Service.BookService;
+import bookcalendar.server.Domain.Mypage.Entity.Cart;
 import bookcalendar.server.global.Security.CustomUserDetails;
 import bookcalendar.server.global.response.ApiResponseWrapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -94,15 +96,15 @@ public class BookController {
     /**
      * 독서 포기 API
      *
-     * @param customUserDetails
-     * @return
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @return 독서 포기 메시지
      */
     @Operation(summary = "독서 포기 API", description = "독서 포기 버튼 클릭 시, DB에서 해당 도서의 status 칼럼이 (독서_포기)로 전환된다.",
             responses = {
                     @ApiResponse(responseCode = "200", description = "요청하신 도서에 대하여 포기 처리가 완료되었습니다.")
             })
     @PatchMapping("")
-    public ResponseEntity<ApiResponseWrapper<String>> giveUpReading(@AuthenticationPrincipal CustomUserDetails customUserDetails){
+    public ResponseEntity<ApiResponseWrapper<Void>> giveUpReading(@AuthenticationPrincipal CustomUserDetails customUserDetails){
 
         //독서 포기 서비스 레이어 호출
         bookService.giveUpReading(customUserDetails);
@@ -114,8 +116,8 @@ public class BookController {
     /**
      * 독서 완료 API
      *
-     * @param customUserDetails
-     * @return
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @return 5개의 도서 추천
      */
     @Operation(summary = "독서 완료 API", description = "독서 완료 버튼 클릭 시 , 도서 추천 5권 및 DB에서 해당 도서의 (status= 독서 완료)로 수정 ",
             responses = {
@@ -132,11 +134,36 @@ public class BookController {
     }
 
     /**
+     * 독서 완료를 통한 도서 추천에서 장바구니에 책 저장 API
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param saveBookAutoRequest 도서 장바구니 저장 정보 DTO
+     * @return 도서 저장 성공 메시지
+     */
+    @Operation(summary = "독서 완료를 통한 도서 추천에서 장바구니에 책 저장 API", description = "독서 완료를 통한 도서 추천 시 장바구니에 저장할 수 있는 기능이다. ",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "해당 도서를 정상적으로 장바구니에 저장했습니다."),
+                    @ApiResponse(responseCode = "401", description = "유저 인증 오류"),
+                    @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            })
+    @PostMapping("/cart")
+    public ResponseEntity<ApiResponseWrapper<Cart>> saveBookToCartByAuto(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+                                                                         @RequestBody SaveBookAutoRequest saveBookAutoRequest){
+
+        // 추천받은 도서 자동 장바구니 저장 서비스 레이어 호출
+        Cart cart = bookService.saveBookToCartByAuto(customUserDetails,saveBookAutoRequest);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponseWrapper<>(cart,"해당 도서를 정상적으로 장바구니에 저장했습니다."));
+    }
+
+
+    /**
      * 등록된 도서들을 캘린더에 선으로 표시하는 API
      *
-     * @param customUserDetails
-     * @param periodRequest
-     * @return
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param periodRequest 달 (예 :1월, 2월)
+     * @return 캘린더에 도서 기간 표시를 할 수 있는 리스트
      */
     @Operation(summary = "등록된 도서 캘린더에 선으로 표시하는 API", description = "등록한 모든 도서 캘린더에 선으로 표시하는 api이다.",
             responses = {

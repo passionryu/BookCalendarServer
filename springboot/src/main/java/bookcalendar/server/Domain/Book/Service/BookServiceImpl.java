@@ -2,6 +2,7 @@ package bookcalendar.server.Domain.Book.Service;
 
 import bookcalendar.server.Domain.Book.DTO.Request.BookRegisterRequest;
 import bookcalendar.server.Domain.Book.DTO.Request.PeriodRequest;
+import bookcalendar.server.Domain.Book.DTO.Request.SaveBookAutoRequest;
 import bookcalendar.server.Domain.Book.DTO.Response.BookResponse;
 import bookcalendar.server.Domain.Book.DTO.Response.CompleteResponse;
 import bookcalendar.server.Domain.Book.DTO.Response.PeriodResponse;
@@ -11,6 +12,8 @@ import bookcalendar.server.Domain.Book.Repository.BookRepository;
 import bookcalendar.server.Domain.Member.Entity.Member;
 import bookcalendar.server.Domain.Member.Exception.MemberException;
 import bookcalendar.server.Domain.Member.Repository.MemberRepository;
+import bookcalendar.server.Domain.Mypage.Entity.Cart;
+import bookcalendar.server.Domain.Mypage.Repository.CartRepository;
 import bookcalendar.server.Domain.Question.Repository.QuestionRepository;
 import bookcalendar.server.Domain.Review.Entity.Review;
 import bookcalendar.server.Domain.Review.Repository.ReviewRepository;
@@ -26,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,6 +42,7 @@ public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
     private final QuestionRepository questionRepository;
     private final MemberRepository memberRepository;
+    private final CartRepository cartRepository;
     private final ReviewRepository reviewRepository;
     private final ChatClient chatClient;
 
@@ -213,6 +218,33 @@ public class BookServiceImpl implements BookService {
 
     }
 
+    /**
+     * 장바구니에 책 자동 등록 메서드
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param saveBookAutoRequest 저장하고자 하는 도서의 정보 DTO
+     * @return 장바구니 객체
+     */
+    @Override
+    @Transactional
+    public Cart saveBookToCartByAuto(CustomUserDetails customUserDetails, SaveBookAutoRequest saveBookAutoRequest) {
+
+        // 현재 멤버 객체 반환
+        Member member = memberRepository.findByMemberId(customUserDetails.getMemberId())
+                .orElseThrow(()-> new MemberException(ErrorCode.USER_NOT_FOUND) );
+
+        // cart 객체 생성
+        Cart cart = Cart.builder()
+                .bookName(saveBookAutoRequest.bookName())
+                .author(saveBookAutoRequest.author())
+                .link(saveBookAutoRequest.url())
+                .date(LocalDateTime.now())
+                .member(member)
+                .build();
+
+        return cartRepository.save(cart);
+    }
+
     // ======================= 등록된 도서의 독서 기간을 캘린더에 선으로 표시하는 로직 =========================
 
     /**
@@ -242,4 +274,6 @@ public class BookServiceImpl implements BookService {
                 .map(book -> new PeriodResponse(book.getBookId() ,book.getBookName(), book.getStartDate(), book.getFinishDate()))
                 .toList();
     }
+
+
 }

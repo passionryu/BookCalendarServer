@@ -1,5 +1,6 @@
 package bookcalendar.server.Domain.Mypage.Service;
 
+import bookcalendar.server.Domain.Book.Exception.BookException;
 import bookcalendar.server.Domain.Community.DTO.Response.PostResponse;
 import bookcalendar.server.Domain.Community.Entity.Post;
 import bookcalendar.server.Domain.Community.Entity.Scrap;
@@ -7,9 +8,12 @@ import bookcalendar.server.Domain.Community.Exception.CommunityException;
 import bookcalendar.server.Domain.Community.Repository.PostRepository;
 import bookcalendar.server.Domain.Community.Repository.ScrapRepository;
 import bookcalendar.server.Domain.Member.Entity.Member;
+import bookcalendar.server.Domain.Mypage.DTO.Request.ManualCartRequest;
 import bookcalendar.server.Domain.Mypage.DTO.Request.UserInfoEditRequest;
 import bookcalendar.server.Domain.Mypage.DTO.Response.*;
+import bookcalendar.server.Domain.Mypage.Entity.Cart;
 import bookcalendar.server.Domain.Mypage.Manager.MypageManager;
+import bookcalendar.server.Domain.Mypage.Repository.CartRepository;
 import bookcalendar.server.Domain.Question.Entity.Question;
 import bookcalendar.server.Domain.Review.Entity.Review;
 import bookcalendar.server.Domain.Review.Repository.ReviewRepository;
@@ -21,6 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,6 +38,7 @@ public class MypageServiceImpl implements MypageService {
     private final ReviewRepository reviewRepository;
     private final PostRepository postRepository;
     private final ScrapRepository scrapRepository;
+    private final CartRepository cartRepository;
 
     // ======================= User Info Page =========================
 
@@ -223,12 +229,78 @@ public class MypageServiceImpl implements MypageService {
     @Transactional
     public void deleteScrap(Integer scrapId) {
 
-        // 요청이 들어온 스크랩 객체가 있는지 확인 - 없으면 에러 반환
+        // 요청이 들어온 스크랩 객체가 있는지 확인, 없으면 에러 반환
         if(!scrapRepository.existsByScrapId(scrapId)){
             throw new CommunityException(ErrorCode.POST_NOT_FOUND);
         }
         // 있으면 해당 스크랩 객체 취소(삭제)
         Scrap scrap = mypageManager.getScrapByScrapId(scrapId);
         scrapRepository.delete(scrap);
+    }
+
+    // ======================= Cart Page =========================
+
+    /**
+     * 장바구니에 책 수동 등록 메서드
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param manualCartRequest 등록하고자 하는 책의 정보
+     */
+    @Override
+    @Transactional
+    public Cart saveBookToCartByManual(CustomUserDetails customUserDetails, ManualCartRequest manualCartRequest) {
+
+        // 현재의 멤버 객체 반환
+        Member member = mypageManager.getMember(customUserDetails.getMemberId());
+
+        // cart 객체 생성
+        Cart cart = Cart.builder()
+                .bookName(manualCartRequest.bookName())
+                .author(manualCartRequest.author())
+                .link(manualCartRequest.url())
+                .date(LocalDateTime.now())
+                .member(member)
+                .build();
+
+        return cartRepository.save(cart);
+    }
+
+    /**
+     * 장바구니 일괄 조회 메서드
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @return 장바구니 DTO 리스트
+     */
+    @Override
+    public List<Cart> getCartList(CustomUserDetails customUserDetails) {
+
+        // 장바구니의 도서 리스트 반환
+        List<Cart> cartList = cartRepository.findByMember_MemberId(customUserDetails.getMemberId());
+
+        return cartList;
+    }
+
+    /**
+     * 저장된 장바구니 도서 취소 메서드
+     *
+     * @param cartId 장바구니 객체 고유 번호
+     */
+    @Override
+    @Transactional
+    public void deleteCart(Integer cartId) {
+
+        /**
+         * 요청한 장바구니 객체가 있는지 확인
+         *
+         * 1. 거짓 - 도서 없음 오류 반환
+         * 2. 참 - Cart DB 테이블에서 삭제
+         *
+         */
+        if(!cartRepository.existsByCartId(cartId)){
+            throw new BookException(ErrorCode.BOOK_NOT_FOUND);
+        }
+        Cart cart = cartRepository.findByCartId(cartId);
+        cartRepository.delete(cart);
+
     }
 }

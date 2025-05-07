@@ -1,8 +1,10 @@
 package bookcalendar.server.Domain.Mypage.Controller;
 
 import bookcalendar.server.Domain.Community.DTO.Response.PostResponse;
+import bookcalendar.server.Domain.Mypage.DTO.Request.ManualCartRequest;
 import bookcalendar.server.Domain.Mypage.DTO.Request.UserInfoEditRequest;
 import bookcalendar.server.Domain.Mypage.DTO.Response.*;
+import bookcalendar.server.Domain.Mypage.Entity.Cart;
 import bookcalendar.server.Domain.Mypage.Service.MypageService;
 import bookcalendar.server.global.Security.CustomUserDetails;
 import bookcalendar.server.global.response.ApiResponseWrapper;
@@ -232,5 +234,77 @@ public class MypageController {
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponseWrapper<>("취소한 스크랩 고유 번호 : " + scrapId, "스크랩이 정상적으로 취소 되었습니다."));
+    }
+
+    // ======================= Cart Page =========================
+
+    /**
+     * 장바구니에 책 수동 등록 API
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param manualCartRequest 장바구니 저장 정보 DTO
+     * @return 장바구니 저장 성공 메시지
+     */
+    @Operation(summary = "장바구니에 책 수동 등록 API", description = "마이페이지 > 장바구니에서 수동으로 직접 책을 등록 ",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "장바구니에 정상적으로 책이 등록되었습니다."),
+                    @ApiResponse(responseCode = "401", description = "유저 인증 오류"),
+                    @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            })
+    @PostMapping("/cart")
+    public ResponseEntity<ApiResponseWrapper<Cart>> saveBookToCartByManual(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+                                                                             @RequestBody ManualCartRequest manualCartRequest){
+
+        // 장바구니 수동 등록 서비스 레이어 호츌
+        Cart cart =mypageService.saveBookToCartByManual(customUserDetails, manualCartRequest);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponseWrapper<>(cart,"장바구니에 정상적으로 책이 등록되었습니다."));
+    }
+
+    /**
+     * 장바구니 일괄 조회 API
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @return 장바구니 DTO 리스트
+     */
+    @Operation(summary = "장바구니 일괄조회 API", description = "마이페이지 > 장바구니에서 장바구니 리스트 조회 ",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "장바구니의 책이 정상적으로 조회 되었습니다."),
+                    @ApiResponse(responseCode = "401", description = "유저 인증 오류"),
+                    @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            })
+    @GetMapping("/cart")
+    public ResponseEntity<ApiResponseWrapper<List<Cart>>> getCartList(@AuthenticationPrincipal CustomUserDetails customUserDetails){
+
+        // 장바구니 일괄 조회 서비스 레이어 호출
+        List<Cart> cartList = mypageService.getCartList(customUserDetails);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponseWrapper<>(cartList,"장바구니의 책이 정상적으로 조회 되었습니다."));
+    }
+
+    /**
+     * 저장된 장바구니 도서 취소 API
+     *
+     * @param cartId 장바구니 객체 고유 번호
+     * @return 장바구니 취소 성공 메시지
+     */
+    @Operation(summary = "저장된 장바구니 도서 취소 API", description = "마이페이지 > 장바구니에서 장바구니 리스트에서 삭제 버튼을 통해 도서 취소 ",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "장바구니의 책이 정상적으로 취소 되었습니다."),
+                    @ApiResponse(responseCode = "401", description = "유저 인증 오류"),
+                    @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            })
+    @DeleteMapping("/cart/{cartId}")
+    public ResponseEntity<ApiResponseWrapper<String>> deleteCart(@PathVariable("cartId") Integer cartId){
+
+
+        // 저장된 장바구니 도서 취소 서비스 레이어 호출
+        mypageService.deleteCart(cartId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponseWrapper<>("장바구니 취소된 도서의 장바구니 고유 번호 : " + cartId,"장바구니의 책이 정상적으로 취소 되었습니다."));
+
     }
 }

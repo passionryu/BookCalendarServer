@@ -1,8 +1,10 @@
 package bookcalendar.server.Domain.Mypage.Service;
 
 import bookcalendar.server.Domain.Community.DTO.Response.PostResponse;
+import bookcalendar.server.Domain.Mypage.DTO.Request.ManualCartRequest;
 import bookcalendar.server.Domain.Mypage.DTO.Request.UserInfoEditRequest;
 import bookcalendar.server.Domain.Mypage.DTO.Response.*;
+import bookcalendar.server.Domain.Mypage.Entity.Cart;
 import bookcalendar.server.global.Security.CustomUserDetails;
 
 import java.util.List;
@@ -79,5 +81,28 @@ public interface MypageService {
      * @param scrapId 취소하고자 하는 스크랩 고유 번호
      */
     void deleteScrap(Integer scrapId);
+
+    /**
+     * 장바구니에 책 수동 등록 인터페이스
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param manualCartRequest 등록하고자 하는 책의 정보
+     */
+    Cart saveBookToCartByManual(CustomUserDetails customUserDetails, ManualCartRequest manualCartRequest);
+
+    /**
+     * 장바구니 일괄 조회 인터페이스
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @return 장바구니 DTO 리스트
+     */
+    List<Cart> getCartList(CustomUserDetails customUserDetails);
+
+    /**
+     * 저장된 장바구니 도서 취소 인터페이스
+     *
+     * @param cartId 장바구니 객체 고유 번호
+     */
+    void deleteCart(Integer cartId);
 
 }

@@ -1,16 +1,24 @@
 package bookcalendar.server.Domain.ChatBot.Service;
 
+import bookcalendar.server.Domain.Book.DTO.Request.SaveBookAutoRequest;
 import bookcalendar.server.Domain.Book.DTO.Response.CompleteResponse;
 import bookcalendar.server.Domain.ChatBot.Manager.RedisManager;
 import bookcalendar.server.Domain.ChatBot.DTO.Request.ChatRequest;
 import bookcalendar.server.Domain.ChatBot.Helper.RedisHelper;
+import bookcalendar.server.Domain.Member.Entity.Member;
+import bookcalendar.server.Domain.Member.Exception.MemberException;
+import bookcalendar.server.Domain.Member.Repository.MemberRepository;
+import bookcalendar.server.Domain.Mypage.Entity.Cart;
+import bookcalendar.server.Domain.Mypage.Repository.CartRepository;
 import bookcalendar.server.global.Security.CustomUserDetails;
+import bookcalendar.server.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.ChatClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -20,6 +28,8 @@ public class ChatbotServiceImpl implements ChatbotService{
 
     private final ChatClient chatClient;
     private final RedisManager redisManager;
+    private final MemberRepository memberRepository;
+    private final CartRepository cartRepository;
 
     // ======================= 챗봇 채팅 로직 =========================
 
@@ -81,6 +91,32 @@ public class ChatbotServiceImpl implements ChatbotService{
 
         // 추천 도서 5개 반환
         return recommendations;
+    }
+
+    /**
+     * 장바구니에 도서 자동 저장 메서드
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param saveBookAutoRequest 저장하고자 하는 도서의 정보 DTO
+     * @return
+     */
+    @Override
+    @Transactional
+    public Cart saveBookToCartByAuto(CustomUserDetails customUserDetails, SaveBookAutoRequest saveBookAutoRequest) {
+        // 현재 멤버 객체 반환
+        Member member = memberRepository.findByMemberId(customUserDetails.getMemberId())
+                .orElseThrow(()-> new MemberException(ErrorCode.USER_NOT_FOUND) );
+
+        // cart 객체 생성
+        Cart cart = Cart.builder()
+                .bookName(saveBookAutoRequest.bookName())
+                .author(saveBookAutoRequest.author())
+                .link(saveBookAutoRequest.url())
+                .date(LocalDateTime.now())
+                .member(member)
+                .build();
+
+        return cartRepository.save(cart);
     }
 
 }

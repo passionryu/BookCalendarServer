@@ -255,9 +255,32 @@ public class MypageController {
     public ResponseEntity<ApiResponseWrapper<Cart>> saveBookToCartByManual(@AuthenticationPrincipal CustomUserDetails customUserDetails,
                                                                              @RequestBody ManualCartRequest manualCartRequest){
 
+        // 장바구니 수동 등록 서비스 레이어 호츌
         Cart cart =mypageService.saveBookToCartByManual(customUserDetails, manualCartRequest);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponseWrapper<>(cart,"장바구니에 정상적으로 책이 등록되었습니다."));
+    }
+
+    /**
+     * 장바구니 일괄 조회 API
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @return 장바구니 DTO 리스트
+     */
+    @Operation(summary = "장바구니 일괄조회 API", description = "마이페이지 > 장바구니에서 장바구니 리스트 조회 ",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "장바구니의 책이 정상적으로 조회 되었습니다."),
+                    @ApiResponse(responseCode = "401", description = "유저 인증 오류"),
+                    @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            })
+    @GetMapping("/cart")
+    public ResponseEntity<ApiResponseWrapper<List<Cart>>> getCartList(@AuthenticationPrincipal CustomUserDetails customUserDetails){
+
+        // 장바구니 일괄 조회 서비스 레이어 호출
+        List<Cart> cartList = mypageService.getCartList(customUserDetails);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponseWrapper<>(cartList,"장바구니의 책이 정상적으로 조회 되었습니다."));
     }
 }

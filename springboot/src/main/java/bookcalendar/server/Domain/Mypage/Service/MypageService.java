@@ -90,4 +90,12 @@ public interface MypageService {
      */
     Cart saveBookToCartByManual(CustomUserDetails customUserDetails, ManualCartRequest manualCartRequest);
 
+    /**
+     * 장바구니 일괄 조회 인터페이스
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @return 장바구니 DTO 리스트
+     */
+    List<Cart> getCartList(CustomUserDetails customUserDetails);
+
 }

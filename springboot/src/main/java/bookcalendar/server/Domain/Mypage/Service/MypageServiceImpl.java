@@ -263,4 +263,19 @@ public class MypageServiceImpl implements MypageService {
 
         return cartRepository.save(cart);
     }
+
+    /**
+     * 장바구니 일괄 조회 메서드
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @return 장바구니 DTO 리스트
+     */
+    @Override
+    public List<Cart> getCartList(CustomUserDetails customUserDetails) {
+
+        // 장바구니의 도서 리스트 반환
+        List<Cart> cartList = cartRepository.findByMember_MemberId(customUserDetails.getMemberId());
+
+        return cartList;
+    }
 }

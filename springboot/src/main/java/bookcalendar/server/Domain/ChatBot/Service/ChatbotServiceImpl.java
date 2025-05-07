@@ -2,6 +2,7 @@ package bookcalendar.server.Domain.ChatBot.Service;
 
 import bookcalendar.server.Domain.Book.DTO.Request.SaveBookAutoRequest;
 import bookcalendar.server.Domain.Book.DTO.Response.CompleteResponse;
+import bookcalendar.server.Domain.ChatBot.DTO.Request.SaveBookRequest;
 import bookcalendar.server.Domain.ChatBot.Manager.RedisManager;
 import bookcalendar.server.Domain.ChatBot.DTO.Request.ChatRequest;
 import bookcalendar.server.Domain.ChatBot.Helper.RedisHelper;
@@ -102,7 +103,7 @@ public class ChatbotServiceImpl implements ChatbotService{
      */
     @Override
     @Transactional
-    public Cart saveBookToCartByAuto(CustomUserDetails customUserDetails, SaveBookAutoRequest saveBookAutoRequest) {
+    public Cart saveBookToCartByAuto(CustomUserDetails customUserDetails, SaveBookRequest saveBookAutoRequest) {
         // 현재 멤버 객체 반환
         Member member = memberRepository.findByMemberId(customUserDetails.getMemberId())
                 .orElseThrow(()-> new MemberException(ErrorCode.USER_NOT_FOUND) );
@@ -118,5 +119,6 @@ public class ChatbotServiceImpl implements ChatbotService{
 
         return cartRepository.save(cart);
     }
+
 
 }

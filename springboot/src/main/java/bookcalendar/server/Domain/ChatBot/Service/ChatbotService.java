@@ -2,7 +2,7 @@ package bookcalendar.server.Domain.ChatBot.Service;
 
 import bookcalendar.server.Domain.Book.DTO.Response.CompleteResponse;
 import bookcalendar.server.Domain.ChatBot.DTO.Request.ChatRequest;
-import bookcalendar.server.Domain.ChatBot.DTO.Request.SaveBookAutoRequest;
+import bookcalendar.server.Domain.ChatBot.DTO.Request.SaveBookRequest;
 import bookcalendar.server.Domain.Mypage.Entity.Cart;
 import bookcalendar.server.global.Security.CustomUserDetails;
 
@@ -34,5 +34,5 @@ public interface ChatbotService {
      * @param saveBookAutoRequest 저장하고자 하는 도서의 정보 DTO
      * @return 장바구니 객체
      */
-    Cart saveBookToCartByAuto(CustomUserDetails customUserDetails, SaveBookAutoRequest saveBookAutoRequest);
+    Cart saveBookToCartByAuto(CustomUserDetails customUserDetails, SaveBookRequest saveBookAutoRequest);
 }

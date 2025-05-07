@@ -3,7 +3,7 @@ package bookcalendar.server.Domain.ChatBot.Controller;
 
 import bookcalendar.server.Domain.Book.DTO.Response.CompleteResponse;
 import bookcalendar.server.Domain.ChatBot.DTO.Request.ChatRequest;
-import bookcalendar.server.Domain.ChatBot.DTO.Request.SaveBookAutoRequest;
+import bookcalendar.server.Domain.ChatBot.DTO.Request.SaveBookRequest;
 import bookcalendar.server.Domain.ChatBot.Service.ChatbotService;
 import bookcalendar.server.Domain.Mypage.Entity.Cart;
 import bookcalendar.server.global.Security.CustomUserDetails;
@@ -90,7 +90,7 @@ public class ChatBotController {
             })
     @PostMapping("/cart")
     public ResponseEntity<ApiResponseWrapper<Cart>> saveBookToCartByAuto(@AuthenticationPrincipal CustomUserDetails customUserDetails,
-                                                                         @RequestBody SaveBookAutoRequest saveBookAutoRequest){
+                                                                         @RequestBody SaveBookRequest saveBookAutoRequest){
 
         // 추천받은 도서 자동 장바구니 저장 서비스 레이어 호출
         Cart cart = chatbotService.saveBookToCartByAuto(customUserDetails,saveBookAutoRequest);

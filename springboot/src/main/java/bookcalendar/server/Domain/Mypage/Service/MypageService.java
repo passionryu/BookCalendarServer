@@ -105,4 +105,12 @@ public interface MypageService {
      */
     void deleteCart(Integer cartId);
 
+    /**
+     * 독후감 검색 인터페이스
+     *
+     * @param keyword 검색 키워드
+     * @return 검색된 독후감 리스트
+     */
+    // List<MyReviewList> searchReview(String keyword);
+
 }

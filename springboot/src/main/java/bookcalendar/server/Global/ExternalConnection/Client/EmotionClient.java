@@ -25,11 +25,21 @@ public class EmotionClient {
                 .uri("/emotion/predict_emotion")
                 .bodyValue(Map.of("text", text))
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {})
-                .map(response -> response.get("emotion"))
-                .doOnNext(emotion -> log.info("감정 분석 결과: {}", emotion))
-                .doOnError(error -> log.error("감정 분석 요청 실패: {}", error.getMessage()));
+                .bodyToMono(String.class)
+                .doOnNext(response -> log.info("Raw response: {}", response));
     }
+
+
+//    public Mono<String> predict(String text) {
+//        return webClient.post()
+//                .uri("/emotion/predict_emotion")
+//                .bodyValue(Map.of("text", text))
+//                .retrieve()
+//                .bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {})
+//                .map(response -> response.get("emotion"))
+//                .doOnNext(emotion -> log.info("감정 분석 결과: {}", emotion))
+//                .doOnError(error -> log.error("감정 분석 요청 실패: {}", error.getMessage()));
+//    }
 
 //    public Mono<String> predict(String text) {
 //        return webClient.post()

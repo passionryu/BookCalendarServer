@@ -21,7 +21,7 @@ public class EmotionClient {
 
     public Mono<String> predict(String text) {
         return webClient.post()
-                .uri("/predict_emotion")
+                .uri("/emotion/predict_emotion")
                 .bodyValue(Map.of("text", text))
                 .retrieve()
                 .bodyToMono(String.class)

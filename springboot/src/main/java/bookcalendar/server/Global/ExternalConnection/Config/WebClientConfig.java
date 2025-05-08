@@ -1,0 +1,21 @@
+package bookcalendar.server.global.ExternalConnection.Config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.web.reactive.function.client.WebClient;
+
+@Configuration
+public class WebClientConfig {
+
+    // 현재 Host PC ip/ port: http://192.9.202.17:3004
+
+    @Bean
+    public WebClient fastApiWebClient() {
+        return WebClient.builder()
+                .baseUrl("http://ceprj.gachon.ac.kr:3004") // 목표 서버 & 포트
+                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .build();
+    }
+}

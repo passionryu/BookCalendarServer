@@ -21,7 +21,7 @@ public class QuestionClient {
 
     public Mono<QuestionNumberTwoThreeResponse> predict(String text) {
         return webClient.post()
-                .uri("/predict_question")
+                .uri("/question/predict_question")
                 .bodyValue(Map.of("paragraph", text))  // 🚨 key 이름 'text' → 'paragraph' 수정 필요!
                 .retrieve()
                 .bodyToMono(QuestionNumberTwoThreeResponse.class)

@@ -14,7 +14,7 @@ public class WebClientConfig {
     @Bean
     public WebClient fastApiWebClient() {
         return WebClient.builder()
-                .baseUrl("http://ceprj.gachon.ac.kr:3004") // 목표 서버 & 포트
+                .baseUrl("http://192.9.202.17:3004") // 목표 서버 & 포트
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();
     }

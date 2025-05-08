@@ -19,7 +19,7 @@ public class QuestionClient {
 
     public Mono<QuestionNumberTwoThreeResponse> predict(String text) {
         return webClient.post()
-                .uri("/question/predict")
+                .uri("/predict_question")
                 .bodyValue(Map.of("text", text))
                 .retrieve()
                 .bodyToMono(QuestionNumberTwoThreeResponse.class);

@@ -1,6 +1,7 @@
 package bookcalendar.server.global.ExternalConnection.Client;
 
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -8,6 +9,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Map;
 
+@Slf4j
 @Component
 public class EmotionClient {
 
@@ -22,6 +24,9 @@ public class EmotionClient {
                 .uri("/predict_emotion")
                 .bodyValue(Map.of("text", text))
                 .retrieve()
-                .bodyToMono(String.class);
+                .bodyToMono(String.class)
+                .doOnNext(response -> log.info("감정 분석 결과: {}", response))
+                .doOnError(error -> log.error("감정 분석 요청 실패: {}", error.getMessage()));
     }
+
 }

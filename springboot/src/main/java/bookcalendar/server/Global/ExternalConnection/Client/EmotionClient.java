@@ -22,8 +22,7 @@ public class EmotionClient {
 
     public Mono<String> predict(String text) {
 
-        log.info("요청 보낼 텍스트: '{}'", text);
-        System.out.println("요청 보낼 텍스트: '{}'" +  text);
+        log.info("요청 보낼 텍스트 :{}", text);
 
         return webClient.post()
                 .uri("/emotion/predict_emotion")

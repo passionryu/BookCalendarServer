@@ -33,6 +33,13 @@ public class ReviewController {
     private final ReviewService reviewService;
     private final BookRepository bookRepository;
 
+    /**
+     * 독후감 작성 API
+     *
+     * @param customUserDetails 인능된 유저의 정보 객체
+     * @param reviewRequest 독후감 데이터
+     * @return AI 질문지 3개
+     */
     @Operation(summary = "독후감 작성  API", description = "독후감을 작성하고, AI 서비스에게 3가지의 질문을 반환한다.",
             responses = {
                     @ApiResponse(responseCode = "201", description = "독후감이 작성된 후, 정상적으로 AI 질문지가 반환되었습니다."),
@@ -51,6 +58,13 @@ public class ReviewController {
     }
 
 
+    /**
+     *|캘린더에서 날짜 선택 후 독후감 조회 API
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param date 조회하고자 하는 독후감 기록의 날짜
+     * @return 독후감 기록
+     */
     @Operation(summary = "캘린더에서 날짜 선택 후 독후감 조회 API", description = "캘린더에서 선택한 날짜에 작성된 유저의 독후감, 질문&답변, AI 격려 메시지 반환",
             responses = {
                     @ApiResponse(responseCode = "201", description = "선택한 날짜의 독후감 기록이 정상적으로 반환되었습니다."),
@@ -68,6 +82,12 @@ public class ReviewController {
                 .body(new ApiResponseWrapper<>(reviewByDateResponse,"선택한 날짜의 독후감 기록이 정상적으로 반환되었습니다."));
     }
 
+    /**
+     * 메인페이지의 독후감 진행률 & 남은 독서일 조회 API
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @return 독후감 진행률 & 남은 독서일
+     */
     @Operation(summary = "메인페이지 독후감 진행률 & 남은 독서일 조회 API", description = "메인페이지 로딩시 독후감 진행률 & 남은 독서일 반환",
             responses = {
                     @ApiResponse(responseCode = "200", description = "메인페이지 독후감 진행률 & 남은 독서일이 정상적으로 반환되었습니다."),
@@ -91,6 +111,13 @@ public class ReviewController {
         );
     }
 
+    /**
+     * 캘린더에 독후감 진행률 표시 API
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param month 달
+     * @return 독후감 진행률
+     */
     @Operation(summary = "캘린더에 독후감 진행률 표시 API", description = "메인페이지 로딩시 캘린더에 독후감 진행률 표시",
             responses = {
                     @ApiResponse(responseCode = "200", description = "메인페이지 독후감 진행률이 정상적으로 표시 되었습니다."),

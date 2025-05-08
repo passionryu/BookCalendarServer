@@ -34,5 +34,4 @@ public interface BookRepository extends JpaRepository<Book, Integer> {
     List<Book> findBooksInMonth(@Param("memberId") Integer memberId,
                                 @Param("startOfMonth") LocalDate startOfMonth,
                                 @Param("endOfMonth") LocalDate endOfMonth);
-
 }

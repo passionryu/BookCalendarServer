@@ -21,8 +21,13 @@ public class EmotionClient {
     }
 
     public Mono<String> predict(String text) {
+
+        log.info("요청 보낼 텍스트: '{}'", text);
+        System.out.println("요청 보낼 텍스트: '{}'" +  text);
+
         return webClient.post()
                 .uri("/emotion/predict_emotion")
+                .header("Content-Type", "application/json")
                 .bodyValue(Map.of("text", text))
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {})

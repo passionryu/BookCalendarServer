@@ -3,6 +3,7 @@ package bookcalendar.server.Domain.Member.Entity;
 import bookcalendar.server.Domain.Book.Entity.Book;
 import bookcalendar.server.Domain.Community.Entity.Post;
 import bookcalendar.server.Domain.Community.Entity.Scrap;
+import bookcalendar.server.Domain.Member.DTO.Request.RegisterRequest;
 import bookcalendar.server.Domain.Mypage.Entity.Cart;
 import bookcalendar.server.Domain.Review.Entity.Review;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -75,6 +76,9 @@ public class Member {
     @Column(nullable = false, length = 20)
     private String role;
 
+    @Column(name = "registerDate")
+    private LocalDate registerDate;
+
     // ======================= 테이블 관계 정의 영역 =========================
 
     /**
@@ -126,5 +130,28 @@ public class Member {
         if (genre != null) this.genre = genre;
         if (job != null) this.job = job;
         if (birth != null) this.birth = birth;
+    }
+
+    /**
+     * 멤버 엔티티 생성 메서드
+     *
+     * @param registerRequest 회원가입 요청 DTO
+     * @param encodedPassword 암호화된 비밀번호
+     * @return 멤버 객체
+     */
+    public static Member createMember(RegisterRequest registerRequest, String encodedPassword) {
+        return Member.builder()
+                .nickName(registerRequest.nickName())
+                .password(encodedPassword)
+                .birth(registerRequest.birth())
+                .phoneNumber(registerRequest.phoneNumber())
+                .genre(registerRequest.genre())
+                .job(registerRequest.job())
+                .completion(0)
+                .reviewCount(0)
+                .rank(100)
+                .role("USER")
+                .registerDate(LocalDate.now())
+                .build();
     }
 }

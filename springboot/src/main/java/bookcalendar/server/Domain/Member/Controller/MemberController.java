@@ -38,7 +38,8 @@ public class MemberController {
         @Operation(summary = "회원가입 API", description = "회원가입을 진행하는 API로, 필요한 정보를 받아 새로운 사용자를 등록합니다. 성공 시 memberId를 반환합니다.",
                 responses = {
                         @ApiResponse(responseCode = "201", description = "회원가입 성공"),
-                        @ApiResponse(responseCode = "409", description = "전화번호 혹은 닉네임의 중복 ")
+                        @ApiResponse(responseCode = "409", description = "전화번호 혹은 닉네임의 중복 "),
+                        @ApiResponse(responseCode = "500", description = "서버 내부 오류 ")
                 })
         @PostMapping("/register")
         public ResponseEntity<ApiResponseWrapper<Member>> register(@RequestBody @Valid RegisterRequest registerRequest) {
@@ -60,7 +61,8 @@ public class MemberController {
                 responses = {
                         @ApiResponse(responseCode = "200", description = "로그인 성공"),
                         @ApiResponse(responseCode = "401", description = "비밀번호가 일치하지 않습니다."),
-                        @ApiResponse(responseCode = "404", description = "해당 유저를 찾울 수 없음")
+                        @ApiResponse(responseCode = "404", description = "해당 유저를 찾울 수 없음"),
+                        @ApiResponse(responseCode = "500", description = "서버 내부 오류 ")
                 })
         @PostMapping("/login")
         public ResponseEntity<ApiResponseWrapper<TokenResponse>> login(@RequestBody LoginRequest loginRequest){
@@ -81,7 +83,8 @@ public class MemberController {
         @Operation(summary = "RTR API", description = "엑세스 토큰 만료시, 클라이언트 측에서 body에 리프레시 토큰을 담아 엑세스토큰, 리프레시 토큰 재발급을 요청하는 API.",
                 responses = {
                         @ApiResponse(responseCode = "201", description = "토큰 RTR 재발급 성공"),
-                        @ApiResponse(responseCode = "401", description = "요청한 리프레시 토큰과 저장된 리프레시 토큰이 일치하지 안ㅇㅎ습니다.")
+                        @ApiResponse(responseCode = "401", description = "요청한 리프레시 토큰과 저장된 리프레시 토큰이 일치하지 않습니다."),
+                        @ApiResponse(responseCode = "500", description = "서버 내부 오류 ")
                 })
         @PostMapping("/rtr")
         public ResponseEntity<ApiResponseWrapper<TokenResponse>> refreshToken(@RequestBody TokenRequest tokenRequest){

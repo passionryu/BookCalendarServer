@@ -15,14 +15,10 @@ import bookcalendar.server.Domain.Member.Exception.MemberException;
 import bookcalendar.server.Domain.Member.Repository.MemberRepository;
 import bookcalendar.server.Domain.Mypage.Entity.Cart;
 import bookcalendar.server.Domain.Mypage.Repository.CartRepository;
-import bookcalendar.server.Domain.Question.Repository.QuestionRepository;
 import bookcalendar.server.Domain.Review.Entity.Review;
 import bookcalendar.server.Domain.Review.Repository.ReviewRepository;
 import bookcalendar.server.global.Security.CustomUserDetails;
 import bookcalendar.server.global.exception.ErrorCode;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.ChatClient;
@@ -102,22 +98,27 @@ public class BookManager {
 
         Book book = bookRepository.findByMemberIdAndStatus(userDetails.getMemberId(), Book.Status.독서중)
                 .orElseThrow(() -> new BookException(ErrorCode.BOOK_NOT_FOUND));
+        Member member = memberRepository.findByMemberId(userDetails.getMemberId())
+                .orElseThrow(() -> new MemberException(ErrorCode.USER_NOT_FOUND));
 
         List<String> emotionList = reviewRepository.findByBook_BookId(book.getBookId()).stream()
                 .map(Review::getEmotion)
                 .collect(Collectors.toList());
 
-        Member member = memberRepository.findByMemberId(userDetails.getMemberId())
-                .orElseThrow(() -> new MemberException(ErrorCode.USER_NOT_FOUND));
         int age = Period.between(member.getBirth(), LocalDate.now()).getYears();
 
-        String prompt = BookHelper.buildPrompt(book, emotionList, member, age);
-        String aiResponse = chatClient.call(prompt);
+        String prompt = BookHelper.buildPrompt(book, emotionList, member, age); // Helper 클래스에서 프롬프트 메시지 생성
+        String aiResponse = chatClient.call(prompt); // AI 추천 도서 반환
 
         List<CompleteResponse> recommendations = BookHelper.parseRecommendations(aiResponse);
 
+        /* Book 객체에서 "독서중" -> "독서 완료"로 정보 수정 */
         book.setStatus(Book.Status.독서완료);
         bookRepository.save(book);
+
+        /* Member 객체에서 독서량(Completion) +1 */
+        member.setCompletion(member.getCompletion() + 1);
+        memberRepository.save(member);
 
         return recommendations;
     }

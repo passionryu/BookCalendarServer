@@ -75,6 +75,9 @@ public class Member {
     @Column(nullable = false, length = 20)
     private String role;
 
+    @Column(name = "registerDate")
+    private LocalDate registerDate;
+
     // ======================= 테이블 관계 정의 영역 =========================
 
     /**

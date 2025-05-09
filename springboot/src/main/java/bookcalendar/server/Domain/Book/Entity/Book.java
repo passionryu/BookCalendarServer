@@ -49,6 +49,9 @@ public class Book {
     @Column(name = "finishDate", nullable = false)
     private LocalDate finishDate;
 
+    @Column(name = "registerDate")
+    private LocalDate registerDate;
+
     @ManyToOne
     @JoinColumn(name = "memberId", referencedColumnName = "memberId", insertable = false, updatable = false,nullable = false)
     private Member member;

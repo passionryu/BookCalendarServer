@@ -39,5 +39,5 @@ public interface ScrapRepository extends JpaRepository<Scrap,Integer> {
      * @param postId 스크랩 하고자 하는 게시글 객체
      * @return 참 거짓
      */
-    Boolean existByMember_MemberIdAndPost_PostId(Integer memberId, Integer postId);
+    Boolean existsByMember_MemberIdAndPost_PostId(Integer memberId, Integer postId);
 }

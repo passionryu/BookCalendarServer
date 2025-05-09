@@ -30,8 +30,8 @@ public class PostReport {
     @Column(nullable = false)
     private LocalDateTime reportDate;
 
-    @PrePersist
-    protected void onCreate() {
-        if (this.reportDate == null) this.reportDate = LocalDateTime.now();
-    }
+//    @PrePersist
+//    protected void onCreate() {
+//        if (this.reportDate == null) this.reportDate = LocalDateTime.now();
+//    }
 }

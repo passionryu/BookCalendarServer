@@ -6,9 +6,7 @@ import bookcalendar.server.Domain.Community.DTO.Request.PostRequest;
 import bookcalendar.server.Domain.Community.DTO.Response.CommentResponse;
 import bookcalendar.server.Domain.Community.DTO.Response.PostListResponse;
 import bookcalendar.server.Domain.Community.DTO.Response.PostResponse;
-import bookcalendar.server.Domain.Community.Entity.Comment;
-import bookcalendar.server.Domain.Community.Entity.Post;
-import bookcalendar.server.Domain.Community.Entity.Scrap;
+import bookcalendar.server.Domain.Community.Entity.*;
 import bookcalendar.server.Domain.Community.Exception.CommunityException;
 import bookcalendar.server.Domain.Community.Helper.CommunityHelper;
 import bookcalendar.server.Domain.Community.Manager.CommunityManager;
@@ -24,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -132,6 +131,7 @@ public class CommunityServiceImpl implements CommunityService {
         commentRepository.delete(comment);
     }
 
+    /* 게시글 신고 메서드 */
     @Override
     @Transactional
     public void reportPost(CustomUserDetails customUserDetails, Integer postId) {
@@ -142,8 +142,14 @@ public class CommunityServiceImpl implements CommunityService {
          throw new CommunityException(ErrorCode.ALREADY_REPORT_POST);
         }
         post.increaseReportCount(); // 도메인 객체에서 신고 수 1 증가
+        postReportRepository.save(PostReport.builder().
+                post(post).
+                member(communityManager.getMember(customUserDetails.getMemberId())).
+                reportDate(LocalDateTime.now()).
+                build()); // 신고 기록 저장
     }
 
+    /* 댓글 신고 메서드 */
     @Override
     @Transactional
     public void reportComment(CustomUserDetails customUserDetails, Integer commentId) {
@@ -154,8 +160,14 @@ public class CommunityServiceImpl implements CommunityService {
             throw new CommunityException(ErrorCode.ALREADY_REPORT_COMMENT);
         }
         comment.increaseReportCount(); // 도메인 객체에서 신고수 1 증가
+        commentReportRepository.save(CommentReport.builder().
+                comment(comment).
+                member(communityManager.getMember(customUserDetails.getMemberId())).
+                reportDate(LocalDateTime.now()).
+                build()); // 신고 기록 저장
     }
 
+    /* 게시글 스크랩 메서드 */
     @Override
     @Transactional
     public void scrapPost(CustomUserDetails customUserDetails, Integer postId) {
@@ -163,7 +175,7 @@ public class CommunityServiceImpl implements CommunityService {
         Member member = communityManager.getMember(customUserDetails.getMemberId());
         Post post = communityManager.getPost(postId);
 
-        if(scrapRepository.existByMember_MemberIdAndPost_PostId(member.getMemberId(), post.getPostId())){
+        if(scrapRepository.existsByMember_MemberIdAndPost_PostId(member.getMemberId(), post.getPostId())){
             throw new CommunityException(ErrorCode.ALREADY_SCRAP);
         }
 

@@ -23,9 +23,9 @@ public class CommentReport {
     @JoinColumn(name = "commentId", nullable = false)
     private Comment comment;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "postId", nullable = false)
-    private Post post;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "postId", nullable = false)
+//    private Post post;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "memberId", nullable = false)
@@ -34,8 +34,8 @@ public class CommentReport {
     @Column(nullable = false)
     private LocalDateTime reportDate;
 
-    @PrePersist
-    protected void onCreate() {
-        if (this.reportDate == null) this.reportDate = LocalDateTime.now();
-    }
+//    @PrePersist
+//    protected void onCreate() {
+//        if (this.reportDate == null) this.reportDate = LocalDateTime.now();
+//    }
 }

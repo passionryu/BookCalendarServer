@@ -35,7 +35,10 @@ public enum ErrorCode {
 
     /* Community Exception 11XX */
     POST_NOT_FOUND("COMMUNITY_ERROR_1100", "해당 게시글을 찾을 수 없습니다." , HttpStatus.NOT_FOUND),
-    COMMENT_NOT_FOUND("COMMUNITY_ERROR_1101", "해당 댓글을 찾을 수 없습니다." , HttpStatus.NOT_FOUND);
+    COMMENT_NOT_FOUND("COMMUNITY_ERROR_1101", "해당 댓글을 찾을 수 없습니다." , HttpStatus.NOT_FOUND),
+    ALREADY_REPORT_POST("COMMUNITY_ERROR_1102", "이미 신고 한 게시글입니다." , HttpStatus.CONFLICT),
+    ALREADY_REPORT_COMMENT("COMMUNITY_ERROR_1103", "이미 신고 한 댓글입니다." , HttpStatus.CONFLICT),
+    ALREADY_SCRAP("COMMUNITY_ERROR_1104", "이미 스크랩 한 게시글입니다." , HttpStatus.CONFLICT);
 
     private final String errorCode;
     private final String message;

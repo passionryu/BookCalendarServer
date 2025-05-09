@@ -61,6 +61,11 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Scrap> scraps = new ArrayList<>();
 
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<PostReport> postReports = new ArrayList<>();
+
+
     @PrePersist
     protected void onCreate() {
         if (this.date == null) this.date = LocalDateTime.now();

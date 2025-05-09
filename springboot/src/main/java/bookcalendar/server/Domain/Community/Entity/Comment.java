@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "comment")
@@ -41,6 +43,11 @@ public class Comment {
     @Builder.Default
     @Column
     private Integer reportCount = 0;
+
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<CommentReport> commentReports = new ArrayList<>();
+
 
     // 댓글 신고 기능 사용시 호출 되는 메서드
     public void increaseReportCount() {

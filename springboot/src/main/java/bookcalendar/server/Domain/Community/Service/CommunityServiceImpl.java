@@ -1,20 +1,17 @@
 package bookcalendar.server.Domain.Community.Service;
 
+import bookcalendar.server.Domain.Book.Exception.BookException;
 import bookcalendar.server.Domain.Community.DTO.Request.CommentRequest;
 import bookcalendar.server.Domain.Community.DTO.Request.PostRequest;
 import bookcalendar.server.Domain.Community.DTO.Response.CommentResponse;
 import bookcalendar.server.Domain.Community.DTO.Response.PostListResponse;
 import bookcalendar.server.Domain.Community.DTO.Response.PostResponse;
-import bookcalendar.server.Domain.Community.Entity.Comment;
-import bookcalendar.server.Domain.Community.Entity.Post;
-import bookcalendar.server.Domain.Community.Entity.Scrap;
+import bookcalendar.server.Domain.Community.Entity.*;
 import bookcalendar.server.Domain.Community.Exception.CommunityException;
 import bookcalendar.server.Domain.Community.Helper.CommunityHelper;
 import bookcalendar.server.Domain.Community.Manager.CommunityManager;
 import bookcalendar.server.Domain.Community.Mapper.CommunityMapper;
-import bookcalendar.server.Domain.Community.Repository.CommentRepository;
-import bookcalendar.server.Domain.Community.Repository.PostRepository;
-import bookcalendar.server.Domain.Community.Repository.ScrapRepository;
+import bookcalendar.server.Domain.Community.Repository.*;
 import bookcalendar.server.Domain.Member.DTO.Response.RankResponse;
 import bookcalendar.server.Domain.Member.Entity.Member;
 import bookcalendar.server.global.Security.CustomUserDetails;
@@ -25,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -37,13 +35,9 @@ public class CommunityServiceImpl implements CommunityService {
     private final ScrapRepository scrapRepository;
     private final CommunityManager communityManager;
     private final CommunityMapper communityMapper;
+    private final PostReportRepository postReportRepository;
+    private final CommentReportRepository commentReportRepository;
 
-    /**
-     * 게시글 작성 메서드
-     *
-     * @param customUserDetails 인증된 유저의 정보 객체
-     * @param postRequest       포스팅할 게시글 정보 DTO
-     */
     @Override
     @Transactional
     public Integer writePost(CustomUserDetails customUserDetails, PostRequest postRequest) {
@@ -56,12 +50,6 @@ public class CommunityServiceImpl implements CommunityService {
         return post.getPostId();
     }
 
-    /**
-     * 게시글 삭제 메서드
-     *
-     * @param customUserDetails 인증된 유저의 정보 객체
-     * @param postId            삭제할 게시글 고유 번호
-     */
     @Override
     public void deletePost(CustomUserDetails customUserDetails, Integer postId) {
 
@@ -75,15 +63,8 @@ public class CommunityServiceImpl implements CommunityService {
         postRepository.delete(post);
     }
 
-    /**
-     * 유저 메달 및 랭킹 반환 메서드
-     *
-     * @param customUserDetails 인증된 유저의 정보 객체
-     * @return 유저 메달 & 랭킹 정보 반환
-     *
-     *         description : 독서 완료 시 캐싱 데이터 무효화
-     *         description : 랭킹 변동 시 캐싱 데이터 무효화
-     */
+    /* description : 독서 완료 시 캐싱 데이터 무효화 */
+    /* description : 랭킹 변동 시 캐싱 데이터 무효화 */
     @Override
     @Cacheable(value = "rankCache", key = "#customUserDetails.memberId")
     public RankResponse getRank(CustomUserDetails customUserDetails) {
@@ -95,13 +76,7 @@ public class CommunityServiceImpl implements CommunityService {
         return new RankResponse(member.getNickName(), member.getRank(), member.getReviewCount());
     }
 
-    /**
-     * 커뮤니티 게시글 리스트 반환 메서드
-     *
-     * @return 커뮤니티 게시글 리스트
-     *
-     *         todo : 캐싱 시스템 적용하기 - 누군가 올리면 캐싱 무효화
-     */
+    /* todo : 캐싱 시스템 적용하기 - 누군가 올리면 캐싱 무효화 */
     @Override
     public List<PostListResponse> getPostList() {
 
@@ -109,12 +84,6 @@ public class CommunityServiceImpl implements CommunityService {
         return postRepository.findAllPostSummaries();
     }
 
-    /**
-     * 선택한 게시글 상세 조회 메서드
-     *
-     * @param postId 게시글 고유 번호
-     * @return 게시글 정보
-     */
     @Override
     public PostResponse getPostDetail(Integer postId) {
 
@@ -123,14 +92,6 @@ public class CommunityServiceImpl implements CommunityService {
                 .orElseThrow(() -> new CommunityException(ErrorCode.POST_NOT_FOUND));
     }
 
-    /**
-     * 댓글 작성 메서드
-     *
-     * @param customUserDetails 인증된 유저의 정보 객체
-     * @param postId            댓글이 달리는 게시글 고유 번호
-     * @param commentRequest    댓글 요청 데이터
-     * @return 작성된 댓글 객체의 고유 번호
-     */
     @Override
     public void createComment(CustomUserDetails customUserDetails, Integer postId, CommentRequest commentRequest) {
 
@@ -144,12 +105,6 @@ public class CommunityServiceImpl implements CommunityService {
         commentRepository.save(comment);
     }
 
-    /**
-     * 게시물에서 댓글 리스트 반환 메서드
-     *
-     * @param postId 댓글이 달라니 게시글 고유 번호
-     * @return 해당 게시글의 댓글 리스트
-     */
     @Override
     public List<CommentResponse> getCommentList(Integer postId) {
 
@@ -157,115 +112,77 @@ public class CommunityServiceImpl implements CommunityService {
         return communityMapper.getCommentsByPostId(postId);
     }
 
-    /**
-     * 내 댓글 삭제 메서드
-     *
-     * @param customUserDetails 인증된 유저의 정보 객체
-     * @param commentId         삭제하고자 하는 댓글의 고유 번호
-     */
     @Override
     public void deleteComment(CustomUserDetails customUserDetails, Integer commentId) {
 
-        // 댓글 고유 번호로 댓글 객체 반환
         Comment comment = communityManager.getComment(commentId);
 
-        // 현재 유저가 삭제하려는 댓글에 삭제 권한이 있는지 확인
-        CommunityHelper.checkOwnership_comment(customUserDetails, comment);
-
-        // 권한이 있으면 댓글 삭제
+        CommunityHelper.checkOwnership_comment(customUserDetails, comment); // 현재 유저가 삭제하려는 댓글에 삭제 권한이 있는지 확인
         commentRepository.delete(comment);
     }
 
-    /**
-     * 게시글 작성자의 본인 게시글 내의 댓글 삭제 메서드
-     *
-     * @param customUserDetails 인증된 유저의 정보 객체
-     * @param postId            삭제할 댓글의 게시글 고유 번호
-     * @param commentId         삭제할 댓글의 고유 번호
-     */
     @Override
     public void deleteCommentByPostOwner(CustomUserDetails customUserDetails, Integer postId, Integer commentId) {
 
-        // 삭제하려는 댓글을 포함하는 게시글 객체 반환
         Comment comment = communityManager.getComment(commentId);
         Post post = communityManager.getPost(comment.getPost().getPostId());
 
-        // 위 게시글의 작성자가 현재 유저와 동일한지 검증 - 삭제 권한 확인
-        CommunityHelper.checkOwnership_post(customUserDetails, post);
-
-        // 권한이 있으면 댓글 삭제
+        CommunityHelper.checkOwnership_post(customUserDetails, post); // 위 게시글의 작성자가 현재 유저와 동일한지 검증 - 삭제 권한 확인
         commentRepository.delete(comment);
     }
 
-    /**
-     * 게시글 신고 메서드
-     *
-     * @param customUserDetails 인증된 유저의 정보 객체
-     * @param postId            신고하고자 하는 게시글 고유 번호
-     */
+    /* 게시글 신고 메서드 */
     @Override
     @Transactional
     public void reportPost(CustomUserDetails customUserDetails, Integer postId) {
 
-        // postId로 신고하려는 Post 객체 반환
         Post post = communityManager.getPost(postId);
 
-        // TODO : 추후 게시글 신고 테이블 만들어서 (동일 인물 && 동일 게시물)에 중복 신고 불가 로직 추가하기
-
-        // 도메인 객체에서 신고 수 1 증가
-        post.increaseReportCount();
+        if(postReportRepository.existsByPostAndMember(post, communityManager.getMember(customUserDetails.getMemberId()))){
+         throw new CommunityException(ErrorCode.ALREADY_REPORT_POST);
+        }
+        post.increaseReportCount(); // 도메인 객체에서 신고 수 1 증가
+        postReportRepository.save(PostReport.builder().
+                post(post).
+                member(communityManager.getMember(customUserDetails.getMemberId())).
+                reportDate(LocalDateTime.now()).
+                build()); // 신고 기록 저장
     }
 
-    /**
-     * 댓글 신고 인터페이스
-     *
-     * @param customUserDetails 인증된 유저의 정보 객체
-     * @param commentId         신고하고자 하는 댓글의 고유 번호
-     */
+    /* 댓글 신고 메서드 */
     @Override
     @Transactional
     public void reportComment(CustomUserDetails customUserDetails, Integer commentId) {
 
-        // commentId로 신고하려는 Comment 객체 반환
         Comment comment = communityManager.getComment(commentId);
 
-        // TODO : 추후 댓글 신고 테이블 만들어서 (동일 인물 && 동일 댓글)에 중복 신고 불가 로직 추가하기
-
-        // 도메인 객체에서 신고수 1 증가
-        comment.increaseReportCount();
+        if(commentReportRepository.existsByCommentAndMember(comment, communityManager.getMember(customUserDetails.getMemberId()))){
+            throw new CommunityException(ErrorCode.ALREADY_REPORT_COMMENT);
+        }
+        comment.increaseReportCount(); // 도메인 객체에서 신고수 1 증가
+        commentReportRepository.save(CommentReport.builder().
+                comment(comment).
+                member(communityManager.getMember(customUserDetails.getMemberId())).
+                reportDate(LocalDateTime.now()).
+                build()); // 신고 기록 저장
     }
 
-    /**
-     * 게시글 스크랩 메서드
-     *
-     * @param customUserDetails 인증된 유저의 정보 객체
-     * @param postId            스크랩 하고자 하는 게시글의 고유 번호
-     */
+    /* 게시글 스크랩 메서드 */
     @Override
     @Transactional
     public void scrapPost(CustomUserDetails customUserDetails, Integer postId) {
 
-        // 스크랩 하고자 하는 멤버 객체 반환
         Member member = communityManager.getMember(customUserDetails.getMemberId());
-
-        // 스크랩 하고자 하는 대상 객체 반환
         Post post = communityManager.getPost(postId);
 
-        // TODO : 동일 인물 && 동일 게시물 중복 스크랩 불가 로직 추가하기
+        if(scrapRepository.existsByMember_MemberIdAndPost_PostId(member.getMemberId(), post.getPostId())){
+            throw new CommunityException(ErrorCode.ALREADY_SCRAP);
+        }
 
-        // Helper 클래스에서 스크랩 객체 생성 레이어 호출
-        Scrap scrap = CommunityHelper.scrapEntityBuilder(member, post);
-
-        // Scrap 객체 저장
-        scrapRepository.save(scrap);
+        Scrap scrap = CommunityHelper.scrapEntityBuilder(member, post); // Helper 클래스에서 스크랩 객체 생성 레이어 호출
+        scrapRepository.save(scrap); // Scrap 객체 저장
     }
 
-    /**
-     * 게시글 검색 메서드
-     *
-     * @param keyword 검색 키워드
-     * @return 검색 조건에 부합하는 게시글 리스트 반환
-     */
     @Override
     public List<PostListResponse> searchPost(String keyword) {
         return postRepository.searchPostsByKeyword(keyword);

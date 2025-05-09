@@ -88,5 +88,4 @@ public class CommunityManager {
 
         log.info("✅ 랭킹 재계산 작업 완료");
     }
-
 }

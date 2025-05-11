@@ -6,6 +6,7 @@ public record PeriodResponse(
         Integer BookId,
         String BookName,
         LocalDate startDate,
-        LocalDate finishDate
+        LocalDate finishDate,
+        String color
 ) {
 }

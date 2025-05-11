@@ -12,8 +12,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Random;
 
 public class BookHelper {
+
+    // ======================= 도서 등록 영역 =========================
+
+    /* 각 도서 별 고유 색감 랜덤 부여 */
+    public static String getRandomColor() {
+        Random random = new Random();
+
+        // 밝은 색감을 위해 각 RGB 채널을 128~255 범위로 설정
+        int r = 128 + random.nextInt(128); // 128 ~ 255
+        int g = 128 + random.nextInt(128);
+        int b = 128 + random.nextInt(128);
+
+        return String.format("#%02X%02X%02X", r, g, b); // 대문자 HEX로 출력
+    }
 
     // ======================= 독서 완료 후 추천 도서 반환 영역 =========================
 

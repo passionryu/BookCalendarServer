@@ -52,6 +52,11 @@ public class Book {
     @Column(name = "registerDate")
     private LocalDate registerDate;
 
+    @Column(name = "color")
+    private String color;
+
+    // ======================= 연관 관계 정의 영역 =========================
+
     @ManyToOne
     @JoinColumn(name = "memberId", referencedColumnName = "memberId", insertable = false, updatable = false,nullable = false)
     private Member member;

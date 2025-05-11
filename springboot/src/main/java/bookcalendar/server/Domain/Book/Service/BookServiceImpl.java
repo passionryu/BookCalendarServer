@@ -39,8 +39,10 @@ public class BookServiceImpl implements BookService {
     /* 독서할 도서 등록 메서드 */
     @Override
     @Transactional
-    public Book registerBook(BookRegisterRequest request, CustomUserDetails userDetails) {
-        return bookManager.registerBook(request, userDetails);
+    public Book registerBook(BookRegisterRequest request, CustomUserDetails customUserDetails) {
+
+        bookManager.checkReadingBookExist(customUserDetails.getMemberId()); // 이미 독서중인 도서가 있는지 검증
+        return bookManager.registerBook(request, customUserDetails);
     }
 
     /* 독서 포기 메서드 */

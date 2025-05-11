@@ -108,13 +108,8 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public ReviewByDateResponse getReviewByDate(CustomUserDetails customUserDetails, LocalDate date) {
 
-        // 해당 날짜의 독후감 조회
-        Review review = reviewRepository.findByMember_MemberIdAndDate(customUserDetails.getMemberId(), date)
-                .orElseThrow(()->new ReviewException(ErrorCode.REVIEW_NOT_FOUND));
-
-        // reviewId로 question객체 반환
-        Question question = questionRepository.findByReview_ReviewId(review.getReviewId())
-                .orElseThrow(()->new QuestionException(ErrorCode.QUESTION_NOT_FOUND));
+        Review review = reviewManager.getReviewByDate(customUserDetails.getMemberId(), date); // 해당 날짜의 독후감 조회
+        Question question = reviewManager.getQuestionByReviewId(review.getReviewId()); // reviewId로 question객체 반환
 
         // ReviewByDateResponse 객체 반환
         return ReviewByDateResponse.builder()

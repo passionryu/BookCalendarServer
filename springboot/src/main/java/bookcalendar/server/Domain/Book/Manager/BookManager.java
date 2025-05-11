@@ -65,14 +65,17 @@ public class BookManager {
     }
     // ======================= 도서 등록 로직 =========================
 
+    /* 이미 독서 중인 도서가 있는지 검증하는 메서드 */
+    public void checkReadingBookExist(Integer memberId) {
+        if (bookRepository.existsByMemberIdAndStatus(memberId, Book.Status.독서중))
+            throw new BookException(ErrorCode.READING_BOOK_ALREADY_EXIST);
+    }
+
     /* 독서할 도서 등록 메서드 */
     public Book registerBook(BookRegisterRequest bookRegisterRequest, CustomUserDetails customUserDetails) {
 
-        // 독서중인 도서가 이미 존재할 경우 "이미 독서 중인 도서 있음"오류 반환
-        if (bookRepository.existsByMemberIdAndStatus(customUserDetails.getMemberId(), Book.Status.독서중))
-            throw new BookException(ErrorCode.READING_BOOK_ALREADY_EXIST);
-
         Book book = bookRegisterRequest.toEntity(customUserDetails.getMemberId()); // DTO → Entity 변환
+        book.setColor(BookHelper.getRandomColor()); // Book 객체에 랜덤(밝은 영역 위주) 색감 지정
         return bookRepository.save(book);
     }
 
@@ -153,7 +156,12 @@ public class BookManager {
         List<Book> books = bookRepository.findBooksInMonth(memberId, start, end);
 
         return books.stream()
-                .map(book -> new PeriodResponse(book.getBookId(), book.getBookName(), book.getStartDate(), book.getFinishDate()))
+                .map(book -> new PeriodResponse(
+                        book.getBookId(),
+                        book.getBookName(),
+                        book.getStartDate(),
+                        book.getFinishDate(),
+                        book.getColor()))
                 .toList();
     }
 

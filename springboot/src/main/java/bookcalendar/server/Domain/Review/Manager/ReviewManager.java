@@ -6,6 +6,7 @@ import bookcalendar.server.Domain.Member.Entity.Member;
 import bookcalendar.server.Domain.Member.Exception.MemberException;
 import bookcalendar.server.Domain.Member.Repository.MemberRepository;
 import bookcalendar.server.Domain.Question.Entity.Question;
+import bookcalendar.server.Domain.Question.Exception.QuestionException;
 import bookcalendar.server.Domain.Question.Repository.QuestionRepository;
 import bookcalendar.server.Domain.Review.DTO.Response.ProgressResponse;
 import bookcalendar.server.Domain.Review.Entity.Review;
@@ -130,5 +131,20 @@ public class ReviewManager {
                 .feedback3(0)
                 .build());
     }
+
+    // ======================= 캘린더에서 날짜 선택 후 독후감 기록 조회 영역 =========================
+
+    /* 캘린더에서 날짜 선택 시 해당 날짜의 독후감 조회 */
+    public Review getReviewByDate(Integer memberId, LocalDate date ) {
+        return reviewRepository.findByMember_MemberIdAndDate(memberId, date)
+                .orElseThrow(()-> new ReviewException(ErrorCode.REVIEW_NOT_FOUND));
+    }
+
+    /* reviewId로 question객체 반환 */
+    public Question getQuestionByReviewId(Integer reviewId) {
+        return questionRepository.findByReview_ReviewId(reviewId)
+                .orElseThrow(()->new QuestionException(ErrorCode.QUESTION_NOT_FOUND));
+    }
+
 
 }

@@ -59,7 +59,7 @@ public class ReviewController {
 
 
     /**
-     *|캘린더에서 날짜 선택 후 독후감 조회 API
+     * 캘린더에서 날짜 선택 후 독후감 조회 API
      *
      * @param customUserDetails 인증된 유저의 정보 객체
      * @param date 조회하고자 하는 독후감 기록의 날짜

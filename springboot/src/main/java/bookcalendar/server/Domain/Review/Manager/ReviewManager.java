@@ -31,18 +31,20 @@ public class ReviewManager {
     private final QuestionRepository questionRepository;
     private final ChatClient chatClient;
 
-    // ======================= writeReview Method =========================
-
-    /* 독후감을 작성하기 전에 오늘 작성한 독후감이 있는지 Check하는 메서드 */
-    public void check_today_review(Integer memberId){
-        if(reviewRepository.existsByMember_MemberIdAndDate(memberId, LocalDate.now()))
-            throw new ReviewException(ErrorCode.ALREADY_EXIST_REVIEW);
-    }
+    // ======================= Util 영역 =========================
 
     /* 유저 본인이 "독서중"인 도서를 반환하는 메서드 */
     public Book getBook_UserReading(Integer memberId){
         return bookRepository.findByMemberIdAndStatus(memberId, Book.Status.독서중)
                 .orElseThrow(()->new MemberException(ErrorCode.BOOK_NOT_FOUND) );
+    }
+
+    // ======================= 독후감 작성 영역 =========================
+
+    /* 독후감을 작성하기 전에 오늘 작성한 독후감이 있는지 Check하는 메서드 */
+    public void check_today_review(Integer memberId){
+        if(reviewRepository.existsByMember_MemberIdAndDate(memberId, LocalDate.now()))
+            throw new ReviewException(ErrorCode.ALREADY_EXIST_REVIEW);
     }
 
     /* 유저 고유 번호를 통한 멤버 객체 반환 메서드 */
@@ -128,7 +130,5 @@ public class ReviewManager {
                 .feedback3(0)
                 .build());
     }
-
-
 
 }

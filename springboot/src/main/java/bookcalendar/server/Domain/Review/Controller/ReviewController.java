@@ -100,8 +100,7 @@ public class ReviewController {
         //현재 도서 중인 독서가 없으면 0 반환
         if (!bookRepository.existsByMemberIdAndStatus(customUserDetails.getMemberId(), Book.Status.독서중)) {
             return ResponseEntity.status(HttpStatus.OK)
-                    .body(new ApiResponseWrapper<>(MainPageResponse.empty(), "현재 독서중인 도서가 없습니다.")
-            );
+                    .body(new ApiResponseWrapper<>(MainPageResponse.empty(), "현재 독서중인 도서가 없습니다."));
         }
 
         //현재 도서 중인 독서가 있으면 서비스 레이어 호출

@@ -40,14 +40,18 @@ public class ReviewServiceImpl implements ReviewService {
     private final EmotionMockModel emotionMockModel;
     private final QuestionMockModel questionMockModel;
 
-    private final EmotionClient emotionClient;
-    private final QuestionClient questionClient;
-    private final IntentClient intentClient;
-
     private final ReviewRepository reviewRepository;
     private final BookRepository bookRepository;
     private final QuestionRepository questionRepository;
 
+    /* AI 모델 커넥션 영역 */
+    private final EmotionClient emotionClient;
+    private final QuestionClient questionClient;
+    private final IntentClient intentClient;
+
+    // ======================= 독후감 작성 영역 =========================
+
+    /* 독후감 작성 메서드 */
     @Override
     @Transactional
     public QuestionResponse writeReview(CustomUserDetails customUserDetails, ReviewRequest reviewRequest) {
@@ -131,20 +135,20 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public MainPageResponse mainPage(CustomUserDetails customUserDetails) {
 
-        // 현재 독서중인 도서 객체 반환
-        Book book = bookRepository.findByMemberIdAndStatus(customUserDetails.getMemberId(), Book.Status.독서중)
-                .orElseThrow(()->new BookException(ErrorCode.BOOK_NOT_FOUND));
+        Book book = reviewManager.getBook_UserReading(customUserDetails.getMemberId()); // 현재 독서중인 도서 객체 반환
 
-        // 도서 id로 독후감 리스트 조회
-        List<Review> reviews = reviewRepository.findByBook_BookId(book.getBookId());
-
-        // 리스트 중 가장 최근 독후감 반환
-        Review latestReview = reviews.stream()
+        List<Review> reviews = reviewRepository.findByBook_BookId(book.getBookId()); // 도서 id로 독후감 리스트 조회
+        Review latestReview = reviews.stream() // 리스트 중 가장 최근 독후감 반환
                 .max(Comparator.comparing(Review::getDate)) // getDate는 LocalDate 혹은 LocalDateTime 필드
                 .orElse(null); // 비어있을 경우 null 반환
-        Integer remainDate = Math.toIntExact(ChronoUnit.DAYS.between(LocalDate.now(), book.getFinishDate()));
-        return new MainPageResponse(latestReview.getProgress(), remainDate);
 
+        Integer remainDate = Math.toIntExact(ChronoUnit.DAYS.between(LocalDate.now(), book.getFinishDate()));
+
+        // FIX: 리뷰가 없는 경우 NPE 발생 방지 (latestReview null 체크 추가)
+        if(latestReview ==null) {
+            return new MainPageResponse(0, remainDate);
+        }
+        return new MainPageResponse(latestReview.getProgress(), remainDate);
     }
 
     // ======================= 캘린더에 독후감 진행률 표시 로직 =========================

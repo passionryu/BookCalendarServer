@@ -7,6 +7,7 @@ import bookcalendar.server.Domain.Community.DTO.Response.PostListResponse;
 import bookcalendar.server.Domain.Community.DTO.Response.PostResponse;
 import bookcalendar.server.Domain.Member.DTO.Response.RankResponse;
 import bookcalendar.server.global.Security.CustomUserDetails;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -111,11 +112,20 @@ public interface CommunityService {
     void scrapPost(CustomUserDetails customUserDetails, Integer postId);
 
     /**
-     * 게시글 검색 API
+     * 게시글 검색 인터페이스
      *
      * @param keyword 검색 키워드
      * @return 검색된 게시글 리스트
      */
     List<PostListResponse> searchPost(String keyword);
+
+    /**
+     * Like 버튼 쿠르기 인터페이스
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param postId 게시글 고유 번호
+     * @return 좋아요 총 합산 수
+     */
+    Integer clickLike(CustomUserDetails customUserDetails, Integer postId);
 
 }

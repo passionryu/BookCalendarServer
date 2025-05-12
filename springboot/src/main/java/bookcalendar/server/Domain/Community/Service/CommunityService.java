@@ -120,12 +120,20 @@ public interface CommunityService {
     List<PostListResponse> searchPost(String keyword);
 
     /**
-     * Like 버튼 쿠르기 인터페이스
+     * Like 버튼 누르기 인터페이스
      *
      * @param customUserDetails 인증된 유저의 정보 객체
      * @param postId 게시글 고유 번호
      * @return 좋아요 총 합산 수
      */
     Integer clickLike(CustomUserDetails customUserDetails, Integer postId);
+
+    /**
+     * Like 카운트 총 합산 반환 인터페이스
+     *
+     * @param postId 게시글 고유 번호
+     * @return 좋아요 총 합산 수
+     */
+    Integer getLikeCount(Integer postId);
 
 }

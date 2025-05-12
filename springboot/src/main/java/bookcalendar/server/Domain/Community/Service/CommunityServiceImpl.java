@@ -242,4 +242,12 @@ public class CommunityServiceImpl implements CommunityService {
         return postLikeRepository.countByPost(post);
     }
 
+    /* LikeCount 총 합산 반환 메서드 */
+    @Override
+    public Integer getLikeCount( Integer postId) {
+
+        Post post = communityManager.getPost(postId); // Like 버튼을 누를 게시글 객체 반환
+        return postLikeRepository.countByPost(post);
+    }
+
 }

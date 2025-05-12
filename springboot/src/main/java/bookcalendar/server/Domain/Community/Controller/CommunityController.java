@@ -371,7 +371,26 @@ public class CommunityController {
                 .body(new ApiResponseWrapper<>(likeCount, "게시글에 성공적으로 좋아요 버튼이 클릭되었습니다."));
     }
 
-    /* Like 합산 반환 API */
+    /**
+     * LikeCount 총 합산 반환 API
+     *
+     * @param postId 게시글 고유 번호
+     * @return LikeCount 수
+     */
+    @Operation(summary = "Like 합산 반환 API",description = "게시글 조회시 바로 반환되는 좋아요 총 합산",
+            responses  ={
+                    @ApiResponse(responseCode = "200", description = "게시글에 좋아요 총 합산이 성공적으로 반환되었습니다."),
+                    @ApiResponse(responseCode = "401",description = "엑세스 토큰 만료"),
+                    @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            })
+    @GetMapping("/like/{postId}")
+    public ResponseEntity<ApiResponseWrapper<Integer>> getLikeCount(@PathVariable Integer postId){
+
+        Integer likeCount = communityService.getLikeCount(postId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponseWrapper<>(likeCount, "게시글에 좋아요 총 합산이 성공적으로 반환되었습니다."));
+    }
 
     /* Like 수 Top3 게시글 썸네일 리스트 반환 API */
 

@@ -5,6 +5,7 @@ import bookcalendar.server.Domain.Community.DTO.Request.PostRequest;
 import bookcalendar.server.Domain.Community.DTO.Response.CommentResponse;
 import bookcalendar.server.Domain.Community.DTO.Response.PostListResponse;
 import bookcalendar.server.Domain.Community.DTO.Response.PostResponse;
+import bookcalendar.server.Domain.Community.DTO.Response.TopLikedPosts;
 import bookcalendar.server.Domain.Member.DTO.Response.RankResponse;
 import bookcalendar.server.global.Security.CustomUserDetails;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -135,5 +136,12 @@ public interface CommunityService {
      * @return 좋아요 총 합산 수
      */
     Integer getLikeCount(Integer postId);
+
+    /**
+     * Like 수 Top3 게시글 썸네일 리스트 반환 인터페이스
+     *
+     * @return Like 수 Top3 게시글 썸네일 리스트
+     */
+    List<TopLikedPosts> getTopLikedPosts();
 
 }

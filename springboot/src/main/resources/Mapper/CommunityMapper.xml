@@ -20,5 +20,20 @@
         ORDER BY c.date ASC
     </select>
 
+    <!-- Like 수 Top3 게시글 썸네일 리스트 반환 -->
+    <select id="findTopLikedPosts" resultType="bookcalendar.server.Domain.Community.DTO.Response.TopLikedPosts">
+        SELECT
+            p.postId AS postId,
+            p.title AS title,
+            m.nickname AS author,
+            p.date AS date,
+            COUNT(pl.postLikeId) AS likeCount
+        FROM post p
+        JOIN member m ON p.memberId = m.memberId
+        LEFT JOIN post_like pl ON p.postId = pl.postId
+        GROUP BY p.postId
+        ORDER BY likeCount DESC, p.date DESC
+        LIMIT 3
+    </select>
 
 </mapper>

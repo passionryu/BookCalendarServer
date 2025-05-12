@@ -6,6 +6,7 @@ import bookcalendar.server.Domain.Community.DTO.Request.PostRequest;
 import bookcalendar.server.Domain.Community.DTO.Response.CommentResponse;
 import bookcalendar.server.Domain.Community.DTO.Response.PostListResponse;
 import bookcalendar.server.Domain.Community.DTO.Response.PostResponse;
+import bookcalendar.server.Domain.Community.DTO.Response.TopLikedPosts;
 import bookcalendar.server.Domain.Community.Entity.*;
 import bookcalendar.server.Domain.Community.Exception.CommunityException;
 import bookcalendar.server.Domain.Community.Helper.CommunityHelper;
@@ -248,6 +249,14 @@ public class CommunityServiceImpl implements CommunityService {
 
         Post post = communityManager.getPost(postId); // Like 버튼을 누를 게시글 객체 반환
         return postLikeRepository.countByPost(post);
+    }
+
+    /* Like 수 Top3 게시글 썸네일 리스트 반환 메서드 */
+    @Override
+    public List<TopLikedPosts> getTopLikedPosts() {
+
+        // like 수로 내림차순 정렬 (동일한 값이 있을 시 date값이 최신인 것이 위로 오게 정렬)
+        return communityMapper.findTopLikedPosts();
     }
 
 }

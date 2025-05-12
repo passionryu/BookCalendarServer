@@ -1,6 +1,7 @@
 package bookcalendar.server.Domain.Community.Mapper;
 
 import bookcalendar.server.Domain.Community.DTO.Response.CommentResponse;
+import bookcalendar.server.Domain.Community.DTO.Response.TopLikedPosts;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.data.repository.query.Param;
 
@@ -17,4 +18,10 @@ public interface CommunityMapper {
      */
     List<CommentResponse> getCommentsByPostId(@Param("postId") Integer postId);
 
+    /**
+     * Like 수 Top3 게시글 썸네일 리스트 반환 매퍼
+     *
+     * @return Like 수 Top3 게시글 썸네일 리스트
+     */
+    List<TopLikedPosts> findTopLikedPosts();
 }

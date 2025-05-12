@@ -1,9 +1,13 @@
 package bookcalendar.server.Domain.Community.Repository;
 
+import bookcalendar.server.Domain.Community.DTO.Response.TopLikedPosts;
 import bookcalendar.server.Domain.Community.Entity.Post;
 import bookcalendar.server.Domain.Community.Entity.PostReport;
 import bookcalendar.server.Domain.Member.Entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
+import java.util.List;
 
 public interface PostReportRepository extends JpaRepository<PostReport,Integer> {
 
@@ -15,4 +19,6 @@ public interface PostReportRepository extends JpaRepository<PostReport,Integer> 
      * @return 참 거짓
      */
     boolean existsByPostAndMember(Post post, Member member);
+
+
 }

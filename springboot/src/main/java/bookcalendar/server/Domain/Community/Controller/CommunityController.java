@@ -5,6 +5,7 @@ import bookcalendar.server.Domain.Community.DTO.Request.PostRequest;
 import bookcalendar.server.Domain.Community.DTO.Response.CommentResponse;
 import bookcalendar.server.Domain.Community.DTO.Response.PostListResponse;
 import bookcalendar.server.Domain.Community.DTO.Response.PostResponse;
+import bookcalendar.server.Domain.Community.DTO.Response.TopLikedPosts;
 import bookcalendar.server.Domain.Community.Service.CommunityService;
 import bookcalendar.server.Domain.Member.DTO.Response.RankResponse;
 import bookcalendar.server.global.Security.CustomUserDetails;
@@ -392,6 +393,25 @@ public class CommunityController {
                 .body(new ApiResponseWrapper<>(likeCount, "게시글에 좋아요 총 합산이 성공적으로 반환되었습니다."));
     }
 
-    /* Like 수 Top3 게시글 썸네일 리스트 반환 API */
+    /**
+     * Like 수 Top3 게시글 썸네일 리스트 반환 API
+     *
+     * @return Like 수 Top3 게시글 썸네일 리스트
+     */
+    @Operation(summary = " Like 수 Top3 게시글 썸네일 리스트 반환 API ",description = "Top 3 게시글 썸네일 반환",
+            responses  ={
+                    @ApiResponse(responseCode = "200", description = "Top3 게시글이 성공적으로 반환되었습니다."),
+                    @ApiResponse(responseCode = "401",description = "엑세스 토큰 만료"),
+                    @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            })
+    @GetMapping("/posts/top-liked")
+    public ResponseEntity<ApiResponseWrapper<List<TopLikedPosts>>> getTopLikedPosts(){
+
+        // Like 수 top3 게시글 썸네일 리스트 반환 서비스 레이어 호출
+        List<TopLikedPosts> topLikedPostsList = communityService.getTopLikedPosts();
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponseWrapper<>(topLikedPostsList, "Top3 게시글이 성공적으로 반환되었습니다."));
+    }
 
 }

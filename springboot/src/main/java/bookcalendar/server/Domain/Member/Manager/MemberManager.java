@@ -74,7 +74,6 @@ public class MemberManager {
 
     // ======================= 리프레시 토큰 로테이션 영역 =========================
 
-
     /* 리프레시 토큰 재발급 */
     public TokenResponse rotateRefreshToken(String accessToken, String oldRefreshToken, long expirationTime) {
         Integer memberId = jwtService.extractUserNumberFromToken(accessToken);

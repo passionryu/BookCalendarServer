@@ -32,14 +32,6 @@ public class BookController {
     private final BookService bookService;
 
     /**
-     * TODO : 독서중인 도서 정보 조회 기능 리펙토링
-     *
-     * 타입 안정성을 위한 Controller 레이어 Object 타입은 구체 타입으로 변환
-     * 쿼리 2회를 1회로 줄일수 있는지 Service레이어 검토
-     * 예외 안정성을 위한 Repository레이어 optinal 사용
-     */
-
-    /**
      * 독서중인 도서 정보 조회 API
      *
      * @param customUserDetails 인증된 유저의 정보 객체
@@ -64,12 +56,6 @@ public class BookController {
                     .body(new ApiResponseWrapper<>(null,"현재 독서중인 도서가 없습니다. 도서 등록이 필요합니다."));
         }
     }
-
-    /**
-     * TODO : 도서 등록 기능 리펙토링
-     *
-     * 오류 발생 가능성 있는 부분 확인하기
-     */
 
     /**
      * 도서 등록 API

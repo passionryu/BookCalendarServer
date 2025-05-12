@@ -16,7 +16,7 @@
         FROM comment c
         JOIN member m
         ON c.memberId = m.memberId
-        WHERE c.postId = #{postId}
+        WHERE c.postId = #{postId }
         ORDER BY c.date ASC
     </select>
 

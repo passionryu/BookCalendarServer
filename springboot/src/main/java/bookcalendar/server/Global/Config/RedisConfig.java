@@ -20,7 +20,7 @@ import java.time.Duration;
 @Configuration
 public class RedisConfig {
 
-    // 회사 서버 Redis 설정
+    // Cache - Redis 설정
     @Value("${spring.data.redis.cache.host}")
     private String cacheRedisHost;
 
@@ -30,7 +30,7 @@ public class RedisConfig {
     @Value("${spring.data.redis.cache.password}")
     private String cacheRedisPassword;
 
-    // 컨테이너 Redis 설정
+    // Session - Redis 설정
     @Value("${spring.data.redis.session.host}")
     private String sessionRedisHost;
 
@@ -40,8 +40,7 @@ public class RedisConfig {
     @Value("${spring.data.redis.session.password}")
     private String sessionRedisPassword;
 
-    // ======================= Redis Basic Configuration : 오류 방지용
-    // =========================
+    // ======================= Redis Basic Config =========================
 
     /**
      * 기본 이름의 redisTemplate
@@ -57,11 +56,10 @@ public class RedisConfig {
         return sessionRedisTemplate(connectionFactory); // 재사용
     }
 
-    // ======================= Company Server Local Redis - only Cache
-    // =========================
+    // ======================= Cache Redis =========================
 
     /**
-     * 회사 서버 Redis Connection Factory
+     * Cache Redis Connection Factory
      *
      * @return
      */
@@ -96,7 +94,7 @@ public class RedisConfig {
     }
 
     /**
-     * 회사 서버 Redis Template - redis를 직접 다룰 때 사용
+     * Cache Redis Template - redis를 직접 다룰 때 사용
      *
      * @param connectionFactory
      * @return
@@ -114,11 +112,10 @@ public class RedisConfig {
         return template;
     }
 
-    // ======================= Podman Container Redis - For Session & ETC
-    // =========================
+    // ======================= Session Redis =========================
 
     /**
-     * 컨테이너 Redis Connection Factory
+     * Session Redis Connection Factory
      *
      * @return
      */
@@ -132,7 +129,7 @@ public class RedisConfig {
     }
 
     /**
-     * 컨테이너 Redis Template (데이터 저장용)
+     * Session Redis Template (데이터 저장용)
      *
      * @param connectionFactory
      * @return

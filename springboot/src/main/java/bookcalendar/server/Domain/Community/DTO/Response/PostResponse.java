@@ -5,5 +5,7 @@ public record PostResponse(
         Integer memberId,
         String author,
         String title,
-        String contents
+        String contents,
+        Integer rank,
+        Integer reviewCount
 ) { }

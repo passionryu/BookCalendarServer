@@ -21,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -37,7 +38,11 @@ public class CommunityServiceImpl implements CommunityService {
     private final CommunityMapper communityMapper;
     private final PostReportRepository postReportRepository;
     private final CommentReportRepository commentReportRepository;
+    private final PostLikeRepository postLikeRepository;
 
+    // ======================= 게시글 영역 =========================
+
+    /* 게시글 작성 메서드 */
     @Override
     @Transactional
     public Integer writePost(CustomUserDetails customUserDetails, PostRequest postRequest) {
@@ -50,6 +55,7 @@ public class CommunityServiceImpl implements CommunityService {
         return post.getPostId();
     }
 
+    /* 게시글 삭제 메서드 */
     @Override
     public void deletePost(CustomUserDetails customUserDetails, Integer postId) {
 
@@ -63,6 +69,7 @@ public class CommunityServiceImpl implements CommunityService {
         postRepository.delete(post);
     }
 
+    /* 랭크 반환 메서드 */
     /* description : 독서 완료 시 캐싱 데이터 무효화 */
     /* description : 랭킹 변동 시 캐싱 데이터 무효화 */
     @Override
@@ -76,6 +83,7 @@ public class CommunityServiceImpl implements CommunityService {
         return new RankResponse(member.getNickName(), member.getRank(), member.getReviewCount());
     }
 
+    /* 게시글 리스트 반환 메서드 */
     /* todo : 캐싱 시스템 적용하기 - 누군가 올리면 캐싱 무효화 */
     @Override
     public List<PostListResponse> getPostList() {
@@ -84,6 +92,7 @@ public class CommunityServiceImpl implements CommunityService {
         return postRepository.findAllPostSummaries();
     }
 
+    /* 게시글 상세 조회 메서드 */
     @Override
     public PostResponse getPostDetail(Integer postId) {
 
@@ -92,6 +101,9 @@ public class CommunityServiceImpl implements CommunityService {
                 .orElseThrow(() -> new CommunityException(ErrorCode.POST_NOT_FOUND));
     }
 
+    // ======================= 댓글 영역 =========================
+
+    /* 댓글 생성 메서드 */
     @Override
     public void createComment(CustomUserDetails customUserDetails, Integer postId, CommentRequest commentRequest) {
 
@@ -105,6 +117,7 @@ public class CommunityServiceImpl implements CommunityService {
         commentRepository.save(comment);
     }
 
+    /* 해당 게시글의 모든 댓글 반환 메서드 */
     @Override
     public List<CommentResponse> getCommentList(Integer postId) {
 
@@ -112,6 +125,7 @@ public class CommunityServiceImpl implements CommunityService {
         return communityMapper.getCommentsByPostId(postId);
     }
 
+    /* 내 댓글 삭제 메서드 */
     @Override
     public void deleteComment(CustomUserDetails customUserDetails, Integer commentId) {
 
@@ -121,6 +135,7 @@ public class CommunityServiceImpl implements CommunityService {
         commentRepository.delete(comment);
     }
 
+    /* 게시글 작성자의 해당 게시글의 모든 댓글 삭제 메서드 */
     @Override
     public void deleteCommentByPostOwner(CustomUserDetails customUserDetails, Integer postId, Integer commentId) {
 
@@ -131,6 +146,8 @@ public class CommunityServiceImpl implements CommunityService {
         commentRepository.delete(comment);
     }
 
+    // ======================= 신고 영역 =========================
+
     /* 게시글 신고 메서드 */
     @Override
     @Transactional
@@ -138,9 +155,11 @@ public class CommunityServiceImpl implements CommunityService {
 
         Post post = communityManager.getPost(postId);
 
+        // 중복 검사 - 기존에 해당 게시글을 신고한 기록이 있는지 확인
         if(postReportRepository.existsByPostAndMember(post, communityManager.getMember(customUserDetails.getMemberId()))){
          throw new CommunityException(ErrorCode.ALREADY_REPORT_POST);
         }
+
         post.increaseReportCount(); // 도메인 객체에서 신고 수 1 증가
         postReportRepository.save(PostReport.builder().
                 post(post).
@@ -156,6 +175,7 @@ public class CommunityServiceImpl implements CommunityService {
 
         Comment comment = communityManager.getComment(commentId);
 
+        // 중복 검사 - 기존에 해당 댓글을 신고한 기록이 있는지 확인
         if(commentReportRepository.existsByCommentAndMember(comment, communityManager.getMember(customUserDetails.getMemberId()))){
             throw new CommunityException(ErrorCode.ALREADY_REPORT_COMMENT);
         }
@@ -166,6 +186,8 @@ public class CommunityServiceImpl implements CommunityService {
                 reportDate(LocalDateTime.now()).
                 build()); // 신고 기록 저장
     }
+
+    // ======================= 스크랩 영역 =========================
 
     /* 게시글 스크랩 메서드 */
     @Override
@@ -183,8 +205,41 @@ public class CommunityServiceImpl implements CommunityService {
         scrapRepository.save(scrap); // Scrap 객체 저장
     }
 
+    // ======================= 검색창 영역 =========================
+
+    /* 커뮤니티 검색창 검색 메서드 */
     @Override
     public List<PostListResponse> searchPost(String keyword) {
+
         return postRepository.searchPostsByKeyword(keyword);
     }
+
+    // ======================= 게시글 Like 영역 =========================
+
+    /* Like 버튼 누르기 메서드 */
+    @Override
+    @Transactional
+    public Integer clickLike(CustomUserDetails customUserDetails, Integer postId) {
+
+        Member member = communityManager.getMember(customUserDetails.getMemberId()); // Like 버튼을 누른 멤버 객체 반환
+        Post post = communityManager.getPost(postId); // Like 버튼을 누를 게시글 객체 반환
+
+        /* 조건문 - 기존에 DB기록 조회에 따른, DB쿼리 작업 */
+        if(postLikeRepository.existsByPostAndMember(post,member)){
+            postLikeRepository.deleteByPostAndMember(post,member); // 좋아요 기록 삭제
+        }
+        else {
+            // 저장할 Like 객체 빌드
+            PostLike postLike = PostLike.builder()
+                    .post(post)
+                    .member(member)
+                    .build();
+            // 좋아요 기록 저장
+            postLikeRepository.save(postLike);
+        }
+
+        /* Like 합산 수 반환 */
+        return postLikeRepository.countByPost(post);
+    }
+
 }

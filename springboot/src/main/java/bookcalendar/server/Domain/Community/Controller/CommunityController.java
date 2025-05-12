@@ -31,6 +31,8 @@ public class CommunityController {
 
     private final CommunityService communityService;
 
+    // ======================= 게시글 영역 =========================
+
     /**
      * 게시글 작성 API
      *
@@ -146,6 +148,8 @@ public class CommunityController {
                 .body(new ApiResponseWrapper<>(postResponse,"커뮤니티 게시글이 정상적으로 조회되었습니다."));
     }
 
+    // ======================= 댓글 영역 =========================
+
     /**
      * 댓글 작성 API
      *
@@ -243,6 +247,8 @@ public class CommunityController {
                 .body(new ApiResponseWrapper<>(null, "댓글이 성공적으로 삭제되었습니다."));
     }
 
+    // ======================= 신고 영역 =========================
+
     /**
      * 게시글 신고 API
      *
@@ -291,6 +297,8 @@ public class CommunityController {
                 .body(new ApiResponseWrapper<>("신고한 댓글 고유 번호 : " + commentId, "댓글이 성공적으로 신고되었습니다."));
     }
 
+    // ======================= 스크랩 영역 =========================
+
     /**
      * 게시글 스크랩 API
      *
@@ -315,6 +323,8 @@ public class CommunityController {
                 .body(new ApiResponseWrapper<>("스크랩한 게시글 고유 번호 : " + postId, "게시글이 성공적으로 스크랩되었습니다."));
     }
 
+    // ======================= 검색 영역 =========================
+
     /**
      * 게시글 검색 API
      *
@@ -335,5 +345,34 @@ public class CommunityController {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponseWrapper<>(postList, "게시글이 성공적으로 검색되었습니다."));
     }
+
+    // ======================= 게시글 Like 영역 =========================
+
+    /**
+     * Like 버튼 누르기 API
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @return 좋아요 총 합산 수 반환
+     */
+    @Operation(summary = "Like 버튼 누르기 API",description = "좋아요 버튼을 누르는 기능, 한번 더 누르면 좋아요 취소 기능까지 포함되어 있으며 해당 API가 작동되면 DB작업과 함께 클라이언트에게 좋아요 총합 수 를 반환한다.",
+            responses  ={
+                    @ApiResponse(responseCode = "200", description = "게시글에 성공적으로 좋아요 버튼이 클릭되었습니다."),
+                    @ApiResponse(responseCode = "401",description = "엑세스 토큰 만료"),
+                    @ApiResponse(responseCode = "500", description = "서버 내부 오류")
+            })
+    @PostMapping("/like/{postId}")
+    public ResponseEntity<ApiResponseWrapper<Integer>> clickLike(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+                                                                 @PathVariable Integer postId){
+
+        // Like 버튼 누르기 서비스 레이어 호출
+        Integer likeCount = communityService.clickLike(customUserDetails, postId);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponseWrapper<>(likeCount, "게시글에 성공적으로 좋아요 버튼이 클릭되었습니다."));
+    }
+
+    /* Like 합산 반환 API */
+
+    /* Like 수 Top3 게시글 썸네일 리스트 반환 API */
 
 }

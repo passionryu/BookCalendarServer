@@ -38,7 +38,7 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
          * @return 게시글 정보
          */
         @Query("SELECT new bookcalendar.server.Domain.Community.DTO.Response.PostResponse(" +
-                        "p.postId, m.memberId, m.nickName, p.title, p.contents,m.rank,m.reviewCount) " +
+                        "p.postId, m.memberId, m.nickName, p.title, p.contents,m.rank,m.reviewCount,false) " +
                         "FROM Post p JOIN p.member m WHERE p.postId = :postId")
         Optional<PostResponse> getPostDetail(@Param("postId") Integer postId);
 

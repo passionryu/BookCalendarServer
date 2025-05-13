@@ -1,11 +1,23 @@
 package bookcalendar.server.Domain.Community.DTO.Response;
 
-public record PostResponse(
-        Integer postId,
-        Integer memberId,
-        String author,
-        String title,
-        String contents,
-        Integer rank,
-        Integer reviewCount
-) { }
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class PostResponse{
+
+    private Integer postId;
+    private Integer memberId;
+    private String author;
+    private String title;
+    private String contents;
+    private Integer rank;
+    private Integer reviewCount;
+    private Boolean clicked;
+
+}

@@ -15,6 +15,7 @@ import bookcalendar.server.Domain.Question.Entity.Question;
 import bookcalendar.server.Domain.Question.Repository.QuestionRepository;
 import bookcalendar.server.Domain.Review.Entity.Review;
 import bookcalendar.server.Domain.Review.Repository.ReviewRepository;
+import bookcalendar.server.global.Security.CustomUserDetails;
 import bookcalendar.server.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -96,7 +97,7 @@ public class MypageManager {
      * @param scrapId 스크랩 고유 번호
      * @return 게시글 객체
      */
-    public Post getPostByScrapId(Integer scrapId){
+    public Post getPostByScrapId(CustomUserDetails customUserDetails, Integer scrapId){
 
         Scrap scrap = scrapRepository.findByScrapId(scrapId)
                 .orElseThrow(()->new CommunityException(ErrorCode.POST_NOT_FOUND));

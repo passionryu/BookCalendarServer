@@ -206,10 +206,11 @@ public class MypageController {
                     @ApiResponse(responseCode = "500", description = "서버 내부 오류")
             })
     @GetMapping("/scrap/{scrapId}")
-    public ResponseEntity<ApiResponseWrapper<PostResponse>> getScrap(@PathVariable("scrapId") Integer scrapId){
+    public ResponseEntity<ApiResponseWrapper<PostResponse>> getScrap(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+                                                                     @PathVariable("scrapId") Integer scrapId){
 
         // 스크랩 한 게시글 정보 반환 서비스 레이어 호출
-        PostResponse postResponse = mypageService.getScrapDetail(scrapId);
+        PostResponse postResponse = mypageService.getScrapDetail(customUserDetails ,scrapId);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponseWrapper<>(postResponse, "스크랩 정보가 정상적으로 반환되었습니다."));

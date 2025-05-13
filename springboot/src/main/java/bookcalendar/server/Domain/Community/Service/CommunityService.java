@@ -51,7 +51,7 @@ public interface CommunityService {
      * @param postId 게시글 고유 번호
      * @return 게시글 정보
      */
-    PostResponse getPostDetail(Integer postId);
+    PostResponse getPostDetail(CustomUserDetails customUserDetails,Integer postId);
 
     /**
      * 댓글 작성 인터페이스

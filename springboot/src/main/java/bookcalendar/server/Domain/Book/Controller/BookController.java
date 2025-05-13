@@ -3,6 +3,7 @@ package bookcalendar.server.Domain.Book.Controller;
 import bookcalendar.server.Domain.Book.DTO.Request.BookRegisterRequest;
 import bookcalendar.server.Domain.Book.DTO.Request.PeriodRequest;
 import bookcalendar.server.Domain.Book.DTO.Request.SaveBookAutoRequest;
+import bookcalendar.server.Domain.Book.DTO.Response.BookResponse;
 import bookcalendar.server.Domain.Book.DTO.Response.CompleteResponse;
 import bookcalendar.server.Domain.Book.DTO.Response.PeriodResponse;
 import bookcalendar.server.Domain.Book.Entity.Book;
@@ -45,16 +46,23 @@ public class BookController {
     @GetMapping("/info")
     public ResponseEntity<ApiResponseWrapper<Object>> bookInfo(@AuthenticationPrincipal CustomUserDetails customUserDetails){
 
-        // 등록 도서 존재 여부 확인 서비스 레이터 호출
-        boolean existResult = bookService.bookExist(customUserDetails);
+        long start = System.currentTimeMillis(); // 시간 측정 시작
 
-        if(existResult){
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(new ApiResponseWrapper<>(bookService.bookInfo(customUserDetails), "등록된 도서가 정상적으로 조회되었습니다."));
-        }else{
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(new ApiResponseWrapper<>(null,"현재 독서중인 도서가 없습니다. 도서 등록이 필요합니다."));
+        boolean existResult = bookService.bookExist(customUserDetails);
+        ApiResponseWrapper<Object> response;
+
+        if (existResult) {
+            BookResponse bookResponse = bookService.bookInfo(customUserDetails); // 캐싱이 적용된 메서드
+            response = new ApiResponseWrapper<>(bookResponse, "등록된 도서가 정상적으로 조회되었습니다.");
+        } else {
+            response = new ApiResponseWrapper<>(null, "현재 독서중인 도서가 없습니다. 도서 등록이 필요합니다.");
         }
+
+        long end = System.currentTimeMillis(); // 시간 측정 종료
+        long duration = end - start;
+        log.info("[bookInfo] 처리 시간: {}ms", duration); // 로그 출력
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     /**

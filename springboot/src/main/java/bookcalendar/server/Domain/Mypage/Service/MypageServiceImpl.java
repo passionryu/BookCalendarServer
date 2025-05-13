@@ -5,6 +5,8 @@ import bookcalendar.server.Domain.Community.DTO.Response.PostResponse;
 import bookcalendar.server.Domain.Community.Entity.Post;
 import bookcalendar.server.Domain.Community.Entity.Scrap;
 import bookcalendar.server.Domain.Community.Exception.CommunityException;
+import bookcalendar.server.Domain.Community.Manager.CommunityManager;
+import bookcalendar.server.Domain.Community.Repository.PostLikeRepository;
 import bookcalendar.server.Domain.Community.Repository.PostRepository;
 import bookcalendar.server.Domain.Community.Repository.ScrapRepository;
 import bookcalendar.server.Domain.Member.Entity.Member;
@@ -39,6 +41,8 @@ public class MypageServiceImpl implements MypageService {
     private final PostRepository postRepository;
     private final ScrapRepository scrapRepository;
     private final CartRepository cartRepository;
+    private final CommunityManager communityManager;
+    private final PostLikeRepository postLikeRepository;
 
     // ======================= User Info Page =========================
 
@@ -211,13 +215,19 @@ public class MypageServiceImpl implements MypageService {
      * @return 스크랩 한 게시글 정보 DTO
      */
     @Override
-    public PostResponse getScrapDetail(Integer scrapId) {
+    public PostResponse getScrapDetail(CustomUserDetails customUserDetails,Integer scrapId) {
 
-        Post post = mypageManager.getPostByScrapId(scrapId);
+        Member member = communityManager.getMember(customUserDetails.getMemberId());
+        Post post = mypageManager.getPostByScrapId(customUserDetails,scrapId);
+
+        PostResponse postResponse =postRepository.getPostDetail(post.getPostId())
+                .orElseThrow(() -> new CommunityException(ErrorCode.POST_NOT_FOUND));
+
+        if(postLikeRepository.existsByPostAndMember(post,member))
+            postResponse.setClicked(true);
 
         // 선택한 게시글 상세 내용 반환
-        return postRepository.getPostDetail(post.getPostId())
-                .orElseThrow(() -> new CommunityException(ErrorCode.POST_NOT_FOUND));
+        return postResponse;
     }
 
     /**

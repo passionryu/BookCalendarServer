@@ -73,7 +73,7 @@ public interface MypageService {
      * @param scrapId 게시글 고유 번호
      * @return 게시글 정보
      */
-    PostResponse getScrapDetail(Integer scrapId);
+    PostResponse getScrapDetail(CustomUserDetails customUserDetails, Integer scrapId);
 
     /**
      * 스크랩 취소 인터페이스

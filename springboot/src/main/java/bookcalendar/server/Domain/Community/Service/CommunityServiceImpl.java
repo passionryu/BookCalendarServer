@@ -95,11 +95,19 @@ public class CommunityServiceImpl implements CommunityService {
 
     /* 게시글 상세 조회 메서드 */
     @Override
-    public PostResponse getPostDetail(Integer postId) {
+    public PostResponse getPostDetail(CustomUserDetails customUserDetails, Integer postId) {
+
+        Member member = communityManager.getMember(customUserDetails.getMemberId());
+        Post post = communityManager.getPost(postId);
+
+        PostResponse postResponse =postRepository.getPostDetail(postId)
+                .orElseThrow(() -> new CommunityException(ErrorCode.POST_NOT_FOUND));
+
+        if(postLikeRepository.existsByPostAndMember(post,member))
+            postResponse.setClicked(true);
 
         // 선택한 게시글 상세 내용 반환
-        return postRepository.getPostDetail(postId)
-                .orElseThrow(() -> new CommunityException(ErrorCode.POST_NOT_FOUND));
+        return postResponse;
     }
 
     // ======================= 댓글 영역 =========================

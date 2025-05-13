@@ -140,10 +140,11 @@ public class CommunityController {
                     @ApiResponse(responseCode = "500", description = "서버 내부 오류")
             })
     @GetMapping("/lists/{postId}")
-    public ResponseEntity<ApiResponseWrapper<PostResponse>> getPostDetail(@PathVariable Integer postId){
+    public ResponseEntity<ApiResponseWrapper<PostResponse>> getPostDetail(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+                                                                          @PathVariable Integer postId){
 
         // 선택한 게시글 정보 반환 서비스 레이어 호출
-        PostResponse postResponse = communityService.getPostDetail(postId);
+        PostResponse postResponse = communityService.getPostDetail(customUserDetails,postId);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponseWrapper<>(postResponse,"커뮤니티 게시글이 정상적으로 조회되었습니다."));

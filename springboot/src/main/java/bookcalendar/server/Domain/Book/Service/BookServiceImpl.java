@@ -8,6 +8,7 @@ import bookcalendar.server.Domain.Book.DTO.Response.CompleteResponse;
 import bookcalendar.server.Domain.Book.DTO.Response.PeriodResponse;
 import bookcalendar.server.Domain.Book.Entity.Book;
 import bookcalendar.server.Domain.Book.Manager.BookManager;
+import bookcalendar.server.Domain.Member.Entity.Member;
 import bookcalendar.server.Domain.Mypage.Entity.Cart;
 import bookcalendar.server.global.Security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +37,8 @@ public class BookServiceImpl implements BookService {
     @Override
     @Cacheable(value = "bookInfo", key = "#customUserDetails.memberId")
     public BookResponse bookInfo(CustomUserDetails customUserDetails) {
-        log.info("==> 캐시 미적중: DB에서 도서 정보를 가져옵니다.");
+
+        log.info("==> Cache Miss : DB에서 도서 정보를 가져옵니다.");
         return bookManager.getCurrentReadingBookInfo(customUserDetails);
     }
 
@@ -64,7 +66,11 @@ public class BookServiceImpl implements BookService {
     @Transactional
     @CacheEvict(value = "bookInfo", key = "#customUserDetails.memberId")
     public List<CompleteResponse> completeReading(CustomUserDetails customUserDetails) {
-        return bookManager.completeReading(customUserDetails);
+
+        Member member = bookManager.getmember(customUserDetails.getMemberId());
+        Book book = bookManager.getRedaingBook(customUserDetails.getMemberId());
+
+        return bookManager.completeReading(member,book);
     }
 
     /* 추천 도서에서 저장 버튼을 눌러 장바구니에 책 저장 메서드 */

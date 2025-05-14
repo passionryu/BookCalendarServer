@@ -17,6 +17,8 @@ import bookcalendar.server.Domain.Mypage.Entity.Cart;
 import bookcalendar.server.Domain.Mypage.Repository.CartRepository;
 import bookcalendar.server.Domain.Review.Entity.Review;
 import bookcalendar.server.Domain.Review.Repository.ReviewRepository;
+import bookcalendar.server.global.Aladin.AladinResponse;
+import bookcalendar.server.global.Aladin.AladinService;
 import bookcalendar.server.global.Security.CustomUserDetails;
 import bookcalendar.server.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +42,22 @@ public class BookManager {
     private final CartRepository cartRepository;
     private final ReviewRepository reviewRepository;
     private final ChatClient chatClient;
+    private final AladinService aladinService;
+
+    // ======================= Util 코드 =========================
+
+    /* 현재 유저 객체 반환 */
+    public Member getmember(Integer memberId) {
+        return memberRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new MemberException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    /* 독서 중인 도서 반환 */
+    public Book getRedaingBook(Integer memberId) {
+        return  bookRepository.findByMemberIdAndStatus(memberId, Book.Status.독서중)
+                .orElseThrow(() -> new BookException(ErrorCode.BOOK_NOT_FOUND));
+
+    }
 
     // ======================= 독서중인 도서 정보 반환 영역 =========================
 
@@ -97,12 +115,7 @@ public class BookManager {
 
     /* 독서 완료 메서드 */
     @Transactional
-    public List<CompleteResponse> completeReading(CustomUserDetails userDetails) {
-
-        Book book = bookRepository.findByMemberIdAndStatus(userDetails.getMemberId(), Book.Status.독서중)
-                .orElseThrow(() -> new BookException(ErrorCode.BOOK_NOT_FOUND));
-        Member member = memberRepository.findByMemberId(userDetails.getMemberId())
-                .orElseThrow(() -> new MemberException(ErrorCode.USER_NOT_FOUND));
+    public List<CompleteResponse> completeReading(Member member, Book book) {
 
         List<String> emotionList = reviewRepository.findByBook_BookId(book.getBookId()).stream()
                 .map(Review::getEmotion)
@@ -114,6 +127,26 @@ public class BookManager {
         String aiResponse = chatClient.call(prompt); // AI 추천 도서 반환
 
         List<CompleteResponse> recommendations = BookHelper.parseRecommendations(aiResponse);
+        // 알라딘 API로 각 도서의 URL 가져오기
+        recommendations = recommendations.stream().map(response -> {
+            try {
+                AladinResponse aladinResponse = aladinService.searchBook(response.getBookName());
+                return new CompleteResponse(
+                        response.getBookName(),
+                        response.getAuthor(),
+                        response.getReason(),
+                        aladinResponse.url()
+                );
+            } catch (Exception e) {
+                // 알라딘 API 호출 실패 시 URL을 빈 문자열로 설정
+                return new CompleteResponse(
+                        response.getBookName(),
+                        response.getAuthor(),
+                        response.getReason(),
+                        ""
+                );
+            }
+        }).collect(Collectors.toList());
 
         /* Book 객체에서 "독서중" -> "독서 완료"로 정보 수정 */
         book.setStatus(Book.Status.독서완료);
@@ -132,8 +165,7 @@ public class BookManager {
     @Transactional
     public Cart saveAutoCart(CustomUserDetails userDetails, SaveBookAutoRequest request) {
 
-        Member member = memberRepository.findByMemberId(userDetails.getMemberId())
-                .orElseThrow(() -> new MemberException(ErrorCode.USER_NOT_FOUND));
+        Member member = getmember(userDetails.getMemberId());
 
         Cart cart = BookHelper.createCartFromRequest(request, member); // helper 클래스 호출
 

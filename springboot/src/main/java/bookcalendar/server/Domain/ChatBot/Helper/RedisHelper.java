@@ -48,7 +48,7 @@ public class RedisHelper {
                 """
                 너는 이 도서 추천 서비스의 유능한 AI 도서 추천 사서이다.
                 다음은 너가 사용자와의 챗봇 서비스에서 나눈 대화 내용이다
-                다음은 내용들을 참고하여 사용자에게 도서 5권을 추천해w:
+                다음은 내용들을 참고하여 사용자에게 도서 5권을 추천해줘:
     
                 - 너(AI 도서 추천 사서 와 사용자와의 지난 모든 대화): "%s"
     
@@ -78,11 +78,21 @@ public class RedisHelper {
 
         List<CompleteResponse> recommendations;
 
+//        try {
+//            recommendations = objectMapper.readValue(
+//                    aiResponse,
+//                    new TypeReference<>() {}
+//            );
         try {
-            recommendations = objectMapper.readValue(
+            // JSON 배열을 파싱하되, url 필드가 없어도 매핑 가능하도록
+            List<CompleteResponse> tempList = objectMapper.readValue(
                     aiResponse,
-                    new TypeReference<>() {}
+                    new TypeReference<List<CompleteResponse>>() {}
             );
+            // url 필드를 빈 문자열로 초기화
+            recommendations = tempList.stream()
+                    .map(resp -> new CompleteResponse(resp.getBookName(), resp.getAuthor(), resp.getReason(), resp.getUrl()))
+                    .toList();
         } catch (JsonProcessingException e) {
             throw new ChatBotException(ErrorCode.FAILED_TO_PARSE);
         }

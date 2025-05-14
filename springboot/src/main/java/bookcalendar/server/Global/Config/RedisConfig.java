@@ -1,7 +1,9 @@
 package bookcalendar.server.global.config;
 
 import bookcalendar.server.Domain.Book.DTO.Response.BookResponse;
+import bookcalendar.server.Domain.Community.DTO.Response.TopLikedPosts;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -22,6 +24,9 @@ import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.time.Duration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Configuration
 public class RedisConfig {
@@ -92,27 +97,56 @@ public class RedisConfig {
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS); // ISO-8601 포맷 유지
 
-//        objectMapper.activateDefaultTyping(
-//                objectMapper.getPolymorphicTypeValidator(),
-//                ObjectMapper.DefaultTyping.NON_FINAL,
-//                JsonTypeInfo.As.PROPERTY
-//        );
+        // ======================= Default =========================
 
-        // BookResponse용 Jackson2JsonRedisSerializer 설정
+        // Generic default (모든 캐시에 무난하게 적용될 기본값)
+        GenericJackson2JsonRedisSerializer genericSerializer = new GenericJackson2JsonRedisSerializer(objectMapper);
+
+        RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofMinutes(30)) // TTL 30분
+                .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(genericSerializer));
+
+        // ======================= Book :: 도서 정보 조회 - BookResponse =========================
+
+        /* BookResponse 전용 Serializer 설정 */
         Jackson2JsonRedisSerializer<BookResponse> serializer = new Jackson2JsonRedisSerializer<>(BookResponse.class);
         serializer.setObjectMapper(objectMapper);
 
-        // GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(objectMapper);
-
-        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofMinutes(30))
+        /*  default cache config (BookResponse 전용)  */
+        RedisCacheConfiguration BookResponseConfig = RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofMinutes(60)) // TTL 60분
                 .serializeKeysWith(RedisSerializationContext.SerializationPair
                         .fromSerializer(new StringRedisSerializer()))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair
                         .fromSerializer(serializer));
 
+        // ======================= Community :: TOP3 게시글 조회 - TopLikedPosts =========================
+
+        /* TopLikedPosts 전용 Serializer 설정 */
+        JavaType type = objectMapper.getTypeFactory().constructCollectionType(List.class, TopLikedPosts.class);
+        Jackson2JsonRedisSerializer<List<TopLikedPosts>> topLikedPostsListSerializer = new Jackson2JsonRedisSerializer<>(type);
+        topLikedPostsListSerializer.setObjectMapper(objectMapper);
+
+        /* top3Posts 캐시만 TTL과 Serializer를 따로 지정 */
+        RedisCacheConfiguration top3Config = RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofMinutes(10)) // TTL 10분
+                .serializeKeysWith(RedisSerializationContext.SerializationPair
+                        .fromSerializer(new StringRedisSerializer()))
+                .serializeValuesWith(RedisSerializationContext.SerializationPair
+                        .fromSerializer(topLikedPostsListSerializer));
+
+        // =======================  캐시 이름별로 서로 다른 캐싱 정책을 적용 =========================
+        
+        Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
+        cacheConfigurations.put("bookResponse", BookResponseConfig);
+        cacheConfigurations.put("top3Posts", top3Config);
+
+        // ======================= 최종 반환 =========================
+
         return RedisCacheManager.builder(connectionFactory)
-                .cacheDefaults(config)
+                .cacheDefaults(defaultConfig)  // 기본 설정
+                .withInitialCacheConfigurations(cacheConfigurations) // 개별 캐시 설정 적용
                 .build();
     }
 

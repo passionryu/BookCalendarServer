@@ -2,6 +2,7 @@ package bookcalendar.server.Domain.Community.Helper;
 
 import bookcalendar.server.Domain.Community.DTO.Request.CommentRequest;
 import bookcalendar.server.Domain.Community.DTO.Request.PostRequest;
+import bookcalendar.server.Domain.Community.DTO.Response.TopLikedPosts;
 import bookcalendar.server.Domain.Community.Entity.Comment;
 import bookcalendar.server.Domain.Community.Entity.Post;
 import bookcalendar.server.Domain.Community.Entity.Scrap;
@@ -11,6 +12,7 @@ import bookcalendar.server.global.Security.CustomUserDetails;
 import bookcalendar.server.global.exception.ErrorCode;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class CommunityHelper {
 
@@ -88,4 +90,24 @@ public class CommunityHelper {
             throw new MemberException(ErrorCode.NO_AUTH);
         }
     }
+
+    // ======================= 좋아요 버튼 영역 =========================
+
+    public static boolean isInfluenceTop3(List<TopLikedPosts> cachedTop3, Integer postId, int newLikeCount) {
+        // 캐시된 Top3에서 가장 낮은 순위의 좋아요 수 찾기
+        int minLikeCountInTop3 = cachedTop3.stream()
+                .mapToInt(TopLikedPosts::likeCount)
+                .min()
+                .orElse(0);
+
+        // 1. 기존 Top3에 이미 있는 게시글이면 → 캐시 무효화
+        if (cachedTop3.stream().anyMatch(p -> p.postId().equals(postId))) {
+            return true;
+        }
+
+        // 2. 좋아요 수가 Top3 중 최저보다 높으면 → 캐시 무효화
+        return newLikeCount > minLikeCountInTop3;
+    }
+
+
 }

@@ -408,8 +408,14 @@ public class CommunityController {
     @GetMapping("/posts/top-liked")
     public ResponseEntity<ApiResponseWrapper<List<TopLikedPosts>>> getTopLikedPosts(){
 
+        long start = System.currentTimeMillis(); // 시간 측정 시작
+
         // Like 수 top3 게시글 썸네일 리스트 반환 서비스 레이어 호출
         List<TopLikedPosts> topLikedPostsList = communityService.getTopLikedPosts();
+
+        long end = System.currentTimeMillis(); // 시간 측정 종료
+        long duration = end - start;
+        log.info("[top3 posts] 처리 시간: {}ms", duration); // 로그 출력
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponseWrapper<>(topLikedPostsList, "Top3 게시글이 성공적으로 반환되었습니다."));

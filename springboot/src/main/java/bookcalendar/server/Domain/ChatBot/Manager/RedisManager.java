@@ -16,6 +16,8 @@ public class RedisManager {
     @Autowired
     private RedisTemplate<String, String> sessionRedisTemplate;
 
+    // ======================= 챗봇 채팅 영역 =========================
+
     /**
      * 이전 메시지 반환 메서드
      *
@@ -62,6 +64,8 @@ public class RedisManager {
         String taggedMessage = sender + ": " + message;
         sessionRedisTemplate.opsForList().rightPush(key, taggedMessage);
     }
+
+    // ======================= 도서 추천 영역 =========================
 
     /**
      * 레디스에서 모든 메시지 반환 메서드

@@ -161,7 +161,8 @@ public class ReviewServiceImpl implements ReviewService {
                 .map(review -> new CalendarResponse(
                         review.getReviewId(),
                         review.getProgress(),
-                        review.getDate()
+                        review.getDate(),
+                        review.getBook().getColor()
                 ))
                 .toList();
     }

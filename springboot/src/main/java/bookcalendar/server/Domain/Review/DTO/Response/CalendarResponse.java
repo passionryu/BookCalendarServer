@@ -5,6 +5,7 @@ import java.time.LocalDate;
 public record CalendarResponse(
         Integer reviewId,
         Integer progress,
-        LocalDate date
+        LocalDate date,
+        String color
 ) {
 }

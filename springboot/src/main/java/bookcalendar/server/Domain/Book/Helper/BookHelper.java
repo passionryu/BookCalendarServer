@@ -16,6 +16,8 @@ import java.util.Random;
 
 public class BookHelper {
 
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
     // ======================= 도서 등록 영역 =========================
 
     /* 각 도서 별 고유 색감 랜덤 부여 */
@@ -65,12 +67,27 @@ public class BookHelper {
 
     /* JSON 응답 파싱 함수 */
     public static List<CompleteResponse> parseRecommendations(String aiResponse) {
+
+        List<CompleteResponse> recommendations;
+
         try {
-            ObjectMapper objectMapper = new ObjectMapper();
-            return objectMapper.readValue(aiResponse, new TypeReference<>() {});
+//            ObjectMapper objectMapper = new ObjectMapper();
+//            return objectMapper.readValue(aiResponse, new TypeReference<>() {});
+
+            // JSON 배열을 파싱하되, url 필드가 없어도 매핑 가능하도록
+            List<CompleteResponse> tempList = objectMapper.readValue(
+                    aiResponse,
+                    new TypeReference<List<CompleteResponse>>() {}
+            );
+            // url 필드를 빈 문자열로 초기화
+            recommendations = tempList.stream()
+                    .map(resp -> new CompleteResponse(resp.getBookName(), resp.getAuthor(), resp.getReason(), resp.getUrl()))
+                    .toList();
+
         } catch (JsonProcessingException e) {
             throw new RuntimeException("AI 응답 파싱 실패: " + e.getMessage(), e);
         }
+        return recommendations;
     }
 
     // ======================= 장바구니 객체 생성 영역 =========================

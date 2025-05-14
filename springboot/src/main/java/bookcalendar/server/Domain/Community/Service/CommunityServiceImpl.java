@@ -20,6 +20,7 @@ import bookcalendar.server.global.exception.ErrorCode;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -40,6 +41,7 @@ public class CommunityServiceImpl implements CommunityService {
     private final PostReportRepository postReportRepository;
     private final CommentReportRepository commentReportRepository;
     private final PostLikeRepository postLikeRepository;
+    private final CacheManager cacheManager;
 
     // ======================= 게시글 영역 =========================
 
@@ -238,17 +240,25 @@ public class CommunityServiceImpl implements CommunityService {
             postLikeRepository.deleteByPostAndMember(post,member); // 좋아요 기록 삭제
         }
         else {
-            // 저장할 Like 객체 빌드
-            PostLike postLike = PostLike.builder()
-                    .post(post)
-                    .member(member)
-                    .build();
-            // 좋아요 기록 저장
-            postLikeRepository.save(postLike);
+            postLikeRepository.save(
+                    PostLike.builder().post(post).member(member).build()
+            );
         }
 
-        /* Like 합산 수 반환 */
-        return postLikeRepository.countByPost(post);
+        // 현재 게시글의 좋아요 총합
+        int newLikeCount = postLikeRepository.countByPost(post);
+
+        // 현재 캐시에 저장된 Top3 리스트 가져오기
+        List<TopLikedPosts> cachedTop3 = (List<TopLikedPosts>) cacheManager.getCache("top3Posts")
+                .get("top3", List.class);
+
+        // 캐시가 존재하고, Top3 안에 새로 들어올 가능성이 있으면 캐시 삭제
+        if (cachedTop3 != null && CommunityHelper.isInfluenceTop3(cachedTop3, postId, newLikeCount)) {
+            cacheManager.getCache("top3Posts").evict("top3");
+            log.info("Top 3 게시글에 대한 캐시 Evicted 작업 완료 ");
+        }
+
+        return newLikeCount;
     }
 
     /* LikeCount 총 합산 반환 메서드 */
@@ -261,10 +271,11 @@ public class CommunityServiceImpl implements CommunityService {
 
     /* Like 수 Top3 게시글 썸네일 리스트 반환 메서드 */
     @Override
+    @Cacheable(value = "top3Posts", key = "'top3'")
     public List<TopLikedPosts> getTopLikedPosts() {
 
-        // like 수로 내림차순 정렬 (동일한 값이 있을 시 date값이 최신인 것이 위로 오게 정렬)
-        return communityMapper.findTopLikedPosts();
+        log.info("==> Cache Miss (Top3 게시글 반환) : DB에서 Top3 게시글 정보를 가져옵니다.");
+        return communityMapper.findTopLikedPosts(); // like 수로 내림차순 정렬 (동일한 값이 있을 시 date값이 최신인 것이 위로 오게 정렬)
     }
 
 }

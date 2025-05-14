@@ -38,7 +38,7 @@ public class BookServiceImpl implements BookService {
     @Cacheable(value = "bookInfo", key = "#customUserDetails.memberId")
     public BookResponse bookInfo(CustomUserDetails customUserDetails) {
 
-        log.info("==> Cache Miss : DB에서 도서 정보를 가져옵니다.");
+        log.info("==> Cache Miss (도서 정보 반환): DB에서 도서 정보를 가져옵니다.");
         return bookManager.getCurrentReadingBookInfo(customUserDetails);
     }
 

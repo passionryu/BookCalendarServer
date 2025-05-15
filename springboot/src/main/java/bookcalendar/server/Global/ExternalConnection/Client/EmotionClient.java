@@ -26,13 +26,15 @@ public class EmotionClient {
         log.info("요청 보낼 텍스트 - 위치(EmotionClient.class) :{}", text);
 
         return webClient.post()
-                .uri("/emotion/predict_emotion")
-                .bodyValue(new TextInput(text)) // 직접 객체로 보내기
+                .uri("/emotion/predict_emotion")  // ✅ 경로 정확히
+                .bodyValue(new TextInput(text))   // ✅ JSON 변환 확인
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {})
                 .map(response -> response.get("emotion"))
                 .doOnNext(emotion -> log.info("감정 분석 결과: {}", emotion))
                 .doOnError(error -> log.error("감정 분석 요청 실패: {}", error.getMessage()));
+    }
+
 
 //        return webClient.post()
 //                .uri("/emotion/predict_emotion")
@@ -43,5 +45,5 @@ public class EmotionClient {
 //                .map(response -> response.get("emotion"))
 //                .doOnNext(emotion -> log.info("감정 분석 결과: {}", emotion))
 //                .doOnError(error -> log.error("감정 분석 요청 실패: {}", error.getMessage()));
-    }
+
 }

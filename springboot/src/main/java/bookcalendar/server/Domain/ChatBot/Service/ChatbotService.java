@@ -10,6 +10,9 @@ import java.util.List;
 
 public interface ChatbotService {
 
+    /* AI 챗봇 모델 연결 인터페이스 */
+    String aiChat(CustomUserDetails customUserDetails, ChatRequest chatRequest);
+
     /**
      * 챗봇 채팅 인터페이스
      *

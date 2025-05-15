@@ -24,10 +24,13 @@ public class EmotionClient {
     public Mono<String> predict(String text) {
 
         log.info("요청 보낼 텍스트 - 위치(EmotionClient.class) :{}", text);
+        Map<String, String> body = Map.of("text", text);
 
         return webClient.post()
                 .uri("/emotion/predict_emotion")  // ✅ 경로 정확히
-                .bodyValue(new TextInput(text))   // ✅ JSON 변환 확인
+                //.bodyValue(new TextInput(text))   // ✅ JSON 변환 확인
+                .header("Content-Type", "application/json")
+                .bodyValue(body)
                 .retrieve()
                 .bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {})
                 .map(response -> response.get("emotion"))

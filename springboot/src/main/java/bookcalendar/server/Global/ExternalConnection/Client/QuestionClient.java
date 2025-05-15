@@ -4,6 +4,7 @@ import bookcalendar.server.Domain.Review.DTO.Response.QuestionNumberTwoThreeResp
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
@@ -30,7 +31,7 @@ public class QuestionClient {
         return webClient.post()
                 .uri("/question/predict_question")
                 .header("Content-Type", "application/json")  // 명시적 추가
-                .bodyValue(Map.of("paragraph", text))
+                .bodyValue(BodyInserters.fromValue(requestBody))
                 .retrieve()
                 .onStatus(
                         status -> status.is4xxClientError() || status.is5xxServerError(),
@@ -47,12 +48,5 @@ public class QuestionClient {
                 .doOnNext(response -> log.info("질문 생성 결과: {}", response))
                 .doOnError(error -> log.error("질문 생성 실패: {}", error.getMessage()));
     }
-//        return webClient.post()
-//                .uri("/question/predict_question")
-//                .bodyValue(Map.of("paragraph", text))  // 🚨 key 이름 'text' → 'paragraph' 수정 필요!
-//                .retrieve()
-//                .bodyToMono(QuestionNumberTwoThreeResponse.class)
-//                .doOnNext(response -> log.info("질문 생성 결과: {}", response))
-//                .doOnError(error -> log.error("질문 생성 실패: {}", error.getMessage()));
-//    }
+
 }

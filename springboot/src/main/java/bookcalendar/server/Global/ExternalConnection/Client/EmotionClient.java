@@ -24,7 +24,7 @@ public class EmotionClient {
     public Mono<String> predict(String text) {
 
         log.info("요청 보낼 텍스트 - 위치(EmotionClient.class) :{}", text);
-        Map<String, String> body = Map.of("요청 을 보내는 데이터 -> text", text);
+        Map<String, String> body = Map.of("text", text);
 
         return webClient.post()
                 .uri("/emotion/predict_emotion")  // ✅ 경로 정확히

@@ -32,6 +32,7 @@ public class EmotionClient {
         return webClient.post()
                 .uri("/emotion/predict_emotion")
                 .bodyValue(new TextInput(text))
+
                 .retrieve()
                 .onStatus(status -> status.is4xxClientError(), response ->
                         response.bodyToMono(String.class)

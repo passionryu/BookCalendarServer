@@ -1,6 +1,5 @@
 package bookcalendar.server.global.ExternalConnection.Client;
 
-
 import bookcalendar.server.global.ExternalConnection.DTO.TextInput;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -22,30 +21,28 @@ public class EmotionClient {
     }
 
     public Mono<String> predict(String text) {
-
         log.info("요청 보낼 텍스트 - 위치(EmotionClient.class) :{}", text);
-        Map<String, String> body = Map.of("text", text);
+
+        // 입력 검증
+        if (text == null || text.trim().isEmpty()) {
+            log.error("입력 텍스트가 null 또는 빈 문자열입니다.");
+            return Mono.error(new IllegalArgumentException("텍스트가 필요합니다."));
+        }
 
         return webClient.post()
-                .uri("/emotion/predict_emotion")  // ✅ 경로 정확히
-                //.bodyValue(new TextInput(text))   // ✅ JSON 변환 확인
-                .bodyValue(body)
+                .uri("/emotion/predict_emotion")
+                .bodyValue(new TextInput(text))
                 .retrieve()
+                .onStatus(status -> status.is4xxClientError(), response ->
+                        response.bodyToMono(String.class)
+                                .map(errorBody -> {
+                                    log.error("FastAPI 오류 응답: {}", errorBody);
+                                    return new RuntimeException("422 Error: " + errorBody);
+                                })
+                )
                 .bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {})
                 .map(response -> response.get("emotion"))
                 .doOnNext(emotion -> log.info("감정 분석 결과: {}", emotion))
                 .doOnError(error -> log.error("감정 분석 요청 실패: {}", error.getMessage()));
     }
-
-
-//        return webClient.post()
-//                .uri("/emotion/predict_emotion")
-//                .header("Content-Type", "application/json")
-//                .bodyValue(Map.of("text", text))
-//                .retrieve()
-//                .bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {})
-//                .map(response -> response.get("emotion"))
-//                .doOnNext(emotion -> log.info("감정 분석 결과: {}", emotion))
-//                .doOnError(error -> log.error("감정 분석 요청 실패: {}", error.getMessage()));
-
 }

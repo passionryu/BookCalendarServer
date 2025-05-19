@@ -13,6 +13,7 @@ import bookcalendar.server.Domain.Mypage.Entity.Cart;
 import bookcalendar.server.Domain.Mypage.Repository.CartRepository;
 import bookcalendar.server.global.Aladin.AladinResponse;
 import bookcalendar.server.global.Aladin.AladinService;
+import bookcalendar.server.global.ExternalConnection.Client.IntentClient;
 import bookcalendar.server.global.Security.CustomUserDetails;
 import bookcalendar.server.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.ChatClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,6 +37,21 @@ public class ChatbotServiceImpl implements ChatbotService{
     private final MemberRepository memberRepository;
     private final CartRepository cartRepository;
     private final AladinService aladinService;
+    private final IntentClient intentClient;
+
+   // ======================= AI 채팅 로직 =========================
+
+    /* AI 챗봇 채팅 로직 */
+    @Override
+    public String aiChat(CustomUserDetails customUserDetails, ChatRequest chatRequest) {
+
+        // Mono<String> aiResponse = intentClient.predict(chatRequest.chatMessage());
+        String aiResponse = intentClient.predict(chatRequest.chatMessage()).block();
+
+        redisManager.saveMessageInRedis(customUserDetails.getMemberId(), chatRequest.chatMessage(),aiResponse);
+
+        return aiResponse;
+    }
 
     // ======================= 챗봇 채팅 로직 =========================
 

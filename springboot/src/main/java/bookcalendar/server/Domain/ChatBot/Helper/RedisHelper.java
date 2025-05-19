@@ -42,31 +42,67 @@ public class RedisHelper {
         return aiResponse.replaceAll("(?i)^counselor:\\s*", "");
     }
 
-    public static String getPromptMessage(String everyMessages){
-
+    /**
+     * 프롬프트 메시지 커스터마이징 메서드
+     *
+     * @param everyMessages 모든 챗봇 대화 메시지
+     * @return 프롬프트 메시지
+     */
+    public static String getPromptMessage(String everyMessages) {
         return String.format(
                 """
                 너는 이 도서 추천 서비스의 유능한 AI 도서 추천 사서이다.
-                다음은 너가 사용자와의 챗봇 서비스에서 나눈 대화 내용이다
-                다음은 내용들을 참고하여 사용자에게 도서 5권을 추천해줘:
-    
-                - 너(AI 도서 추천 사서 와 사용자와의 지난 모든 대화): "%s"
-    
-                아래 JSON 형식으로 꼭 반환해줘:
-    
+                다음은 사용자와의 챗봇 서비스에서 나눈 대화 내용이다:
+                
+                - 사용자와의 지난 모든 대화: "%s"
+                
+                이 대화 내용을 바탕으로 사용자에게 **정확히 5권의 도서**를 추천해야 한다. 
+                각 도서는 사용자의 관심사와 대화 맥락에 맞춰 선정하고, 아래 조건을 반드시 준수하라:
+                - 추천 도서는 정확히 5권이어야 하며, 그 이상도 이하도 안 된다.
+                - 각 도서의 추천 사유는 2~3문장으로 간결하고 명확하게 작성하라.
+                - 응답은 반드시 아래 JSON 형식으로 반환하라:
+                
                 [
                   {
                     "bookName": "책 제목",
                     "author": "저자 이름",
-                    "reason": "이 도서를 추천하는 이유2~3줄"
+                    "reason": "이 도서를 추천하는 이유 (2~3문장)"
                   },
                   ...
                 ]
+                
+                대화 내용이 모호하거나 정보가 부족하더라도, 사용자의 관심사를 추론하여 5권을 반드시 추천하라.
                 """,
                 everyMessages
         );
-
     }
+
+    // 이전 프롬프트 메시지 메서드 . 2025.05/19
+//    public static String getPromptMessage(String everyMessages){
+//
+//        return String.format(
+//                """
+//                너는 이 도서 추천 서비스의 유능한 AI 도서 추천 사서이다.
+//                다음은 너가 사용자와의 챗봇 서비스에서 나눈 대화 내용이다
+//                다음은 내용들을 참고하여 사용자에게 도서 5권을 추천해줘:
+//
+//                - 너(AI 도서 추천 사서 와 사용자와의 지난 모든 대화): "%s"
+//
+//                아래 JSON 형식으로 꼭 반환해줘:
+//
+//                [
+//                  {
+//                    "bookName": "책 제목",
+//                    "author": "저자 이름",
+//                    "reason": "이 도서를 추천하는 이유2~3줄"
+//                  },
+//                  ...
+//                ]
+//                """,
+//                everyMessages
+//        );
+//
+//    }
 
     /**
      * 리스트 파서 메서드
@@ -78,11 +114,6 @@ public class RedisHelper {
 
         List<CompleteResponse> recommendations;
 
-//        try {
-//            recommendations = objectMapper.readValue(
-//                    aiResponse,
-//                    new TypeReference<>() {}
-//            );
         try {
             // JSON 배열을 파싱하되, url 필드가 없어도 매핑 가능하도록
             List<CompleteResponse> tempList = objectMapper.readValue(

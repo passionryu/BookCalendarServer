@@ -112,7 +112,13 @@ public class QuestionHelper{
      * @return 하루에 읽어야 하는 평균 페이지 반환
      */
     public static int calculateAveragePages(Book book, Review review, int remainDate) {
-        return (book.getTotalPage() - review.getPages()) / remainDate;
+
+        int remainingPages = book.getTotalPage() - review.getPages();
+        if (remainDate <= 0) {
+            return remainingPages;
+        }
+        return remainingPages / remainDate;
+
     }
 
     /**

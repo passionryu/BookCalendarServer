@@ -23,6 +23,8 @@ import bookcalendar.server.global.Security.CustomUserDetails;
 import bookcalendar.server.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +37,9 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class ReviewServiceImpl implements ReviewService {
+
+    @Qualifier("cacheRedisTemplate")
+    private final RedisTemplate<String, String> redisTemplate;
 
     private final ReviewManager reviewManager;
     private final EmotionMockModel emotionMockModel;
@@ -84,6 +89,9 @@ public class ReviewServiceImpl implements ReviewService {
 
         // review저장 후 member의 reviewCount에 +1
         member.setReviewCount(member.getReviewCount() + 1);
+
+        // 이벤트 큐에 유저 고유 번호를 저장
+        redisTemplate.opsForSet().add("ranking:update:memberIds", member.getMemberId().toString());
 
         /* 결과를 Question DB에 저장하는 로직 */
         Question question = reviewManager.saveQuestion(

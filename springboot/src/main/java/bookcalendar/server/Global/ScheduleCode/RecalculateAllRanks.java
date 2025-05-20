@@ -44,8 +44,8 @@ public class RecalculateAllRanks {
     /**
      * 랭킹 재배치 스케줄러
      */
-    //@Scheduled(cron = "0 */1 * * * ?")  // 매 10분마다 실행
-    @Scheduled(fixedRate = 60000) // 60초마다 실행
+    //@Scheduled(fixedRate = 60000) // 60초마다 실행
+    @Scheduled(cron = "0 0/5 * * * ?")  // 매 10분마다 실행
     @Transactional
     @CacheEvict(value = "rankCache", allEntries = true)
     public void recalculateAllRanks() {

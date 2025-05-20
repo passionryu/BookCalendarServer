@@ -10,6 +10,7 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -194,8 +196,19 @@ public class JwtService {
 
     /* 기간 만료된 AccessToken 입력 시 새로운 accesstoken, refreshToken반환 (RTR) */
 
+    // ======================= Black List 로직
 
-    // ======================= Logout 후 Black List에 JWT 토큰 등록 로직
+    public void addTokenToBlacklist(String token) {
+        long expiration = getRemainingExpiration(token); // 토큰 만료까지 남은 시간 계산
+        String hashedKey = DigestUtils.sha256Hex(token); //
+        sessionRedis.opsForValue().set("blacklist:" + hashedKey, "true", expiration, TimeUnit.MILLISECONDS);
+    }
+
+    public long getRemainingExpiration(String token) {
+        Claims claims = extractClaims(token);
+        Date expiration = claims.getExpiration();
+        return expiration.getTime() - System.currentTimeMillis();
+    }
 
     /**
      * 토큰 검증 메서드 (블랙리스트 체크 포함)
@@ -229,7 +242,8 @@ public class JwtService {
      * @return 블랙리스트에 있으면 true, 아니면 false
      */
     public boolean isTokenBlacklisted(String token) {
-        return Boolean.TRUE.equals(sessionRedis.hasKey("blacklist:" + token));
+        String hashedKey = DigestUtils.sha256Hex(token);
+        return Boolean.TRUE.equals(sessionRedis.hasKey("blacklist:" + hashedKey));
     }
 
     // ======================= Util Code =========================
@@ -247,13 +261,5 @@ public class JwtService {
                 .parseClaimsJws(token)
                 .getBody();
     }
-
-//    public Claims extractClaims(String token) {
-//        return Jwts.parserBuilder()
-//                .setSigningKey(Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8)))
-//                .build()
-//                .parseClaimsJws(token)
-//                .getBody();
-//    }
 
 }

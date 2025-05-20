@@ -1,7 +1,9 @@
 package bookcalendar.server.global.jwt;
 
 import bookcalendar.server.Domain.Member.Entity.Member;
+import bookcalendar.server.Domain.Member.Exception.MemberException;
 import bookcalendar.server.global.Security.CustomUserDetails;
+import bookcalendar.server.global.exception.ErrorCode;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
@@ -117,7 +119,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 return;
             }
         } else {
-            log.debug("유효하지 않은 JWT 토큰 또는 토큰 없음 - Location : JwtAutenticationFilter");
+            throw new MemberException(ErrorCode.NO_AUTH); // 블랙리스트에 해당 유저의 엑세스 토큰이 있을 시 인증 오류 발생
         }
 
         // [8단계] 필터 체인을 계속 진행

@@ -42,9 +42,6 @@ public class EmotionClient {
 
         return webClient.post()
                 .uri("/emotion/predict_emotion")
-                //.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                //.contentType(MediaType.APPLICATION_JSON)
-                // .bodyValue(new TextInput(text))
                 .bodyValue(Map.of("text", text))
                 .retrieve()
                 .onStatus(status -> status.is4xxClientError(), response ->

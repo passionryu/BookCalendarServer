@@ -78,8 +78,8 @@ public class ReviewServiceImpl implements ReviewService {
         String question1 = ReviewHelper.makeQuestion1(emotion); // 1번 질문지 생성
 
         /* 2번 질문지 생성 AI 모델로 요청 */
-        QuestionNumberTwoThreeResponse questionNumberTwoThreeResponse = questionMockModel.numberTwoThreeQuestion(contents); //로컬 용 Mock AI 모델 호출
-        // QuestionNumberTwoThreeResponse questionNumberTwoThreeResponse = questionClient.predict(contents).block(); // Fast-API 의 질문지 생성 AI 모델 호출
+        // QuestionNumberTwoThreeResponse questionNumberTwoThreeResponse = questionMockModel.numberTwoThreeQuestion(contents); //로컬 용 Mock AI 모델 호출
+        QuestionNumberTwoThreeResponse questionNumberTwoThreeResponse = questionClient.predict(contents).block(); // Fast-API 의 질문지 생성 AI 모델 호출
 
         /* 결과 Review DB에 저장 하는 로직 */
         Review savedReview = reviewManager.saveReview(

@@ -30,10 +30,9 @@ public class EmotionClient {
             return Mono.error(new IllegalArgumentException("텍스트가 필요합니다."));
         }
 
-        String jsonBody = "";
         TextInput input = new TextInput(text);
         try {
-            jsonBody = new ObjectMapper().writeValueAsString(input);
+            String jsonBody = new ObjectMapper().writeValueAsString(input);
             log.info("직렬화된 JSON 본문 - {} ", jsonBody);
         } catch (Exception e) {
             log.error("JSON 직렬화 실패: {}", e.getMessage());
@@ -42,8 +41,8 @@ public class EmotionClient {
         return webClient.post()
                 .uri("/emotion/predict_emotion")
                 // .bodyValue(new TextInput(text))
-                //.bodyValue(Map.of("text", text))  // <-- 이 부분 중요
-                .bodyValue(jsonBody)
+                .bodyValue(Map.of("text", text))  // <-- 이 부분 중요
+                //.bodyValue(jsonBody);
 
                 .retrieve()
                 .onStatus(status -> status.is4xxClientError(), response ->

@@ -41,21 +41,17 @@ public class ChatbotServiceImpl implements ChatbotService{
 
    // ======================= AI 채팅 로직 =========================
 
-    /* AI 챗봇 채팅 로직 */
+    /* Fast-API 서버 AI 챗봇 채팅 로직 */
     @Override
     public String aiChat(CustomUserDetails customUserDetails, ChatRequest chatRequest) {
 
-        // Mono<String> aiResponse = intentClient.predict(chatRequest.chatMessage());
-        String aiResponse = intentClient.predict(chatRequest.chatMessage()).block();
-
-        redisManager.saveMessageInRedis(customUserDetails.getMemberId(), chatRequest.chatMessage(),aiResponse);
+        String aiResponse = intentClient.predict(chatRequest.chatMessage()).block(); // fast-api 서버의 ai 챗봇 모델 호출
+        redisManager.saveMessageInRedis(customUserDetails.getMemberId(), chatRequest.chatMessage(),aiResponse); // 유저 메시지,챗봇 답변 Redis에 업로드
 
         return aiResponse;
     }
 
-    // ======================= 챗봇 채팅 로직 =========================
-
-    /* 챗봇 채팅 메서드 */
+    /* Gpt Mock AI 챗봇 채팅 메서드 */
     @Override
     public String chat(CustomUserDetails customUserDetails, ChatRequest chatRequest) {
 

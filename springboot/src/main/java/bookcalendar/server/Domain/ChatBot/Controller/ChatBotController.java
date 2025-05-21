@@ -46,8 +46,10 @@ public class ChatBotController {
     public ResponseEntity<ApiResponseWrapper<String>> chat(@AuthenticationPrincipal CustomUserDetails customUserDetails,
                                                           @RequestBody ChatRequest chatRequest) {
 
+        // Fast-API 서버 ChatBot AI 연결 서비스 레이어 호출
+        String aiResponse = chatbotService.aiChat(customUserDetails, chatRequest);
         // 챗봇 채팅 서비스 레이어 호출
-        String aiResponse = chatbotService.chat(customUserDetails, chatRequest);
+        // String aiResponse = chatbotService.chat(customUserDetails, chatRequest);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponseWrapper<>(aiResponse, "채팅 메시지가 정상적으로 전송/반환되었습니다."));

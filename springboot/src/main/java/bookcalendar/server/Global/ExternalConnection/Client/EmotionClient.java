@@ -22,7 +22,7 @@ public class EmotionClient {
     }
 
     public Mono<String> predict(String text) {
-        log.info("요청 보낼 텍스트 - 위치(EmotionClient.class) : ", text);
+        log.info("요청 보낼 텍스트 - 위치(EmotionClient.class) : {}", text);
 
         /* 입력 검증 */
         if (text == null || text.trim().isEmpty()) {
@@ -33,7 +33,7 @@ public class EmotionClient {
         TextInput input = new TextInput(text);
         try {
             String jsonBody = new ObjectMapper().writeValueAsString(input);
-            log.info("직렬화된 JSON 본문 - ", jsonBody);
+            log.info("직렬화된 JSON 본문 - {} ", jsonBody);
         } catch (Exception e) {
             log.error("JSON 직렬화 실패: {}", e.getMessage());
         }

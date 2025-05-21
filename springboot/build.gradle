@@ -63,6 +63,8 @@ dependencies {
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.0'
 	/* DigestUtils */
 	implementation 'commons-codec:commons-codec:1.15'
+	/* Webclient */
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 }
 
 tasks.named('test') {

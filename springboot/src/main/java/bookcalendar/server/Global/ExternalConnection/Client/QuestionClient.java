@@ -32,7 +32,8 @@ public class QuestionClient {
 
         return webClient.post()
                 .uri("/question/predict_question")
-                .bodyValue(BodyInserters.fromValue(requestBody))
+                .bodyValue(Map.of("paragraph", text))
+                //.bodyValue(BodyInserters.fromValue(requestBody))
                 .retrieve()
                 .onStatus(
                         status -> status.is4xxClientError() || status.is5xxServerError(),

@@ -24,20 +24,11 @@ public class EmotionClient {
     }
 
     public Mono<String> predict(String text) {
-        log.info("요청 보낼 텍스트 - 위치(EmotionClient.class) : {}", text);
 
         /* 입력 검증 */
         if (text == null || text.trim().isEmpty()) {
             log.error("입력 텍스트가 null 또는 빈 문자열입니다.");
             return Mono.error(new IllegalArgumentException("텍스트가 필요합니다."));
-        }
-
-        TextInput input = new TextInput(text);
-        try {
-            String jsonBody = new ObjectMapper().writeValueAsString(input);
-            log.info("직렬화된 JSON 본문 - {} ", jsonBody);
-        } catch (Exception e) {
-            log.error("JSON 직렬화 실패: {}", e.getMessage());
         }
 
         return webClient.post()

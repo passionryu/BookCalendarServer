@@ -23,13 +23,6 @@ public class QuestionClient {
 
     public Mono<QuestionNumberTwoThreeResponse> predict(String text) {
 
-        /* 입력값 로그 */
-        log.info("try input(입력값 로그) : " + text);
-
-        /* 요청 보내기 직전의 로그 */
-        Map<String, String> requestBody = Map.of("paragraph", text);
-        log.info("Request Body(요청 보내기 직전의 로그): {}", requestBody);
-
         return webClient.post()
                 .uri("/question/predict_question")
                 .bodyValue(Map.of("paragraph", text))

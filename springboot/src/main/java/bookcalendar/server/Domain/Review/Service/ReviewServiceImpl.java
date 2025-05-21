@@ -73,8 +73,8 @@ public class ReviewServiceImpl implements ReviewService {
         ProgressResponse progressResponse = reviewManager.getProgress(customUserDetails.getMemberId(), pages);
 
         /* 감정 분석 AI 모델로 요청 */
-        String emotion = emotionMockModel.numberOneQuestion(contents); // 로컬 용 Mock AI 모델 호출
-        // String emotion = emotionClient.predict(contents).block(); // Fast -API 의 감정 분류 AI 모델 호출
+        // String emotion = emotionMockModel.numberOneQuestion(contents); // 로컬 용 Mock AI 모델 호출
+        String emotion = emotionClient.predict(contents).block(); // Fast -API 의 감정 분류 AI 모델 호출
         String question1 = ReviewHelper.makeQuestion1(emotion); // 1번 질문지 생성
 
         /* 2번 질문지 생성 AI 모델로 요청 */

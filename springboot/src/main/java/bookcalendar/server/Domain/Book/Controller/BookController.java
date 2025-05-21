@@ -74,7 +74,9 @@ public class BookController {
      */
     @Operation(summary = "도서 등록 API", description = "도서 등록에 필요한 모든 데이터를 입력 한 후 도서 등록 버튼을 누르면 동작하는 API이다.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "입력하신 도서가 정상적으로 등록되었습니다.")
+                    @ApiResponse(responseCode = "200", description = "입력하신 도서가 정상적으로 등록되었습니다."),
+                    @ApiResponse(responseCode = "401", description = "유저 인증 오류"),
+                    @ApiResponse(responseCode = "500", description = "서버 내부 오류")
             })
     @PostMapping("")
     public ResponseEntity<ApiResponseWrapper<Book>> registerBook(@RequestBody BookRegisterRequest bookRegisterRequest,
@@ -95,7 +97,9 @@ public class BookController {
      */
     @Operation(summary = "독서 포기 API", description = "독서 포기 버튼 클릭 시, DB에서 해당 도서의 status 칼럼이 (독서_포기)로 전환된다.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "요청하신 도서에 대하여 포기 처리가 완료되었습니다.")
+                    @ApiResponse(responseCode = "200", description = "요청하신 도서에 대하여 포기 처리가 완료되었습니다."),
+                    @ApiResponse(responseCode = "401", description = "유저 인증 오류"),
+                    @ApiResponse(responseCode = "500", description = "서버 내부 오류")
             })
     @PatchMapping("")
     public ResponseEntity<ApiResponseWrapper<Void>> giveUpReading(@AuthenticationPrincipal CustomUserDetails customUserDetails){
@@ -115,7 +119,9 @@ public class BookController {
      */
     @Operation(summary = "독서 완료 API", description = "독서 완료 버튼 클릭 시 , 도서 추천 5권 및 DB에서 해당 도서의 (status= 독서 완료)로 수정 ",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "요청하신 도서에 대하여 독서 완료 처리가 완료되었습니다.")
+                    @ApiResponse(responseCode = "200", description = "요청하신 도서에 대하여 독서 완료 처리가 완료되었습니다."),
+                    @ApiResponse(responseCode = "401", description = "유저 인증 오류"),
+                    @ApiResponse(responseCode = "500", description = "서버 내부 오류")
             })
     @PostMapping("/complete")
     public ResponseEntity<ApiResponseWrapper<List<CompleteResponse>>> completeReading(@AuthenticationPrincipal CustomUserDetails customUserDetails){
@@ -152,22 +158,30 @@ public class BookController {
     }
 
     /**
-     * 등록된 도서들을 캘린더에 선으로 표시하는 API
+     *  등록된 도서리스트를 메인페이지에 표시 하는 API
      *
      * @param customUserDetails 인증된 유저의 정보 객체
      * @param periodRequest 달 (예 :1월, 2월)
      * @return 캘린더에 도서 기간 표시를 할 수 있는 리스트
      */
-    @Operation(summary = "등록된 도서 캘린더에 선으로 표시하는 API", description = "등록한 모든 도서 캘린더에 선으로 표시하는 api이다.",
+    @Operation(summary = " 등록된 도서리스트를 메인페이지에 표시 하는 API", description = " 등록된 도서리스트를 메인페이지에 표시하는 api이다.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "이번 달에 등록된 모든 도서의 기간이 반환되었습니다.")
+                    @ApiResponse(responseCode = "200", description = "이번 달에 등록된 모든 도서의 기간이 반환되었습니다."),
+                    @ApiResponse(responseCode = "401", description = "유저 인증 오류"),
+                    @ApiResponse(responseCode = "500", description = "서버 내부 오류")
             })
     @PostMapping("/period")
     public ResponseEntity<ApiResponseWrapper<List<PeriodResponse>>> getPeriodList(@AuthenticationPrincipal CustomUserDetails customUserDetails,
                                                                                   @RequestBody PeriodRequest periodRequest){
 
+        long start = System.currentTimeMillis(); // 시간 측정 시작
+
         // 등록된 도서들의 도서 기간을 캘린더에 반환하는 서비스 레이어 호출
         List<PeriodResponse> periodResponseList = bookService.getPeriodList(customUserDetails,periodRequest);
+
+        long end = System.currentTimeMillis(); // 시간 측정 종료
+        long duration = end - start;
+        log.info("[List<PeriodResponse>] 처리 시간: {}ms", duration); // 로그 출력
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponseWrapper<>(periodResponseList,"이번 달에 등록된 모든 도서의 기간이 반환되었습니다."));

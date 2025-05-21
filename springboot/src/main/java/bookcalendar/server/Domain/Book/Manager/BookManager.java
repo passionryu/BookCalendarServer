@@ -24,6 +24,7 @@ import bookcalendar.server.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.ChatClient;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,8 +42,10 @@ public class BookManager {
     private final MemberRepository memberRepository;
     private final CartRepository cartRepository;
     private final ReviewRepository reviewRepository;
-    private final ChatClient chatClient;
     private final AladinService aladinService;
+
+    private final ChatClient chatClient;
+    private final CacheManager cacheManager;
 
     // ======================= Util 코드 =========================
 
@@ -95,6 +98,14 @@ public class BookManager {
         Book book = bookRegisterRequest.toEntity(customUserDetails.getMemberId()); // DTO → Entity 변환
         book.setColor(BookHelper.getRandomColor()); // Book 객체에 랜덤(밝은 영역 위주) 색감 지정
         return bookRepository.save(book);
+    }
+
+    /* 도서 등록 시  getPeriodList 캐시 삭제 메서드 */
+    public void evictMonthlyBookListCache(Integer memberId) {
+        for (int month = 1; month <= 12; month++) {
+            String key = memberId + "-" + month;
+            cacheManager.getCache("monthlyBookList").evictIfPresent(key);
+        }
     }
 
     // ======================= 독서 포기 로직 =========================
@@ -174,16 +185,8 @@ public class BookManager {
 
     // ======================= 캘린더에 선으로 표시하는 영역 =========================
 
-    /* 등록된 도서를 캘린더에 선으로 표시 하는 메서드 */
-    public List<PeriodResponse> getBooksPeriodInMonth(CustomUserDetails userDetails, PeriodRequest request) {
-
-        int month = request.month();
-        int year = LocalDate.now().getYear(); // 요청에서 연도도 받으려면 구조 확장 가능
-
-        LocalDate start = BookHelper.getStartOfMonth(year, month);
-        LocalDate end = BookHelper.getEndOfMonth(start);
-
-        Integer memberId = userDetails.getMemberId();
+    /* 등록된 도서리스트 반환 메서드  */
+    public List<PeriodResponse> getBooksPeriodInMonth(Integer memberId, LocalDate start, LocalDate end) {
 
         List<Book> books = bookRepository.findBooksInMonth(memberId, start, end);
 

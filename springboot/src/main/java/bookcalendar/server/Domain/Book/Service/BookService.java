@@ -55,7 +55,7 @@ public interface BookService {
     List<CompleteResponse>  completeReading(CustomUserDetails customUserDetails);
 
     /**
-     * 등록된 도서들을 캘린더에 선으로 표시하는 인터페이스
+     *  등록된 도서리스트를 메인페이지에 표시 하는 메서드
      *
      * @param customUserDetails
      * @param periodRequest

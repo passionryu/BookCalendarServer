@@ -118,9 +118,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "서버 내부 오류");
                 return;
             }
-        } else
+        } else {
+            log.debug("유효하지 않은 JWT 토큰 또는 토큰 없음 - Location : JwtAutenticationFilter");
             //throw new MemberException(ErrorCode.NO_AUTH); // 블랙리스트에 해당 유저의 엑세스 토큰이 있을 시 인증 오류 발생
-
+        }
 
         // [8단계] 필터 체인을 계속 진행
         filterChain.doFilter(request, response);

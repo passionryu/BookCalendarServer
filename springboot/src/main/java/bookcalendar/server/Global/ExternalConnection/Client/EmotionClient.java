@@ -43,7 +43,8 @@ public class EmotionClient {
                 .uri("/emotion/predict_emotion")
                 // .bodyValue(new TextInput(text))
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(Map.of("text", text))  // <-- 이 부분 중요
+                //.bodyValue(Map.of("text", text))  // <-- 이 부분 중요
+                .bodyValue(input)
                 //.bodyValue(jsonBody);
 
                 .retrieve()

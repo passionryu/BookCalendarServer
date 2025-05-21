@@ -12,6 +12,7 @@ import bookcalendar.server.global.response.ApiResponseWrapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -75,6 +76,28 @@ public class MemberController {
         }
 
         /**
+         * 로그아웃 API
+         *
+         * @param httpServletRequest
+         * @return 로그아웃 성공 메시지
+         */
+        @Operation(summary = "로그아웃 API",description = "로그 아웃 진행 시, 클라이언트 레이어에서는 엑세스 토큰을 삭제하고 서버 레이어에서는 Session Redis에 블랙리스트틀 만들어 해당 유저의 현재 엑세스 토큰을 블랙리스트에 업데이트한다.",
+                responses = {
+                        @ApiResponse(responseCode = "200", description = "정상적으로 로그아웃에 성공하였습니다."),
+                        @ApiResponse(responseCode = "404", description = "해당 유저를 찾울 수 없음"),
+                        @ApiResponse(responseCode = "500", description = "서버 내부 오류 ")
+                })
+        @PostMapping("/logout")
+        public ResponseEntity<ApiResponseWrapper<Void>> logout(HttpServletRequest httpServletRequest) {
+
+                // 로그아웃 서비스 레이어 호출
+                memberService.logout(httpServletRequest);
+
+                return ResponseEntity.status(HttpStatus.OK)
+                        .body(new ApiResponseWrapper<>(null,"정상적으로 로그아웃에 성공하였습니다."));
+        }
+
+        /**
          * JWT 토큰 최신화 API (RTR)
          *
          * @param tokenRequest 유저가 전송한 토큰
@@ -95,7 +118,5 @@ public class MemberController {
                 return ResponseEntity.status(HttpStatus.CREATED)
                         .body(new ApiResponseWrapper<>(tokenResponse, "엑세스 토큰 & 리프레시 토큰이 정상적으로 재발급 되었습니다."));
         }
-
-
 
 }

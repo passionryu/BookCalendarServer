@@ -139,7 +139,7 @@ public class RedisConfig {
         // =======================  캐시 이름별로 서로 다른 캐싱 정책을 적용 =========================
         
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
-        cacheConfigurations.put("bookResponse", BookResponseConfig);
+        cacheConfigurations.put("bookInfo", BookResponseConfig);
         cacheConfigurations.put("top3Posts", top3Config);
 
         // ======================= 최종 반환 =========================

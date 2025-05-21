@@ -19,7 +19,7 @@ public class IntentClient {
 
     public Mono<String> predict(String text) {
         return webClient.post()
-                .uri("/intent/predict")
+                .uri("/intent/predict_intent")
                 .bodyValue(Map.of("text", text))
                 .retrieve()
                 .bodyToMono(String.class);

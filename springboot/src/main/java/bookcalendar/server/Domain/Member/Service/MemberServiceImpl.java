@@ -7,6 +7,8 @@ import bookcalendar.server.Domain.Member.DTO.Response.TokenResponse;
 import bookcalendar.server.Domain.Member.Entity.Member;
 import bookcalendar.server.Domain.Member.Manager.MemberManager;
 import bookcalendar.server.Domain.Member.Repository.MemberRepository;
+import bookcalendar.server.global.jwt.JwtService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +27,7 @@ public class MemberServiceImpl implements MemberService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final MemberRepository memberRepository;
     private final MemberManager memberManager;
+    private final JwtService jwtService;
 
     /* 회원가입 메서드 */
     @Override
@@ -52,14 +55,21 @@ public class MemberServiceImpl implements MemberService {
         return tokens;
     }
 
+    /* 로그아웃 메서드 */
+    @Override
+    public void logout(HttpServletRequest httpServletRequest) {
+
+        String accessToken = jwtService.extractAccessToken(httpServletRequest); // 유저의 요청으로 부터 엑세스 토큰 추출
+        jwtService.addTokenToBlacklist(accessToken); // Session-Redis의 블랙리스트에 현재 유저의 엑세스 토큰 업로드
+    }
+
     /* 리프레시 토큰 로테이션 메서드 */
     @Override
     public TokenResponse refreshToken(TokenRequest refreshRequest) {
         return memberManager.rotateRefreshToken(
-                refreshRequest.accessToken(),
-                refreshRequest.refreshToken(),
-                REFRESH_TOKEN_EXPIRATION_TIME
+                refreshRequest.accessToken(), // 새로 발급받은 엑세스 토큰
+                refreshRequest.refreshToken(), // 새로 발급받은 리프레시 토큰
+                REFRESH_TOKEN_EXPIRATION_TIME //리프레시 토큰 만료 시간
         );
     }
-
 }

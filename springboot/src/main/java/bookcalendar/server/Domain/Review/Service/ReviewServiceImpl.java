@@ -98,16 +98,16 @@ public class ReviewServiceImpl implements ReviewService {
                 savedReview,
                 member,
                 question1,
-                questionNumberTwoThreeResponse.question2(),
-                questionNumberTwoThreeResponse.question3()
+                questionNumberTwoThreeResponse.question1(),
+                questionNumberTwoThreeResponse.question2()
         );
 
         return new QuestionResponse(
                 savedReview.getReviewId(),
                 question.getQuestionId(),
                 question1,
-                questionNumberTwoThreeResponse.question2(),
-                questionNumberTwoThreeResponse.question3());
+                questionNumberTwoThreeResponse.question1(),
+                questionNumberTwoThreeResponse.question2());
     }
 
     // ======================= 캘린더에서 날짜 선택 후 독후감 기록 조회 로직 =========================

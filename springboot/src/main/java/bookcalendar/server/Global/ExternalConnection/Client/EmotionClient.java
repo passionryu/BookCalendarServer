@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -41,6 +42,7 @@ public class EmotionClient {
         return webClient.post()
                 .uri("/emotion/predict_emotion")
                 // .bodyValue(new TextInput(text))
+                .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(Map.of("text", text))  // <-- 이 부분 중요
                 //.bodyValue(jsonBody);
 

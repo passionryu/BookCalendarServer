@@ -22,7 +22,7 @@ public class WebClientConfig {
 //                    request.headers().forEach((name, values) -> values.forEach(value -> log.info("{}={}", name, value)));
 //                    return next.exchange(request);
 //                })
-                .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                //.defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();
     }
 }

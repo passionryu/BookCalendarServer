@@ -42,13 +42,10 @@ public class EmotionClient {
 
         return webClient.post()
                 .uri("/emotion/predict_emotion")
-                // .bodyValue(new TextInput(text))
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                //.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 //.contentType(MediaType.APPLICATION_JSON)
-                //.bodyValue(Map.of("text", text))
-                .bodyValue(new TextInput(text))
-                //.bodyValue(jsonBody);
-
+                // .bodyValue(new TextInput(text))
+                .bodyValue(Map.of("text", text))
                 .retrieve()
                 .onStatus(status -> status.is4xxClientError(), response ->
                         response.bodyToMono(String.class)

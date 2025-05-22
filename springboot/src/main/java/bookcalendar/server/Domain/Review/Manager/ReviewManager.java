@@ -12,19 +12,26 @@ import bookcalendar.server.Domain.Review.DTO.Response.ProgressResponse;
 import bookcalendar.server.Domain.Review.Entity.Review;
 import bookcalendar.server.Domain.Review.Repository.ReviewRepository;
 import bookcalendar.server.Domain.Review.ReviewException;
+import bookcalendar.server.global.Security.CustomUserDetails;
 import bookcalendar.server.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.ChatClient;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class ReviewManager {
+
+    @Qualifier("cacheRedisTemplate")
+    private final RedisTemplate<String, String> redisTemplate;
 
     private final ReviewRepository reviewRepository;
     private final MemberRepository memberRepository;
@@ -130,6 +137,19 @@ public class ReviewManager {
                 .feedback2(0)
                 .feedback3(0)
                 .build());
+    }
+
+    /**
+     * MonthlyReviewList 캐시 삭제 메서드
+     *
+     * @param customUserDetails 인증된 유저 객체
+     */
+    public void deleteMonthlyReviewListCache(CustomUserDetails customUserDetails){
+
+        Set<String> keys = redisTemplate.keys("monthlyReviewList::" + customUserDetails.getMemberId() + "-*");
+        if (keys != null && !keys.isEmpty()) {
+            redisTemplate.delete(keys);
+        }
     }
 
     // ======================= 캘린더에서 날짜 선택 후 독후감 기록 조회 영역 =========================

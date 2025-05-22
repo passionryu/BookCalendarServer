@@ -15,8 +15,8 @@ public interface ReviewService {
     /**
      *독후감 작성 인터페이스
      *
-     * @param customUserDetails
-     * @param reviewRequest
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param reviewRequest 독후감 데이터
      * @return
      */
     QuestionResponse writeReview(CustomUserDetails customUserDetails, ReviewRequest reviewRequest);
@@ -24,8 +24,8 @@ public interface ReviewService {
     /**
      * 캘린더에서 날짜 선택 후 독후감 조회 인터페이스
      *
-     * @param customUserDetails
-     * @param date
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param date 독후감을 보고자 하는 날짜
      * @return
      */
     ReviewByDateResponse getReviewByDate(CustomUserDetails customUserDetails, LocalDate date);
@@ -33,7 +33,7 @@ public interface ReviewService {
     /**
      * 메인 페이지 독후감 진행률 & 남은 독서일 조회 인터페이스
      *
-     * @param customUserDetails
+     * @param customUserDetails 인증된 유저의 정보 객체
      * @return
      */
     MainPageResponse mainPage(CustomUserDetails customUserDetails);
@@ -41,7 +41,7 @@ public interface ReviewService {
     /**
      * 캘린더에 독후감 진행률 조회 인터페이스
      *
-     * @param customUserDetails
+     * @param customUserDetails 인증된 유저의 정보 객체
      * @return
      */
     List<CalendarResponse> calendar(CustomUserDetails customUserDetails, Integer month);

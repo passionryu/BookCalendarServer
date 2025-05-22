@@ -24,6 +24,7 @@ import bookcalendar.server.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,17 +43,15 @@ public class ReviewServiceImpl implements ReviewService {
     private final RedisTemplate<String, String> redisTemplate;
 
     private final ReviewManager reviewManager;
-    private final EmotionMockModel emotionMockModel;
-    private final QuestionMockModel questionMockModel;
-
     private final ReviewRepository reviewRepository;
-    private final BookRepository bookRepository;
-    private final QuestionRepository questionRepository;
 
     /* AI 모델 커넥션 영역 */
     private final EmotionClient emotionClient;
     private final QuestionClient questionClient;
-    private final IntentClient intentClient;
+
+    /* Gpt Mock AI 모델 */
+    private final EmotionMockModel emotionMockModel;
+    private final QuestionMockModel questionMockModel;
 
     // ======================= 독후감 작성 영역 =========================
 
@@ -87,8 +86,9 @@ public class ReviewServiceImpl implements ReviewService {
                 emotion, member, book
         );
 
-        // review저장 후 member의 reviewCount에 +1
-        member.setReviewCount(member.getReviewCount() + 1);
+
+        member.setReviewCount(member.getReviewCount() + 1); // review저장 후 member의 reviewCount에 +1
+        reviewManager.deleteMonthlyReviewListCache(customUserDetails); // monthlyReviewList 캐시 삭제
 
         // 이벤트 큐에 유저 고유 번호를 저장
         redisTemplate.opsForSet().add("ranking:update:memberIds", member.getMemberId().toString());
@@ -156,9 +156,12 @@ public class ReviewServiceImpl implements ReviewService {
 
     // ======================= 캘린더에 독후감 진행률 표시 로직 =========================
 
-    /* 캘린더에 독후감 진행률 표시 메서드 */
+    /* 캘린더에 독후감을 작성한 날짜들을 표시 메서드 */
     @Override
+    @Cacheable(value = "monthlyReviewList", key = "#customUserDetails.memberId + '-' + #month")
     public List<CalendarResponse> calendar(CustomUserDetails customUserDetails, Integer month) {
+
+        log.info("==> Cache Miss (캘린더에 독후감을 작성한 날짜 정보 반환): DB에서 캘린더에 독후감을 작성한 날짜 정보를 가져옵니다.");
 
         int targetMonth = (month != null) ? month : LocalDate.now().getMonthValue();
         int targetYear = LocalDate.now().getYear();

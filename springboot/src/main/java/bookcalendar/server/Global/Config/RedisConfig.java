@@ -4,6 +4,7 @@ import bookcalendar.server.Domain.Book.DTO.Response.BookResponse;
 import bookcalendar.server.Domain.Book.DTO.Response.PeriodResponse;
 import bookcalendar.server.Domain.Community.DTO.Response.TopLikedPosts;
 import bookcalendar.server.Domain.Review.DTO.Response.CalendarResponse;
+import bookcalendar.server.Domain.Review.DTO.Response.MainPageResponse;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -159,6 +160,17 @@ public class RedisConfig {
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(monthlyReviewListSerializer));
 
+        // ======================= Review :: 메인 페이지 독후감 진행률 & 남은 독서일 정보 - MainPageResponse =========================
+
+        Jackson2JsonRedisSerializer<MainPageResponse> mainPageResponseSerializer = new Jackson2JsonRedisSerializer<>(MainPageResponse.class);
+        mainPageResponseSerializer.setObjectMapper(objectMapper);
+
+        RedisCacheConfiguration mainPageResponseConfig = RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofHours(12)) // TTL 12시간
+                .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(mainPageResponseSerializer));
+
+
         // =======================  캐시 이름별로 서로 다른 캐싱 정책을 적용 =========================
         
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
@@ -166,6 +178,7 @@ public class RedisConfig {
         cacheConfigurations.put("monthlyBookList", monthlyBookListConfig);
         cacheConfigurations.put("top3Posts", top3Config);
         cacheConfigurations.put("monthlyReviewList", monthlyReviewListConfig);
+        cacheConfigurations.put("mainPageResponse", mainPageResponseConfig);
 
         // ======================= 최종 반환 =========================
 

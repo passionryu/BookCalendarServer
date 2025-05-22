@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,7 +51,11 @@ public class BookServiceImpl implements BookService {
     // 이번달의 도서 리스트 캐시 삭제
     @Override
     @Transactional
-    @CacheEvict(value = "bookInfo", key = "#customUserDetails.memberId") // 도서 정보 조회 캐시 삭제
+    @Caching(evict = {
+            @CacheEvict(value = "bookInfo", key = "#customUserDetails.memberId"),
+            @CacheEvict(value = "mainPageResponse", key = "#customUserDetails.memberId")
+    })
+
     public Book registerBook(BookRegisterRequest request, CustomUserDetails customUserDetails) {
 
         bookManager.checkReadingBookExist(customUserDetails.getMemberId()); // 이미 독서중인 도서가 있는지 검증
@@ -63,7 +68,11 @@ public class BookServiceImpl implements BookService {
     /* 독서 포기 메서드 */
     @Override
     @Transactional
-    @CacheEvict(value = "bookInfo", key = "#customUserDetails.memberId")
+    @Caching(evict = {
+            @CacheEvict(value = "bookInfo", key = "#customUserDetails.memberId"),
+            @CacheEvict(value = "mainPageResponse", key = "#customUserDetails.memberId")
+    })
+
     public void giveUpReading(CustomUserDetails customUserDetails) {
 
         bookManager.giveUpReading(customUserDetails);
@@ -72,7 +81,11 @@ public class BookServiceImpl implements BookService {
     /* 독서 중인 도서 독서 완료 메서드 */
     @Override
     @Transactional
-    @CacheEvict(value = "bookInfo", key = "#customUserDetails.memberId")
+    @Caching(evict = {
+            @CacheEvict(value = "bookInfo", key = "#customUserDetails.memberId"),
+            @CacheEvict(value = "mainPageResponse", key = "#customUserDetails.memberId")
+    })
+
     public List<CompleteResponse> completeReading(CustomUserDetails customUserDetails) {
 
         Member member = bookManager.getmember(customUserDetails.getMemberId());

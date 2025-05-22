@@ -14,10 +14,13 @@ import bookcalendar.server.Domain.Review.Repository.ReviewRepository;
 import bookcalendar.server.Domain.Review.ReviewException;
 import bookcalendar.server.global.Security.CustomUserDetails;
 import bookcalendar.server.global.exception.ErrorCode;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.ChatClient;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -38,6 +41,8 @@ public class ReviewManager {
     private final BookRepository bookRepository;
     private final QuestionRepository questionRepository;
     private final ChatClient chatClient;
+
+    private final CacheManager cacheManager;
 
     // ======================= Util 영역 =========================
 
@@ -146,10 +151,17 @@ public class ReviewManager {
      */
     public void deleteMonthlyReviewListCache(CustomUserDetails customUserDetails){
 
-        Set<String> keys = redisTemplate.keys("monthlyReviewList::" + customUserDetails.getMemberId() + "-*");
-        if (keys != null && !keys.isEmpty()) {
-            redisTemplate.delete(keys);
+        Cache cache = cacheManager.getCache("monthlyReviewList");
+        if (cache != null) {
+            for (int month = 1; month <= 12; month++) {
+                String key = customUserDetails.getMemberId() + "-" + month;
+                cache.evict(key); // Spring 내부 키 전략을 그대로 따름
+            }
         }
+//        Set<String> keys = redisTemplate.keys("monthlyReviewList::" + customUserDetails.getMemberId() + "-*");
+//        if (keys != null && !keys.isEmpty()) {
+//            redisTemplate.delete(keys);
+//        }
     }
 
     // ======================= 캘린더에서 날짜 선택 후 독후감 기록 조회 영역 =========================

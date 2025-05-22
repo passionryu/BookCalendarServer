@@ -111,13 +111,13 @@ public class ReviewController {
     }
 
     /**
-     * 캘린더에 독후감 진행률 표시 API
+     * 캘린더에 독후감을 작성한 날에 점으로 표시하는 API
      *
      * @param customUserDetails 인증된 유저의 정보 객체
      * @param month 달
      * @return 독후감 진행률
      */
-    @Operation(summary = "캘린더에 독후감 진행률 표시 API", description = "메인페이지 로딩시 캘린더에 독후감 진행률 표시",
+    @Operation(summary = "캘린더에 독후감을 작성한 날에 점으로 표시하는 API", description = "메인페이지 로딩시 캘린더에 독후감 진행률 표시",
             responses = {
                     @ApiResponse(responseCode = "200", description = "메인페이지 독후감 진행률이 정상적으로 표시 되었습니다."),
                     @ApiResponse(responseCode = "401", description = "엑세스 토큰이 만료되었습니다."),
@@ -127,8 +127,14 @@ public class ReviewController {
     public ResponseEntity<ApiResponseWrapper<List<CalendarResponse>>> calendar(@AuthenticationPrincipal CustomUserDetails customUserDetails,
                                                                          @RequestParam(name = "month", required = false) Integer month){
 
+        long start = System.currentTimeMillis(); // 시간 측정 시작
+
         // 캘린더에 독후감 진행률 표시 서비스 레이어 호룿
         List<CalendarResponse> calendarResponses = reviewService.calendar(customUserDetails,month);
+
+        long end = System.currentTimeMillis(); // 시간 측정 종료
+        long duration = end - start;
+        log.info("[List<CalendarResponse>] 처리 시간: {}ms", duration); // 로그 출력
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponseWrapper<>(calendarResponses,"메인페이지 독후감 진행률이 정상적으로 표시 되었습니다."));

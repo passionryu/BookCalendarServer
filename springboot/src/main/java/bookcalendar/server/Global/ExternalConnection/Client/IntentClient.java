@@ -2,6 +2,7 @@ package bookcalendar.server.global.ExternalConnection.Client;
 
 
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -22,6 +23,7 @@ public class IntentClient {
                 .uri("/intent/predict_intent")
                 .bodyValue(Map.of("text", text))
                 .retrieve()
-                .bodyToMono(String.class);
+                .bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {})
+                .map(response -> response.get("message")); // 여기서 "message" 값만 추출
     }
 }

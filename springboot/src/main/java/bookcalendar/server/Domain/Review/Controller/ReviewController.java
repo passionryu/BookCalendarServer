@@ -97,6 +97,8 @@ public class ReviewController {
     @GetMapping("/mainpage")
     public ResponseEntity<ApiResponseWrapper<MainPageResponse>> mainPage(@AuthenticationPrincipal CustomUserDetails customUserDetails){
 
+        long start = System.currentTimeMillis(); // 시간 측정 시작
+
         //현재 도서 중인 독서가 없으면 0 반환
         if (!bookRepository.existsByMemberIdAndStatus(customUserDetails.getMemberId(), Book.Status.독서중)) {
             return ResponseEntity.status(HttpStatus.OK)
@@ -105,6 +107,11 @@ public class ReviewController {
 
         //현재 도서 중인 독서가 있으면 서비스 레이어 호출
         MainPageResponse response = reviewService.mainPage(customUserDetails);
+
+        long end = System.currentTimeMillis(); // 시간 측정 종료
+        long duration = end - start;
+        log.info("[MainPageResponse] 처리 시간: {}ms", duration); // 로그 출력
+
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponseWrapper<>(response, "메인페이지 독후감 진행률 & 남은 독서일이 정상적으로 반환되었습니다.")
         );

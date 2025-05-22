@@ -24,6 +24,7 @@ import bookcalendar.server.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -58,6 +59,7 @@ public class ReviewServiceImpl implements ReviewService {
     /* 독후감 작성 메서드 */
     @Override
     @Transactional
+    @CacheEvict(value = "mainPageResponse", key = "#customUserDetails.memberId")
     public QuestionResponse writeReview(CustomUserDetails customUserDetails, ReviewRequest reviewRequest) {
 
         String contents = reviewRequest.contents(); // 오늘 독후감 본문
@@ -136,7 +138,10 @@ public class ReviewServiceImpl implements ReviewService {
 
     /* 메인 페이지 독후감 진행률 & 남은 독서일 조회 메서드 */
     @Override
+    @Cacheable(value = "mainPageResponse", key = "#customUserDetails.memberId")
     public MainPageResponse mainPage(CustomUserDetails customUserDetails) {
+
+        log.info("==> Cache Miss ( 메인 페이지 독후감 진행률 & 남은 독서일 반환): DB에서 메인 페이지 독후감 진행률 & 남은 독서일 정보를 가져옵니다.");
 
         Book book = reviewManager.getBook_UserReading(customUserDetails.getMemberId()); // 현재 독서중인 도서 객체 반환
 

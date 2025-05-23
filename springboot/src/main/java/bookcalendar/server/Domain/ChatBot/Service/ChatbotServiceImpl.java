@@ -1,6 +1,5 @@
 package bookcalendar.server.Domain.ChatBot.Service;
 
-import bookcalendar.server.Domain.Book.DTO.Request.SaveBookAutoRequest;
 import bookcalendar.server.Domain.Book.DTO.Response.CompleteResponse;
 import bookcalendar.server.Domain.ChatBot.DTO.Request.SaveBookRequest;
 import bookcalendar.server.Domain.ChatBot.Manager.RedisManager;
@@ -11,8 +10,10 @@ import bookcalendar.server.Domain.Member.Exception.MemberException;
 import bookcalendar.server.Domain.Member.Repository.MemberRepository;
 import bookcalendar.server.Domain.Mypage.Entity.Cart;
 import bookcalendar.server.Domain.Mypage.Repository.CartRepository;
-import bookcalendar.server.global.Aladin.AladinResponse;
-import bookcalendar.server.global.Aladin.AladinService;
+import bookcalendar.server.global.BookOpenApi.Aladin.AladinResponse;
+import bookcalendar.server.global.BookOpenApi.Aladin.AladinService;
+import bookcalendar.server.global.BookOpenApi.Never.NaverResponse;
+import bookcalendar.server.global.BookOpenApi.Never.NaverService;
 import bookcalendar.server.global.ExternalConnection.Client.IntentClient;
 import bookcalendar.server.global.Security.CustomUserDetails;
 import bookcalendar.server.global.exception.ErrorCode;
@@ -21,7 +22,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.ChatClient;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -37,6 +37,7 @@ public class ChatbotServiceImpl implements ChatbotService{
     private final MemberRepository memberRepository;
     private final CartRepository cartRepository;
     private final AladinService aladinService;
+    private final NaverService naverService;
     private final IntentClient intentClient;
 
    // ======================= AI 채팅 로직 =========================
@@ -79,9 +80,10 @@ public class ChatbotServiceImpl implements ChatbotService{
         String aiResponse = chatClient.call(aiPromptMessage); // 프롬프팅 메시지를 AI 챗봇에게 전송
         List<CompleteResponse> recommendations = RedisHelper.parseJsonArray(aiResponse); // AI 챗봇이 답변한 추천도서 5개를 파싱
 
-        // 알라딘 API로 각 도서의 URL 가져오기
+        // 도서 기관 Open API로 각 도서의 URL 가져오기
         recommendations = recommendations.stream().map(response -> {
             try {
+                // 1차 : 알라딘 API 호출
                 AladinResponse aladinResponse = aladinService.searchBook(response.getBookName(), response.getAuthor());
                 return new CompleteResponse(
                         response.getBookName(),
@@ -89,19 +91,29 @@ public class ChatbotServiceImpl implements ChatbotService{
                         response.getReason(),
                         aladinResponse.url()
                 );
-            } catch (Exception e) {
-                // 알라딘 API 호출 실패 시 URL을 빈 문자열로 설정
-                return new CompleteResponse(
-                        response.getBookName(),
-                        response.getAuthor(),
-                        response.getReason(),
-                        ""
-                );
+            } catch (Exception e1) {
+                try {
+                    // 2차 :네이버 API 호출
+                    NaverResponse naverResponse = naverService.searchBook(response.getBookName(), response.getAuthor());
+                    return new CompleteResponse(
+                            response.getBookName(),
+                            response.getAuthor(),
+                            response.getReason(),
+                            naverResponse.url()
+                    );
+                } catch (Exception e) {
+                    // Open API 호출 실패 시 URL을 빈 문자열로 설정
+                    return new CompleteResponse(
+                            response.getBookName(),
+                            response.getAuthor(),
+                            response.getReason(),
+                            ""
+                    );
+                }
             }
         }).collect(Collectors.toList());
 
         redisManager.deleteAllMessages(customUserDetails.getMemberId()); // Redis에 저장된 모든 대화 메시지 삭제
-
         return recommendations;
     }
 

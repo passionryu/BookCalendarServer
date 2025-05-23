@@ -1,4 +1,4 @@
-package bookcalendar.server.global.Aladin;
+package bookcalendar.server.global.BookOpenApi.Aladin;
 
 public record AladinResponse(
         String title,

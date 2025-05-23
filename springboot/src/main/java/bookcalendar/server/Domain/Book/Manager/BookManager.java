@@ -1,7 +1,6 @@
 package bookcalendar.server.Domain.Book.Manager;
 
 import bookcalendar.server.Domain.Book.DTO.Request.BookRegisterRequest;
-import bookcalendar.server.Domain.Book.DTO.Request.PeriodRequest;
 import bookcalendar.server.Domain.Book.DTO.Request.SaveBookAutoRequest;
 import bookcalendar.server.Domain.Book.DTO.Response.BookResponse;
 import bookcalendar.server.Domain.Book.DTO.Response.CompleteResponse;
@@ -17,8 +16,8 @@ import bookcalendar.server.Domain.Mypage.Entity.Cart;
 import bookcalendar.server.Domain.Mypage.Repository.CartRepository;
 import bookcalendar.server.Domain.Review.Entity.Review;
 import bookcalendar.server.Domain.Review.Repository.ReviewRepository;
-import bookcalendar.server.global.Aladin.AladinResponse;
-import bookcalendar.server.global.Aladin.AladinService;
+import bookcalendar.server.global.BookOpenApi.Aladin.AladinResponse;
+import bookcalendar.server.global.BookOpenApi.Aladin.AladinService;
 import bookcalendar.server.global.Security.CustomUserDetails;
 import bookcalendar.server.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;

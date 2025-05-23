@@ -26,12 +26,12 @@ public class AladinService {
         this.objectMapper = objectMapper;
     }
 
-    public AladinResponse searchBook(String bookTitle) throws Exception {
+    public AladinResponse searchBook(String bookTitle, String author) throws Exception {
         // 알라딘 검색 API URL 구성
         String url = UriComponentsBuilder.fromHttpUrl(aladinSearchUrl)
                 .queryParam("ttbkey", aladinApiKey)
-                .queryParam("Query", bookTitle)
-                .queryParam("QueryType", "Title")
+                .queryParam("Query", bookTitle + " " + author) // 제목과 저자 결합
+                .queryParam("QueryType", "Keyword") // QueryType을 Keyword로 변경
                 .queryParam("Output", "JS")
                 .queryParam("Version", "20131101")
                 .build()
@@ -50,7 +50,7 @@ public class AladinService {
             String link = firstItem.path("link").asText();
             return new AladinResponse(title, link);
         } else {
-            throw new Exception("No book found for title: " + bookTitle);
+            throw new Exception("No book found for title: " + bookTitle + " and author: " + author);
         }
     }
 }

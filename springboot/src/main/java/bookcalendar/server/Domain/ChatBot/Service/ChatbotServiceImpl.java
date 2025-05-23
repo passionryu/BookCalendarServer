@@ -82,7 +82,7 @@ public class ChatbotServiceImpl implements ChatbotService{
         // 알라딘 API로 각 도서의 URL 가져오기
         recommendations = recommendations.stream().map(response -> {
             try {
-                AladinResponse aladinResponse = aladinService.searchBook(response.getBookName());
+                AladinResponse aladinResponse = aladinService.searchBook(response.getBookName(), response.getAuthor());
                 return new CompleteResponse(
                         response.getBookName(),
                         response.getAuthor(),

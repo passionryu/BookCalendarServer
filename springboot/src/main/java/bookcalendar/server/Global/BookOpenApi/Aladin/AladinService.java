@@ -1,13 +1,15 @@
-package bookcalendar.server.global.Aladin;
+package bookcalendar.server.global.BookOpenApi.Aladin;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+@Slf4j
 @Service
 public class AladinService {
 
@@ -27,6 +29,7 @@ public class AladinService {
     }
 
     public AladinResponse searchBook(String bookTitle, String author) throws Exception {
+        log.info("Aladin URL 반환");
         // 알라딘 검색 API URL 구성
         String url = UriComponentsBuilder.fromHttpUrl(aladinSearchUrl)
                 .queryParam("ttbkey", aladinApiKey)

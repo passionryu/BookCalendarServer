@@ -4,9 +4,9 @@ import org.hibernate.id.IncrementGenerator;
 
 public record MainPageResponse(
         Integer progress,
-        Integer remainDate
+        String remainDate
 ) {
     public static MainPageResponse empty() {
-        return new MainPageResponse(0, 0);
+        return new MainPageResponse(0, "0");
     }
 }

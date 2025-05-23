@@ -14,7 +14,6 @@ import bookcalendar.server.Domain.Review.Repository.ReviewRepository;
 import bookcalendar.server.Domain.Review.ReviewException;
 import bookcalendar.server.global.Security.CustomUserDetails;
 import bookcalendar.server.global.exception.ErrorCode;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.ChatClient;
@@ -26,7 +25,6 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 
 @Slf4j
 @Component
@@ -89,8 +87,10 @@ public class ReviewManager {
                 .mapToInt(Review::getPages)
                 .sum();
 
-        // Progress 계산 로직
-        Integer progress = (int)(((double) (previousPages + pages) / book.getTotalPage()) * 100);
+        // 이 함수는 진행률이 100이 넘어갈 위험이 있다.
+        // Integer progress = (int)(((double) (previousPages + pages) / book.getTotalPage()) * 100);
+        // Math.min(100, )함수를 활용하여 진행률이 100이상일 지라도 100으로 제한
+        Integer progress = Math.min(100, (int)(((double)(previousPages + pages) / book.getTotalPage()) * 100));
 
         return new ProgressResponse(progress,previousPages);
 
@@ -158,10 +158,6 @@ public class ReviewManager {
                 cache.evict(key); // Spring 내부 키 전략을 그대로 따름
             }
         }
-//        Set<String> keys = redisTemplate.keys("monthlyReviewList::" + customUserDetails.getMemberId() + "-*");
-//        if (keys != null && !keys.isEmpty()) {
-//            redisTemplate.delete(keys);
-//        }
     }
 
     // ======================= 캘린더에서 날짜 선택 후 독후감 기록 조회 영역 =========================

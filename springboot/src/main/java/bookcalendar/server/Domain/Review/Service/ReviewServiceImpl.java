@@ -1,26 +1,19 @@
 package bookcalendar.server.Domain.Review.Service;
 
 import bookcalendar.server.Domain.Book.Entity.Book;
-import bookcalendar.server.Domain.Book.Exception.BookException;
-import bookcalendar.server.Domain.Book.Repository.BookRepository;
 import bookcalendar.server.Domain.Member.Entity.Member;
 import bookcalendar.server.Domain.MockAiModel.Emotion.EmotionMockModel;
 import bookcalendar.server.Domain.MockAiModel.Question.QuestionMockModel;
 import bookcalendar.server.Domain.Question.Entity.Question;
-import bookcalendar.server.Domain.Question.Exception.QuestionException;
-import bookcalendar.server.Domain.Question.Repository.QuestionRepository;
 import bookcalendar.server.Domain.Review.DTO.Request.ReviewRequest;
 import bookcalendar.server.Domain.Review.DTO.Response.*;
 import bookcalendar.server.Domain.Review.Entity.Review;
-import bookcalendar.server.Domain.Review.Exception.ReviewException;
 import bookcalendar.server.Domain.Review.Helper.ReviewHelper;
 import bookcalendar.server.Domain.Review.Manager.ReviewManager;
 import bookcalendar.server.Domain.Review.Repository.ReviewRepository;
 import bookcalendar.server.global.ExternalConnection.Client.EmotionClient;
-import bookcalendar.server.global.ExternalConnection.Client.IntentClient;
 import bookcalendar.server.global.ExternalConnection.Client.QuestionClient;
 import bookcalendar.server.global.Security.CustomUserDetails;
-import bookcalendar.server.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -31,7 +24,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
 
@@ -150,12 +142,11 @@ public class ReviewServiceImpl implements ReviewService {
                 .max(Comparator.comparing(Review::getDate)) // getDate는 LocalDate 혹은 LocalDateTime 필드
                 .orElse(null); // 비어있을 경우 null 반환
 
-        Integer remainDate = Math.toIntExact(ChronoUnit.DAYS.between(LocalDate.now(), book.getFinishDate()));
+        String remainDate = ReviewHelper.calculateRemainDate(book); // 독서 예정일까지 남은 날짜 계산 Helper 메서드 호출
 
-        // FIX: 리뷰가 없는 경우 NPE 발생 방지 (latestReview null 체크 추가)
-        if(latestReview ==null) {
-            return new MainPageResponse(0, remainDate);
-        }
+        if(latestReview ==null)
+            return new MainPageResponse(0, remainDate); // FIX: 리뷰가 없는 경우 NPE 발생 방지 (latestReview null 체크 추가)
+
         return new MainPageResponse(latestReview.getProgress(), remainDate);
     }
 

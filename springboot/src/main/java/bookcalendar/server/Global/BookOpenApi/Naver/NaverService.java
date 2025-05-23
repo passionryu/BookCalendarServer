@@ -1,4 +1,4 @@
-package bookcalendar.server.global.BookOpenApi.Never;
+package bookcalendar.server.global.BookOpenApi.Naver;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;

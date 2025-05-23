@@ -1,4 +1,4 @@
-package bookcalendar.server.global.BookOpenApi.Never;
+package bookcalendar.server.global.BookOpenApi.Naver;
 
 public record NaverResponse(
         String title,

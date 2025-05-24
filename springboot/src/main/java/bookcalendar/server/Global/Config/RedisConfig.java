@@ -3,6 +3,7 @@ package bookcalendar.server.global.config;
 import bookcalendar.server.Domain.Book.DTO.Response.BookResponse;
 import bookcalendar.server.Domain.Book.DTO.Response.PeriodResponse;
 import bookcalendar.server.Domain.Community.DTO.Response.TopLikedPosts;
+import bookcalendar.server.Domain.Mypage.DTO.Response.MyReviewList;
 import bookcalendar.server.Domain.Review.DTO.Response.CalendarResponse;
 import bookcalendar.server.Domain.Review.DTO.Response.MainPageResponse;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -112,17 +113,13 @@ public class RedisConfig {
 
         // ======================= Book :: 도서 정보 조회 - BookResponse =========================
 
-        /* BookResponse 전용 Serializer 설정 */
         Jackson2JsonRedisSerializer<BookResponse> serializer = new Jackson2JsonRedisSerializer<>(BookResponse.class);
         serializer.setObjectMapper(objectMapper);
 
-        /*  default cache config (BookResponse 전용)  */
         RedisCacheConfiguration BookResponseConfig = RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofMinutes(60)) // TTL 60분
-                .serializeKeysWith(RedisSerializationContext.SerializationPair
-                        .fromSerializer(new StringRedisSerializer()))
-                .serializeValuesWith(RedisSerializationContext.SerializationPair
-                        .fromSerializer(serializer));
+                .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(serializer));
 
         // ======================= Book :: 월별 도서 리스트 - List<PeriodResponse> =========================
 
@@ -137,20 +134,17 @@ public class RedisConfig {
 
         // ======================= Community :: TOP3 게시글 조회 - TopLikedPosts =========================
 
-        /* TopLikedPosts 전용 Serializer 설정 */
         JavaType type = objectMapper.getTypeFactory().constructCollectionType(List.class, TopLikedPosts.class);
         Jackson2JsonRedisSerializer<List<TopLikedPosts>> topLikedPostsListSerializer = new Jackson2JsonRedisSerializer<>(type);
         topLikedPostsListSerializer.setObjectMapper(objectMapper);
 
-        /* top3Posts 캐시만 TTL과 Serializer를 따로 지정 */
         RedisCacheConfiguration top3Config = RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofMinutes(10)) // TTL 10분
-                .serializeKeysWith(RedisSerializationContext.SerializationPair
-                        .fromSerializer(new StringRedisSerializer()))
-                .serializeValuesWith(RedisSerializationContext.SerializationPair
-                        .fromSerializer(topLikedPostsListSerializer));
+                .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(topLikedPostsListSerializer));
 
         // ======================= Review :: 월별 독후감 리스트 - List<CalendarResponse> =========================
+
         Jackson2JsonRedisSerializer<List<CalendarResponse>> monthlyReviewListSerializer =
                 new Jackson2JsonRedisSerializer<>(objectMapper.getTypeFactory().constructCollectionType(List.class, CalendarResponse.class));
         monthlyReviewListSerializer.setObjectMapper(objectMapper);
@@ -170,6 +164,16 @@ public class RedisConfig {
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(mainPageResponseSerializer));
 
+        // ======================= Mypage :: 내 독후감 리스트 일괄 조회 - List<MyReviewList> =========================
+
+        Jackson2JsonRedisSerializer<List<MyReviewList>> myReviewListSerializer =
+                new Jackson2JsonRedisSerializer<>(objectMapper.getTypeFactory().constructCollectionType(List.class, MyReviewList.class));
+        myReviewListSerializer.setObjectMapper(objectMapper);
+
+        RedisCacheConfiguration myReviewListConfig = RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofHours(12)) // TTL 12시간
+                .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(myReviewListSerializer));
 
         // =======================  캐시 이름별로 서로 다른 캐싱 정책을 적용 =========================
         
@@ -179,6 +183,7 @@ public class RedisConfig {
         cacheConfigurations.put("top3Posts", top3Config);
         cacheConfigurations.put("monthlyReviewList", monthlyReviewListConfig);
         cacheConfigurations.put("mainPageResponse", mainPageResponseConfig);
+        cacheConfigurations.put("myReviewList", myReviewListConfig);
 
         // ======================= 최종 반환 =========================
 

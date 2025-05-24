@@ -24,6 +24,7 @@ import bookcalendar.server.global.Security.CustomUserDetails;
 import bookcalendar.server.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -125,7 +126,10 @@ public class MypageServiceImpl implements MypageService {
      * @return 독후감 리스트 반환
      */
     @Override
+    @Cacheable(value = "myReviewList", key = "#customUserDetails.memberId")
     public List<MyReviewList> getReviewList(CustomUserDetails customUserDetails) {
+
+        log.info("==> Cache Miss (내 독후감 리스트 반환): DB에서 내 독후감 리스트 정보를 가져옵니다.");
 
         // 해당 유저가 지금까지 작성한 모든 독후감 객체 반환
         List<Review> myReviewLists = mypageManager.getReviewListByMemberId(customUserDetails.getMemberId());

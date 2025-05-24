@@ -85,7 +85,6 @@ public class BookServiceImpl implements BookService {
             @CacheEvict(value = "bookInfo", key = "#customUserDetails.memberId"),
             @CacheEvict(value = "mainPageResponse", key = "#customUserDetails.memberId")
     })
-
     public List<CompleteResponse> completeReading(CustomUserDetails customUserDetails) {
 
         Member member = bookManager.getmember(customUserDetails.getMemberId());

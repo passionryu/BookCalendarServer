@@ -128,6 +128,18 @@ services:
       timeout: 5s
       retries: 5
 
+  mysqld-exporter:
+    image: prom/mysqld-exporter
+    container_name: mysqld-exporter
+    environment:
+      - DATA_SOURCE_NAME=bookcalendar:bookcalendar123@(mariadb:3306)/
+    ports:
+      - "9104:9104"
+    depends_on:
+      - mariadb
+    networks:
+      - bookcalendar_network
+
   prometheus:
     image: docker.io/prom/prometheus:latest
     container_name: prometheus

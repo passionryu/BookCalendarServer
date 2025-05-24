@@ -118,8 +118,14 @@ public class MypageController {
     @GetMapping("/reviews")
     public ResponseEntity<ApiResponseWrapper<List<MyReviewList>>> getReviewList(@AuthenticationPrincipal CustomUserDetails customUserDetails){
 
+        long start = System.currentTimeMillis(); // 시간 측정 시작
+
         // 내 독후감 리스트 일괄 조회 서비스 레이어 호출
         List<MyReviewList> myReviewList = mypageService.getReviewList(customUserDetails);
+
+        long end = System.currentTimeMillis(); // 시간 측정 종료
+        long duration = end - start;
+        log.info("[List<MyReviewList>] 처리 시간: {}ms", duration); // 로그 출력
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponseWrapper<>(myReviewList, "내 독후감 리스트가 정상적으로 조회되었습니다."));

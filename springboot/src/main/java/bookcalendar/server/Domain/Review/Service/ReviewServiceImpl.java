@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,6 +53,10 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     @Transactional
     @CacheEvict(value = "mainPageResponse", key = "#customUserDetails.memberId")
+    @Caching(evict = {
+            @CacheEvict(value = "mainPageResponse", key = "#customUserDetails.memberId"),
+            @CacheEvict(value = "myReviewList", key = "#customUserDetails.memberId")
+    })
     public QuestionResponse writeReview(CustomUserDetails customUserDetails, ReviewRequest reviewRequest) {
 
         String contents = reviewRequest.contents(); // 오늘 독후감 본문

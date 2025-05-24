@@ -2,9 +2,12 @@ package bookcalendar.server.global.config;
 
 import bookcalendar.server.Domain.Book.DTO.Response.BookResponse;
 import bookcalendar.server.Domain.Book.DTO.Response.PeriodResponse;
+import bookcalendar.server.Domain.Community.DTO.Response.PostListResponse;
 import bookcalendar.server.Domain.Community.DTO.Response.TopLikedPosts;
 import bookcalendar.server.Domain.Mypage.DTO.Response.MyReviewList;
 import bookcalendar.server.Domain.Mypage.DTO.Response.MyScrapListResponse;
+import bookcalendar.server.Domain.Mypage.DTO.Response.StatisticResponse;
+import bookcalendar.server.Domain.Mypage.Entity.Cart;
 import bookcalendar.server.Domain.Review.DTO.Response.CalendarResponse;
 import bookcalendar.server.Domain.Review.DTO.Response.MainPageResponse;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -117,7 +120,7 @@ public class RedisConfig {
         Jackson2JsonRedisSerializer<BookResponse> serializer = new Jackson2JsonRedisSerializer<>(BookResponse.class);
         serializer.setObjectMapper(objectMapper);
 
-        RedisCacheConfiguration BookResponseConfig = RedisCacheConfiguration.defaultCacheConfig()
+        RedisCacheConfiguration bookResponseConfig = RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofMinutes(60)) // TTL 60분
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(serializer));
@@ -143,6 +146,17 @@ public class RedisConfig {
                 .entryTtl(Duration.ofMinutes(10)) // TTL 10분
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(topLikedPostsListSerializer));
+
+        // ======================= Community : 게시글 리스트 일괄 조회 - List<PostListResponse> =========================
+
+        Jackson2JsonRedisSerializer<List<PostListResponse>> postListSerializer =
+                new Jackson2JsonRedisSerializer<>(objectMapper.getTypeFactory().constructCollectionType(List.class, PostListResponse.class));
+        postListSerializer.setObjectMapper(objectMapper);
+
+        RedisCacheConfiguration PostListConfig = RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofMinutes(10)) // TTL 10분
+                .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(postListSerializer));
 
         // ======================= Review :: 월별 독후감 리스트 - List<CalendarResponse> =========================
 
@@ -182,21 +196,45 @@ public class RedisConfig {
                 new Jackson2JsonRedisSerializer<>(objectMapper.getTypeFactory().constructCollectionType(List.class, MyScrapListResponse.class));
         myScrapListSerializer.setObjectMapper(objectMapper);
 
-        RedisCacheConfiguration MyScrapListConfig = RedisCacheConfiguration.defaultCacheConfig()
+        RedisCacheConfiguration myScrapListConfig = RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofHours(1)) // TTL 1시간
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(myScrapListSerializer));
 
+        // ======================= Mypage :: 내 장바구니 리스트 일괄 조회 List<Cart> =========================
+
+        Jackson2JsonRedisSerializer<List<Cart>> myCartListSerializer =
+                new Jackson2JsonRedisSerializer<>(objectMapper.getTypeFactory().constructCollectionType(List.class, Cart.class));
+        myCartListSerializer.setObjectMapper(objectMapper);
+
+        RedisCacheConfiguration myCartListConfig = RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofHours(1)) // TTL 1시간
+                .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(myCartListSerializer));
+
+        // ======================= Mypage :: 독서 수 & 독후감 작성 수 조회- StatisticResponse =========================
+
+        Jackson2JsonRedisSerializer<StatisticResponse> statisticResponseSerializer = new Jackson2JsonRedisSerializer<>(StatisticResponse.class);
+        statisticResponseSerializer.setObjectMapper(objectMapper);
+
+        RedisCacheConfiguration statisticResponseConfig = RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofHours(12)) // TTL 12시간
+                .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(statisticResponseSerializer));
+
         // =======================  캐시 이름별로 서로 다른 캐싱 정책을 적용 =========================
         
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
-        cacheConfigurations.put("bookInfo", BookResponseConfig);
+        cacheConfigurations.put("bookInfo", bookResponseConfig);
         cacheConfigurations.put("monthlyBookList", monthlyBookListConfig);
         cacheConfigurations.put("top3Posts", top3Config);
         cacheConfigurations.put("monthlyReviewList", monthlyReviewListConfig);
         cacheConfigurations.put("mainPageResponse", mainPageResponseConfig);
         cacheConfigurations.put("myReviewList", myReviewListConfig);
-        cacheConfigurations.put("myScrapList", MyScrapListConfig);
+        cacheConfigurations.put("myScrapList", myScrapListConfig);
+        cacheConfigurations.put("myCartList", myCartListConfig);
+        cacheConfigurations.put("myStatistics", statisticResponseConfig);
+        cacheConfigurations.put("postList", PostListConfig);
 
         // ======================= 최종 반환 =========================
 
@@ -256,11 +294,6 @@ public class RedisConfig {
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(new StringRedisSerializer());
 
-//        template.setKeySerializer(new StringRedisSerializer());
-//        template.setValueSerializer(new StringRedisSerializer());
-//        template.setHashKeySerializer(new StringRedisSerializer());
-//        template.setHashValueSerializer(new StringRedisSerializer());
-//        template.afterPropertiesSet();
         return template;
     }
 }

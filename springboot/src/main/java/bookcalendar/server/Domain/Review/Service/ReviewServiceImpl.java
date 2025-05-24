@@ -55,7 +55,8 @@ public class ReviewServiceImpl implements ReviewService {
     @CacheEvict(value = "mainPageResponse", key = "#customUserDetails.memberId")
     @Caching(evict = {
             @CacheEvict(value = "mainPageResponse", key = "#customUserDetails.memberId"),
-            @CacheEvict(value = "myReviewList", key = "#customUserDetails.memberId")
+            @CacheEvict(value = "myReviewList", key = "#customUserDetails.memberId"),
+            @CacheEvict(value = "myStatistics", key = "#customUserDetails.memberId")
     })
     public QuestionResponse writeReview(CustomUserDetails customUserDetails, ReviewRequest reviewRequest) {
 

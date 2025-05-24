@@ -49,6 +49,7 @@ public class CommunityServiceImpl implements CommunityService {
     /* 게시글 작성 메서드 */
     @Override
     @Transactional
+    @CacheEvict(value = "postList")
     public Integer writePost(CustomUserDetails customUserDetails, PostRequest postRequest) {
 
         // 현재 멤버 객체 반환
@@ -61,6 +62,7 @@ public class CommunityServiceImpl implements CommunityService {
 
     /* 게시글 삭제 메서드 */
     @Override
+    @CacheEvict(value = "postList")
     public void deletePost(CustomUserDetails customUserDetails, Integer postId) {
 
         // 게시글 ID를 통한 게시글 객체 반환
@@ -88,9 +90,11 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     /* 게시글 리스트 반환 메서드 */
-    /* todo : 캐싱 시스템 적용하기 - 누군가 올리면 캐싱 무효화 */
     @Override
+    @Cacheable(value = "postList")
     public List<PostListResponse> getPostList() {
+
+        log.info("==> Cache Miss (게시글 리스트 반환) : DB에서 게시글 리스트 정보를 가져옵니다.");
 
         // 게시글 리스트 DTO 반환
         return postRepository.findAllPostSummaries();

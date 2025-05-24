@@ -120,8 +120,14 @@ public class CommunityController {
     @GetMapping("/lists")
     public ResponseEntity<ApiResponseWrapper<List<PostListResponse>>> getPostList(){
 
+        long start = System.currentTimeMillis(); // 시간 측정 시작
+
         // 게시글 리스트 반환 서비스 레이어 호출
         List<PostListResponse> postList = communityService.getPostList();
+
+        long end = System.currentTimeMillis(); // 시간 측정 종료
+        long duration = end - start;
+        log.info("[List<PostListResponse>] 처리 시간: {}ms", duration); // 로그 출력
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponseWrapper<>(postList,"커뮤니티 게시글 리스트가 정상적으로 조회되었습니다."));

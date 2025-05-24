@@ -44,15 +44,24 @@ public interface PostRepository extends JpaRepository<Post, Integer> {
 
 
         /**
-         * 키워드로 게시글 검색
+         * 키워드로 게시글 검색(성능 개선 버전 : 제목, 저자, 본문 인식 가능)
          *
          * @param keyword 검색 키워드
          * @return 게시글 리스트
          */
-        @Query("SELECT new bookcalendar.server.Domain.Community.DTO.Response.PostListResponse(p.postId, p.title, m.nickName, p.date) "
-                        +
-                        "FROM Post p JOIN p.member m WHERE p.title LIKE %:keyword%")
+        @Query("SELECT new bookcalendar.server.Domain.Community.DTO.Response.PostListResponse(" +
+                "p.postId, p.title, m.nickName, p.date) " +
+                "FROM Post p JOIN p.member m " +
+                "WHERE p.title LIKE %:keyword% " +
+                "   OR p.contents LIKE %:keyword% " +
+                "   OR m.nickName LIKE %:keyword%")
         List<PostListResponse> searchPostsByKeyword(@Param("keyword") String keyword);
+
+          /* 구버전 : 제목만 인식 가능 */
+//        @Query("SELECT new bookcalendar.server.Domain.Community.DTO.Response.PostListResponse(p.postId, p.title, m.nickName, p.date) "
+//                        +
+//                        "FROM Post p JOIN p.member m WHERE p.title LIKE %:keyword%")
+//        List<PostListResponse> searchPostsByKeyword(@Param("keyword") String keyword);
 
 
 

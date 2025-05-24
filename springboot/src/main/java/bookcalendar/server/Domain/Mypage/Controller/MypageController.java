@@ -192,8 +192,14 @@ public class MypageController {
     @GetMapping("/scraps")
     public ResponseEntity<ApiResponseWrapper<List<MyScrapListResponse>>> getScrapList(@AuthenticationPrincipal CustomUserDetails customUserDetails){
 
+        long start = System.currentTimeMillis(); // 시간 측정 시작
+
         // 내 스크랩 리스트 조회 서비스 레이어 호출
         List<MyScrapListResponse> myScrapList = mypageService.getScrapList(customUserDetails);
+
+        long end = System.currentTimeMillis(); // 시간 측정 종료
+        long duration = end - start;
+        log.info("[List<MyScrapListResponse>] 처리 시간: {}ms", duration); // 로그 출력
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponseWrapper<>(myScrapList, "내 스크랩 리스트가 정상적으로 반환되었습니다"));

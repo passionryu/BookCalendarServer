@@ -4,6 +4,7 @@ import bookcalendar.server.Domain.Book.DTO.Response.BookResponse;
 import bookcalendar.server.Domain.Book.DTO.Response.PeriodResponse;
 import bookcalendar.server.Domain.Community.DTO.Response.TopLikedPosts;
 import bookcalendar.server.Domain.Mypage.DTO.Response.MyReviewList;
+import bookcalendar.server.Domain.Mypage.DTO.Response.MyScrapListResponse;
 import bookcalendar.server.Domain.Review.DTO.Response.CalendarResponse;
 import bookcalendar.server.Domain.Review.DTO.Response.MainPageResponse;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -175,6 +176,17 @@ public class RedisConfig {
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
                 .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(myReviewListSerializer));
 
+        // ======================= Mypage :: 내 스크랩 리스트 일괄 조회 - List<MyScrapListResponse> =========================
+
+        Jackson2JsonRedisSerializer<List<MyScrapListResponse>> myScrapListSerializer =
+                new Jackson2JsonRedisSerializer<>(objectMapper.getTypeFactory().constructCollectionType(List.class, MyScrapListResponse.class));
+        myScrapListSerializer.setObjectMapper(objectMapper);
+
+        RedisCacheConfiguration MyScrapListConfig = RedisCacheConfiguration.defaultCacheConfig()
+                .entryTtl(Duration.ofHours(1)) // TTL 1시간
+                .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(myScrapListSerializer));
+
         // =======================  캐시 이름별로 서로 다른 캐싱 정책을 적용 =========================
         
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
@@ -184,6 +196,7 @@ public class RedisConfig {
         cacheConfigurations.put("monthlyReviewList", monthlyReviewListConfig);
         cacheConfigurations.put("mainPageResponse", mainPageResponseConfig);
         cacheConfigurations.put("myReviewList", myReviewListConfig);
+        cacheConfigurations.put("myScrapList", MyScrapListConfig);
 
         // ======================= 최종 반환 =========================
 

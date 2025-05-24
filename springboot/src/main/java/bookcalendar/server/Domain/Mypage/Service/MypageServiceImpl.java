@@ -24,6 +24,7 @@ import bookcalendar.server.global.Security.CustomUserDetails;
 import bookcalendar.server.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -196,7 +197,10 @@ public class MypageServiceImpl implements MypageService {
      * @return 스크랩 정보 DTO 리스트
      */
     @Override
+    @Cacheable(value = "myScrapList", key = "#customUserDetails.memberId")
     public List<MyScrapListResponse> getScrapList(CustomUserDetails customUserDetails) {
+
+        log.info("==> Cache Miss (내 스크랩 리스트 반환): DB에서 내 스크랩 리스트 정보를 가져옵니다.");
 
         // 유저의 고유 번호를 통해서 스크랩 리스트 반환
         List<Scrap> scrapList = mypageManager.getScrapListByMemberId(customUserDetails.getMemberId());
@@ -241,6 +245,7 @@ public class MypageServiceImpl implements MypageService {
      */
     @Override
     @Transactional
+    @CacheEvict(value = "myScrapList", key = "#customUserDetails.memberId")
     public void deleteScrap(Integer scrapId) {
 
         // 요청이 들어온 스크랩 객체가 있는지 확인, 없으면 에러 반환

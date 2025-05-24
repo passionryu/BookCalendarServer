@@ -21,6 +21,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -203,6 +204,7 @@ public class CommunityServiceImpl implements CommunityService {
     /* 게시글 스크랩 메서드 */
     @Override
     @Transactional
+    @CacheEvict(value = "myScrapList", key = "#customUserDetails.memberId")
     public void scrapPost(CustomUserDetails customUserDetails, Integer postId) {
 
         Member member = communityManager.getMember(customUserDetails.getMemberId());

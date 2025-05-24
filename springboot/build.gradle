@@ -59,7 +59,6 @@ dependencies {
 	implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter:0.8.0'
 	/* Prometheus */
 	implementation 'io.micrometer:micrometer-registry-prometheus'
-	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	/* jackson */
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.0'
 	/* DigestUtils */

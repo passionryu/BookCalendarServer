@@ -267,6 +267,7 @@ public class MypageServiceImpl implements MypageService {
      */
     @Override
     @Transactional
+    @CacheEvict(value = "myCartList", key = "#customUserDetails.memberId")
     public Cart saveBookToCartByManual(CustomUserDetails customUserDetails, ManualCartRequest manualCartRequest) {
 
         // 현재의 멤버 객체 반환
@@ -291,7 +292,10 @@ public class MypageServiceImpl implements MypageService {
      * @return 장바구니 DTO 리스트
      */
     @Override
+    @Cacheable(value = "myCartList", key = "#customUserDetails.memberId")
     public List<Cart> getCartList(CustomUserDetails customUserDetails) {
+
+        log.info("==> Cache Miss (내 장바구니 리스트 반환): DB에서 내 장바구니 리스트 정보를 가져옵니다.");
 
         // 장바구니의 도서 리스트 반환
         List<Cart> cartList = cartRepository.findByMember_MemberId(customUserDetails.getMemberId());
@@ -306,6 +310,7 @@ public class MypageServiceImpl implements MypageService {
      */
     @Override
     @Transactional
+    @CacheEvict(value = "myCartList", key = "#customUserDetails.memberId")
     public void deleteCart(Integer cartId) {
 
         /**
@@ -331,7 +336,10 @@ public class MypageServiceImpl implements MypageService {
      * @return 독서 수 & 독후감 작성 수 DTO
      */
     @Override
+    @Cacheable(value = "myStatistics", key = "#customUserDetails.memberId")
     public StatisticResponse getStatistic(CustomUserDetails customUserDetails) {
+
+        log.info("==> Cache Miss (내 독서 수 & 독후감 작성 수 반환): DB에서 내 독서 수 & 독후감 작성 수 정보를 가져옵니다.");
 
         // 인증된 유저 정보 객체를 통해 member 객체 반환
         Member member = mypageManager.getMember(customUserDetails.getMemberId());

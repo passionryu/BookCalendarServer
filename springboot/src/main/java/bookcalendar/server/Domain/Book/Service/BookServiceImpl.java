@@ -83,7 +83,8 @@ public class BookServiceImpl implements BookService {
     @Transactional
     @Caching(evict = {
             @CacheEvict(value = "bookInfo", key = "#customUserDetails.memberId"),
-            @CacheEvict(value = "mainPageResponse", key = "#customUserDetails.memberId")
+            @CacheEvict(value = "mainPageResponse", key = "#customUserDetails.memberId"),
+            @CacheEvict(value = "myStatistics", key = "#customUserDetails.memberId")
     })
     public List<CompleteResponse> completeReading(CustomUserDetails customUserDetails) {
 
@@ -96,6 +97,7 @@ public class BookServiceImpl implements BookService {
     /* 추천 도서에서 저장 버튼을 눌러 장바구니에 책 저장 메서드 */
     @Override
     @Transactional
+    @CacheEvict(value = "myCartList", key = "#customUserDetails.memberId")
     public Cart saveBookToCartByAuto(CustomUserDetails customUserDetails, SaveBookAutoRequest saveBookAutoRequest) {
 
         return bookManager.saveAutoCart(customUserDetails, saveBookAutoRequest);

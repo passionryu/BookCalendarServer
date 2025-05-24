@@ -291,8 +291,14 @@ public class MypageController {
     @GetMapping("/cart")
     public ResponseEntity<ApiResponseWrapper<List<Cart>>> getCartList(@AuthenticationPrincipal CustomUserDetails customUserDetails){
 
+        long start = System.currentTimeMillis(); // 시간 측정 시작
+
         // 장바구니 일괄 조회 서비스 레이어 호출
         List<Cart> cartList = mypageService.getCartList(customUserDetails);
+
+        long end = System.currentTimeMillis(); // 시간 측정 종료
+        long duration = end - start;
+        log.info("[List<Cart>] 처리 시간: {}ms", duration); // 로그 출력
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponseWrapper<>(cartList,"장바구니의 책이 정상적으로 조회 되었습니다."));
@@ -338,8 +344,14 @@ public class MypageController {
     @GetMapping("/statistics")
     public ResponseEntity<ApiResponseWrapper<StatisticResponse>> getStatistics(@AuthenticationPrincipal CustomUserDetails customUserDetails){
 
+        long start = System.currentTimeMillis(); // 시간 측정 시작
+
         // 독서 수 & 독후감 작성 수 조회 서비스 레이어 호출
         StatisticResponse statisticResponse = mypageService.getStatistic(customUserDetails);
+
+        long end = System.currentTimeMillis(); // 시간 측정 종료
+        long duration = end - start;
+        log.info("[StatisticResponse] 처리 시간: {}ms", duration); // 로그 출력
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponseWrapper<>(statisticResponse,"독서 수와 독후감 작성수가 정상적으로 되었습니다."));

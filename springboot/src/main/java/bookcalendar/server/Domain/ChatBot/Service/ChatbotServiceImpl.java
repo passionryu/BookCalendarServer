@@ -20,6 +20,7 @@ import bookcalendar.server.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.ChatClient;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -120,6 +121,7 @@ public class ChatbotServiceImpl implements ChatbotService{
     /* 추천 도서 장바구니에 저장 메서드 */
     @Override
     @Transactional
+    @CacheEvict(value = "myCartList", key = "#customUserDetails.memberId")
     public Cart saveBookToCartByAuto(CustomUserDetails customUserDetails, SaveBookRequest saveBookAutoRequest) {
         // 현재 멤버 객체 반환
         Member member = memberRepository.findByMemberId(customUserDetails.getMemberId())

@@ -132,7 +132,7 @@ services:
     image: prom/mysqld-exporter
     container_name: mysqld-exporter
     environment:
-      - DATA_SOURCE_NAME=bookcalendar:root@(mariadb:3306)/
+      - DATA_SOURCE_NAME=bookcalendar:bookcalendar123@(mariadb:3306)/
     ports:
       - "9104:9104"
     depends_on:

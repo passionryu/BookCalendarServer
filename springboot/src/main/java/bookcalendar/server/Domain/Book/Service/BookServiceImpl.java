@@ -85,11 +85,13 @@ public class BookServiceImpl implements BookService {
             @CacheEvict(value = "bookInfo", key = "#customUserDetails.memberId"),
             @CacheEvict(value = "mainPageResponse", key = "#customUserDetails.memberId"),
             @CacheEvict(value = "myStatistics", key = "#customUserDetails.memberId")
-    })
+    })  
     public List<CompleteResponse> completeReading(CustomUserDetails customUserDetails) {
 
         Member member = bookManager.getmember(customUserDetails.getMemberId());
         Book book = bookManager.getRedaingBook(customUserDetails.getMemberId());
+
+        // todo : Manager 메서드는 도서 추천 메서드로 이름 정정
 
         return bookManager.completeReading(member,book);
     }

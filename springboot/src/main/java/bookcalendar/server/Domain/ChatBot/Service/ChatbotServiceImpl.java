@@ -12,6 +12,8 @@ import bookcalendar.server.Domain.Mypage.Entity.Cart;
 import bookcalendar.server.Domain.Mypage.Repository.CartRepository;
 import bookcalendar.server.global.BookOpenApi.Aladin.AladinResponse;
 import bookcalendar.server.global.BookOpenApi.Aladin.AladinService;
+import bookcalendar.server.global.BookOpenApi.NationalCentralLibrary.NationalCentralLibraryResponse;
+import bookcalendar.server.global.BookOpenApi.NationalCentralLibrary.NationalCentralLibraryService;
 import bookcalendar.server.global.BookOpenApi.Naver.NaverResponse;
 import bookcalendar.server.global.BookOpenApi.Naver.NaverService;
 import bookcalendar.server.global.ExternalConnection.Client.IntentClient;
@@ -37,9 +39,11 @@ public class ChatbotServiceImpl implements ChatbotService{
     private final RedisManager redisManager;
     private final MemberRepository memberRepository;
     private final CartRepository cartRepository;
+    private final IntentClient intentClient;
+
     private final AladinService aladinService;
     private final NaverService naverService;
-    private final IntentClient intentClient;
+    private final NationalCentralLibraryService nationalCentralLibraryService;
 
    // ======================= AI 채팅 로직 =========================
 
@@ -102,7 +106,18 @@ public class ChatbotServiceImpl implements ChatbotService{
                             response.getReason(),
                             naverResponse.url()
                     );
-                } catch (Exception e) {
+                } catch (Exception e2) {
+                    try {
+                        // 3차: 국립중앙도서관 API 호출
+                        NationalCentralLibraryResponse nclResponse = nationalCentralLibraryService.searchBook(response.getBookName(), response.getAuthor());
+                        return new CompleteResponse(
+                                response.getBookName(),
+                                response.getAuthor(),
+                                response.getReason(),
+                                nclResponse.url()
+                        );
+                    }
+                catch (Exception e) {
                     // Open API 호출 실패 시 URL을 빈 문자열로 설정
                     return new CompleteResponse(
                             response.getBookName(),
@@ -110,6 +125,7 @@ public class ChatbotServiceImpl implements ChatbotService{
                             response.getReason(),
                             ""
                     );
+                }
                 }
             }
         }).collect(Collectors.toList());

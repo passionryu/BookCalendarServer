@@ -1,6 +1,5 @@
 package bookcalendar.server.Domain.Community.Service;
 
-import bookcalendar.server.Domain.Book.Exception.BookException;
 import bookcalendar.server.Domain.Community.DTO.Request.CommentRequest;
 import bookcalendar.server.Domain.Community.DTO.Request.PostRequest;
 import bookcalendar.server.Domain.Community.DTO.Response.CommentResponse;
@@ -24,7 +23,6 @@ import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -49,7 +47,7 @@ public class CommunityServiceImpl implements CommunityService {
     /* 게시글 작성 메서드 */
     @Override
     @Transactional
-    @CacheEvict(value = "postList")
+    @CacheEvict(value = "postList", beforeInvocation = false)
     public Integer writePost(CustomUserDetails customUserDetails, PostRequest postRequest) {
 
         // 현재 멤버 객체 반환
@@ -59,6 +57,15 @@ public class CommunityServiceImpl implements CommunityService {
         Post post = postRepository.save(CommunityHelper.postEntityBuilder(member, postRequest));
         return post.getPostId();
     }
+    /**
+     *  @CacheEvict(value = "postList", beforeInvocation = false)  에 대한 설명
+     *  문제 상황 : 게시글 작성 이후 게시글 리스트에 방금 작성한 게시글이 조회되지 않는 문제
+     *
+     * Transactional과 @CacheEvict기 함께 쓰이는 경우
+     * DB에 메서드의 결괏값이 커밋 되기 이전에 캐시를 삭제한 후 게시글 리스트 조회 api를 호출하니,
+     * 새 커밋 DB가 반영되지 않는 문제가 있어서
+     * beforeInvocation = false를 추가해서 커밋 이후 캐시가 삭제되게 수정함
+     */
 
     /* 게시글 삭제 메서드 */
     @Override
@@ -76,8 +83,6 @@ public class CommunityServiceImpl implements CommunityService {
     }
 
     /* 랭크 반환 메서드 */
-    /* description : 독서 완료 시 캐싱 데이터 무효화 */
-    /* description : 랭킹 변동 시 캐싱 데이터 무효화 */
     @Override
     @Cacheable(value = "rankCache", key = "#customUserDetails.memberId")
     public RankResponse getRank(CustomUserDetails customUserDetails) {

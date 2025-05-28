@@ -138,7 +138,6 @@ public class BookManager {
 
         List<CompleteResponse> recommendations = BookHelper.parseRecommendations(aiResponse);
         // 알라딘 API로 각 도서의 URL 가져오기
-        // todo : 네이버 서점 API추가하기
         recommendations = recommendations.stream().map(response -> {
             try {
                 AladinResponse aladinResponse = aladinService.searchBook(response.getBookName(), response.getAuthor());

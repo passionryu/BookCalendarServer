@@ -68,46 +68,12 @@ public class BookHelper {
         );
     }
 
-    /* 별도 프롬프트 구성 함수 */
-//    public static String buildPrompt(Book book, List<String> emotions, Member member, int age) {
-//        return String.format("""
-//        다음 정보를 참고해서 사용자에게 도서 5권을 추천해줘:
-//
-//        - 읽은 책: "%s"
-//        - 장르: %s
-//        - 감정 목록: %s
-//        - 사용자 나이: %d살
-//        - 선호 장르: %s
-//        - 직업: %s
-//
-//        아래 JSON 형식으로 꼭 반환해줘:
-//
-//        [
-//          {
-//            "bookName": "책 제목",
-//            "author": "저자 이름",
-//            "reason": "이 도서를 추천하는 이유2~3줄"
-//          }
-//        ]
-//        """,
-//                book.getBookName(),
-//                book.getGenre(),
-//                emotions,
-//                age,
-//                member.getGenre(),
-//                member.getJob()
-//        );
-//    }
-
     /* JSON 응답 파싱 함수 */
     public static List<CompleteResponse> parseRecommendations(String aiResponse) {
 
         List<CompleteResponse> recommendations;
 
         try {
-//            ObjectMapper objectMapper = new ObjectMapper();
-//            return objectMapper.readValue(aiResponse, new TypeReference<>() {});
-
             // JSON 배열을 파싱하되, url 필드가 없어도 매핑 가능하도록
             List<CompleteResponse> tempList = objectMapper.readValue(
                     aiResponse,

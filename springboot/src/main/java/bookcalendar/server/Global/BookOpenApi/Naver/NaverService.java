@@ -34,6 +34,14 @@ public class NaverService {
         this.objectMapper = objectMapper;
     }
 
+    /**
+     * 제목 & 저자로 도서 Url 반환 메서드
+     *
+     * @param bookTitle 추천 도서 제목
+     * @param author 추천 도서 저자
+     * @return 추천 도서 제목, 저자, Url
+     * @throws Exception 도서 없음 메시지
+     */
     public NaverResponse searchBook(String bookTitle, String author) throws Exception {
         log.info("Naver URl 반환");
         // 네이버 검색 API URL 구성
@@ -66,4 +74,6 @@ public class NaverService {
             throw new Exception("No book found for title: " + bookTitle + " and author: " + author);
         }
     }
+
+
 }

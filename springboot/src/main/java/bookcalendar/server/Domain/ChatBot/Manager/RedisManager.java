@@ -1,20 +1,38 @@
 package bookcalendar.server.Domain.ChatBot.Manager;
 
+import bookcalendar.server.Domain.Book.DTO.Response.CompleteResponse;
+import bookcalendar.server.Domain.ChatBot.Helper.RedisHelper;
+import bookcalendar.server.global.BookOpenApi.Aladin.AladinService;
+import bookcalendar.server.global.Security.CustomUserDetails;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.chat.ChatClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class RedisManager {
 
     @Qualifier("sessionRedisTemplate")
     @Autowired
     private RedisTemplate<String, String> sessionRedisTemplate;
+    @Autowired
+    private ChatClient chatClient;
+
+    private final AladinService aladinService;
+    /* 도서 주제 블랙리스트 */
+    private static final Set<String> INVALID_TOPICS = Set.of("책", "도서", "서적", "추천", "중고", "알라딘",
+            "포장팩", "가방", "쇼핑", "상품", "판매");
 
     // ======================= 챗봇 채팅 영역 =========================
 
@@ -91,5 +109,78 @@ public class RedisManager {
         String key = userNumber + ":chat";
         sessionRedisTemplate.delete(key);
         log.info("Redis에서 메시지 삭제 완료: {}", key);
+    }
+
+    /**
+     * 채팅에서 주제 추출 메서드
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @return 주제 리스트
+     */
+    public List<String> getTopicsFromMessages(CustomUserDetails customUserDetails) {
+
+        // Redis 메모리에서 모든 메시지 반환
+        String everyMessages = getAllMessage(customUserDetails.getMemberId());
+
+        // 2개의 메인 주제 추출 (Gpt프롬프팅, Gpt 호출, 파싱)
+        List<String> topicList = getTopicList(everyMessages).stream()
+                .filter(topic -> !INVALID_TOPICS.contains(topic)) // 주제로 나오면 안되는 블랙리스트 운영
+                .collect(Collectors.toList());
+
+        // 주제가 2개가 아니면 GPT 재호출 + 재필터링
+        if (topicList.size() != 2) {
+            List<String> retriedTopicList = getTopicList(everyMessages).stream()
+                    .filter(topic -> !INVALID_TOPICS.contains(topic))
+                    .collect(Collectors.toList());
+
+            topicList = retriedTopicList.size() == 2 ? retriedTopicList : List.of(); // 그래도 안 되면 빈 리스트 반환
+        }
+
+        return topicList;
+    }
+
+    /**
+     * 알라딘에서 2개의 주제로 총 5권의 추천도서를 반환
+     *
+     * @param topicList 주제 2개
+     * @return 5권의 추천도서
+     */
+    public List<CompleteResponse> getBookFromAladin(List<String> topicList){
+
+        List<CompleteResponse> recommendations = new ArrayList<>();
+
+        // 주제1로 책 3권 추천
+        List<Optional<CompleteResponse>> topic1Books = aladinService.searchTopBooksByTopic(topicList.get(0), 3);
+        topic1Books.stream()
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .forEach(recommendations::add);
+
+        // 주제2로 책 2권 추천
+        List<Optional<CompleteResponse>> topic2Books = aladinService.searchTopBooksByTopic(topicList.get(1), 2);
+        topic2Books.stream()
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .forEach(recommendations::add);
+
+        return recommendations;
+    }
+
+    /* 주제를 통한 도서 반환 */
+    public List<String> getTopicList(String everyMessages) {
+
+        /* Helper 클래스에서 Gpt 프롬프팅 */
+        String promptedMessage = RedisHelper.buildPrompt_getTopic(everyMessages);
+
+        /* Gpt 호출 */
+        String topicsResponseByGpt = chatClient.call(promptedMessage);
+
+        /* 데이터 파싱 */
+        List<String> topicList = RedisHelper.parseTopicList(topicsResponseByGpt);
+
+        /* 로그 출력 */
+        log.info("RedisManager 클래스 getTopicList메서드 결과 : {}", topicList);
+
+        return topicList;
     }
 }

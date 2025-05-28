@@ -27,7 +27,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -44,6 +47,9 @@ public class ChatbotServiceImpl implements ChatbotService{
     private final AladinService aladinService;
     private final NaverService naverService;
     private final NationalCentralLibraryService nationalCentralLibraryService;
+
+    /* 도서 주제 블랙리스트 */
+    private static final Set<String> INVALID_TOPICS = Set.of("책", "도서", "서적");
 
    // ======================= AI 채팅 로직 =========================
 
@@ -78,59 +84,10 @@ public class ChatbotServiceImpl implements ChatbotService{
     @Transactional
     public List<CompleteResponse> recommend(CustomUserDetails customUserDetails) {
 
-
-        String everyMessages = redisManager.getAllMessage(customUserDetails.getMemberId());  // Redis 메모리에서 모든 메시지 반환
-        String aiPromptMessage = RedisHelper.getPromptMessage(everyMessages); // 도서추천을 위한 대화 내용을 AI 프롬프팅 (반드시 JSON 배열로 반환하도록 지시)
-
-        String aiResponse = chatClient.call(aiPromptMessage); // 프롬프팅 메시지를 AI 챗봇에게 전송
-        List<CompleteResponse> recommendations = RedisHelper.parseJsonArray(aiResponse); // AI 챗봇이 답변한 추천도서 5개를 파싱
-
-        // 도서 기관 Open API로 각 도서의 URL 가져오기
-        recommendations = recommendations.stream().map(response -> {
-            try {
-                // 1차 : 알라딘 API 호출
-                AladinResponse aladinResponse = aladinService.searchBook(response.getBookName(), response.getAuthor());
-                return new CompleteResponse(
-                        response.getBookName(),
-                        response.getAuthor(),
-                        response.getReason(),
-                        aladinResponse.url()
-                );
-            } catch (Exception e1) {
-                try {
-                    // 2차 :네이버 API 호출
-                    NaverResponse naverResponse = naverService.searchBook(response.getBookName(), response.getAuthor());
-                    return new CompleteResponse(
-                            response.getBookName(),
-                            response.getAuthor(),
-                            response.getReason(),
-                            naverResponse.url()
-                    );
-                } catch (Exception e2) {
-                    try {
-                        // 3차: 국립중앙도서관 API 호출
-                        NationalCentralLibraryResponse nclResponse = nationalCentralLibraryService.searchBook(response.getBookName(), response.getAuthor());
-                        return new CompleteResponse(
-                                response.getBookName(),
-                                response.getAuthor(),
-                                response.getReason(),
-                                nclResponse.url()
-                        );
-                    }
-                catch (Exception e) {
-                    // Open API 호출 실패 시 URL을 빈 문자열로 설정
-                    return new CompleteResponse(
-                            response.getBookName(),
-                            response.getAuthor(),
-                            response.getReason(),
-                            ""
-                    );
-                }
-                }
-            }
-        }).collect(Collectors.toList());
-
+        List<String> topicList = redisManager.getTopicsFromMessages(customUserDetails);  // 채팅 내용에서 두개의 주제 추출
+        List<CompleteResponse> recommendations = redisManager.getBookFromAladin(topicList);// 알라딘에서 도서 반환 메서드 호출
         redisManager.deleteAllMessages(customUserDetails.getMemberId()); // Redis에 저장된 모든 대화 메시지 삭제
+
         return recommendations;
     }
 

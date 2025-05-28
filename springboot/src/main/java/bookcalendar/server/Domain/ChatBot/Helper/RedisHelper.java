@@ -5,9 +5,11 @@ import bookcalendar.server.Domain.ChatBot.Exception.ChatBotException;
 import bookcalendar.server.global.exception.ErrorCode;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import groovy.util.logging.Slf4j;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -43,91 +45,64 @@ public class RedisHelper {
     }
 
     /**
-     * 프롬프트 메시지 커스터마이징 메서드
+     * Gpt에게 2가지의 대표 주제를 추출하도록 요청하는 프롬프트 메시지 생성기
      *
-     * @param everyMessages 모든 챗봇 대화 메시지
+     * @param everyMessages 유저와 챗봇의 모든 대화
      * @return 프롬프트 메시지
      */
-    public static String getPromptMessage(String everyMessages) {
+    public static String buildPrompt_getTopic(String everyMessages) {
         return String.format(
                 """
-                너는 이 도서 추천 서비스의 유능한 AI 도서 추천 사서이다.
-                다음은 사용자와의 챗봇 서비스에서 나눈 대화 내용이다:
+                너는 유능한 AI 분석가이다. 아래는 사용자와 챗봇이 나눈 대화 내용이다:
                 
-                - 사용자와의 지난 모든 대화: "%s"
+                - 사용자와의 대화 내용: "%s"
                 
-                이 대화 내용을 바탕으로 사용자에게 **정확히 5권의 도서**를 추천해야 한다. 
-                각 도서는 사용자의 관심사와 대화 맥락에 맞춰 선정하고, 아래 조건을 반드시 준수하라:
-                - 추천 도서는 정확히 5권이어야 하며, 그 이상도 이하도 안 된다.
-                - 각 도서의 추천 사유는 2~3문장으로 간결하고 명확하게 작성하라.
+                위 대화를 바탕으로, 사용자의 관심사 및 주요 대화 흐름을 분석하여 
+                **핵심 주제 2가지**를 추출하라.
+                
+                반드시 다음 조건을 지켜라:
+                - 주제는 **단어 단위(명사 형태)**로 추출해야 한다 (예: "리더십", "자기계발", "프로그래밍").
+                - 반드시 **정확히 2개의 주제 단어**만 추출하라. 그 이상도 이하도 안 된다.
+                - 이 2개는 전체 대화를 가장 잘 대표하는 핵심 주제어여야 한다.
+                - **주제를 상위 카테고리로 추상화하지 말고, 가능한 한 구체적인 관심사나 개념을 선택하라.**
                 - 응답은 반드시 아래 JSON 형식으로 반환하라:
                 
-                [
-                  {
-                    "bookName": "책 제목",
-                    "author": "저자 이름",
-                    "reason": "이 도서를 추천하는 이유 (2~3문장)"
-                  },
-                  ...
-                ]
+                {
+                  "topics": ["주제1", "주제2"]
+                }
                 
-                대화 내용이 모호하거나 정보가 부족하더라도, 사용자의 관심사를 추론하여 5권을 반드시 추천하라.
+                대화가 모호하더라도, 사용자의 흥미를 기반으로 **적절한 2가지 단어 주제**를 반드시 생성하라.
                 """,
                 everyMessages
         );
     }
 
-    // 이전 프롬프트 메시지 메서드 . 2025.05/19
-//    public static String getPromptMessage(String everyMessages){
-//
-//        return String.format(
-//                """
-//                너는 이 도서 추천 서비스의 유능한 AI 도서 추천 사서이다.
-//                다음은 너가 사용자와의 챗봇 서비스에서 나눈 대화 내용이다
-//                다음은 내용들을 참고하여 사용자에게 도서 5권을 추천해줘:
-//
-//                - 너(AI 도서 추천 사서 와 사용자와의 지난 모든 대화): "%s"
-//
-//                아래 JSON 형식으로 꼭 반환해줘:
-//
-//                [
-//                  {
-//                    "bookName": "책 제목",
-//                    "author": "저자 이름",
-//                    "reason": "이 도서를 추천하는 이유2~3줄"
-//                  },
-//                  ...
-//                ]
-//                """,
-//                everyMessages
-//        );
-//
-//    }
 
     /**
-     * 리스트 파서 메서드
+     * GPT가 응답한 JSON 문자열에서 "topics" 배열을 파싱하여 List<String>으로 반환
      *
-     * @param aiResponse
-     * @return
+     * @param gptResponse GPT가 반환한 JSON 문자열
+     * @return 주제 리스트 (정상적으로 파싱 실패 시 빈 리스트 반환)
      */
-    public static List<CompleteResponse> parseJsonArray(String aiResponse){
-
-        List<CompleteResponse> recommendations;
-
+    public static List<String> parseTopicList(String gptResponse) {
+        List<String> topicList = new ArrayList<>();
         try {
-            // JSON 배열을 파싱하되, url 필드가 없어도 매핑 가능하도록
-            List<CompleteResponse> tempList = objectMapper.readValue(
-                    aiResponse,
-                    new TypeReference<List<CompleteResponse>>() {}
-            );
-            // url 필드를 빈 문자열로 초기화
-            recommendations = tempList.stream()
-                    .map(resp -> new CompleteResponse(resp.getBookName(), resp.getAuthor(), resp.getReason(), resp.getUrl()))
-                    .toList();
-        } catch (JsonProcessingException e) {
-            throw new ChatBotException(ErrorCode.FAILED_TO_PARSE);
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode rootNode = objectMapper.readTree(gptResponse);
+
+            JsonNode topicsArray = rootNode.get("topics");
+            if (topicsArray != null && topicsArray.isArray()) {
+                for (JsonNode topic : topicsArray) {
+                    topicList.add(topic.asText());
+                }
+            }
+        } catch (Exception e) {
+            // 파싱 실패 로그 출력 또는 처리
+            System.err.println("GPT topic 파싱 실패: " + gptResponse);
+            e.printStackTrace();
         }
-        return recommendations;
+
+        return topicList;
     }
 
 }

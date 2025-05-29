@@ -7,10 +7,12 @@ import bookcalendar.server.Domain.Member.Entity.Member;
 import bookcalendar.server.Domain.Mypage.Entity.Cart;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -35,59 +37,67 @@ public class BookHelper {
     // ======================= 독서 완료 후 추천 도서 반환 영역 =========================
 
     /* 별도 프롬프트 구성 함수 */
-    public static String buildPrompt(Book book, List<String> emotions, Member member, int age) {
+    public static String buildPrompt(Book book, List<String> contentsList, Member member, int age) {
         return String.format("""
-    다음 정보를 참고해서 사용자에게 도서 5권을 **정확히** 추천해줘.
-    반드시 5권 모두 추천해야 하며, 부족하거나 초과하지 말고 정확히 5권만 응답해야 해:
-
-    - 읽은 책: "%s"
-    - 장르: %s
-    - 감정 목록: %s
-    - 사용자 나이: %d살
-    - 선호 장르: %s
-    - 직업: %s
-
-    아래 형식을 참고해서 **반드시 JSON 배열에 5개의 도서를 포함해 반환**해줘:
-
-    [
-      {
-        "bookName": "책 제목",
-        "author": "저자 이름",
-        "reason": "이 도서를 추천하는 이유 (2~3줄)"
-      },
-      ...
-      (총 5개 항목)
-    ]
-    """,
+            당신은 사용자의 독서 데이터를 기반으로 주요 주제를 정밀하게 추출하는 AI입니다.
+        
+            아래는 한 사용자의 독서 정보입니다.
+            이 사용자의 독후감과 정보를 바탕으로 메인 주제를 **2개만**, **단어 형식**으로 추출하세요.
+            
+            추출된 주제는 알라딘 도서 검색 API를 통해 책을 추천하는 데 사용됩니다.
+            
+            반드시 주제 2개를 각각 **단어 하나의 형식**으로 추출하세요.
+            다른 설명은 하지 마세요.
+        
+            [입력 정보]
+            - 읽은 책: "%s"
+            - 장르: %s
+            - 사용자 나이: %d살
+            - 선호 장르: %s
+            - 직업: %s
+            - 유저가 이 책에 대해 작성한 독후감 리스트: %s
+        
+             - 응답은 반드시 아래 JSON 형식으로 반환하라:
+           
+                {
+                  "topics": ["인간관계"], ["성장"]
+                }
+            """
+                ,
                 book.getBookName(),
                 book.getGenre(),
-                emotions,
                 age,
                 member.getGenre(),
-                member.getJob()
+                member.getJob(),
+                contentsList
         );
     }
 
-    /* JSON 응답 파싱 함수 */
-    public static List<CompleteResponse> parseRecommendations(String aiResponse) {
-
-        List<CompleteResponse> recommendations;
-
+    /**
+     * GPT가 응답한 JSON 문자열에서 "topics" 배열을 파싱하여 List<String>으로 반환
+     *
+     * @param gptResponse GPT가 반환한 JSON 문자열
+     * @return 주제 리스트 (정상적으로 파싱 실패 시 빈 리스트 반환)
+     */
+    public static List<String> parseTopicList(String gptResponse) {
+        List<String> topicList = new ArrayList<>();
         try {
-            // JSON 배열을 파싱하되, url 필드가 없어도 매핑 가능하도록
-            List<CompleteResponse> tempList = objectMapper.readValue(
-                    aiResponse,
-                    new TypeReference<List<CompleteResponse>>() {}
-            );
-            // url 필드를 빈 문자열로 초기화
-            recommendations = tempList.stream()
-                    .map(resp -> new CompleteResponse(resp.getBookName(), resp.getAuthor(), resp.getReason(), resp.getUrl()))
-                    .toList();
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode rootNode = objectMapper.readTree(gptResponse);
 
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException("AI 응답 파싱 실패: " + e.getMessage(), e);
+            JsonNode topicsArray = rootNode.get("topics");
+            if (topicsArray != null && topicsArray.isArray()) {
+                for (JsonNode topic : topicsArray) {
+                    topicList.add(topic.asText());
+                }
+            }
+        } catch (Exception e) {
+            // 파싱 실패 로그 출력 또는 처리
+            System.err.println("GPT topic 파싱 실패: " + gptResponse);
+            e.printStackTrace();
         }
-        return recommendations;
+
+        return topicList;
     }
 
     // ======================= 장바구니 객체 생성 영역 =========================

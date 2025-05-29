@@ -139,12 +139,7 @@ public class RedisManager {
         return topicList;
     }
 
-    /**
-     * 알라딘에서 2개의 주제로 총 5권의 추천도서를 반환
-     *
-     * @param topicList 주제 2개
-     * @return 5권의 추천도서
-     */
+    /* 알라딘에서 5권의 도서를 추출 */
     public List<CompleteResponse> getBookFromAladin(List<String> topicList){
 
         List<CompleteResponse> recommendations = new ArrayList<>();
@@ -155,13 +150,6 @@ public class RedisManager {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .forEach(recommendations::add);
-
-        // 주제2로 책 2권 추천
-//        List<Optional<CompleteResponse>> topic2Books = aladinService.searchTopBooksByTopic(topicList.get(1), 2);
-//        topic2Books.stream()
-//                .filter(Optional::isPresent)
-//                .map(Optional::get)
-//                .forEach(recommendations::add);
 
         return recommendations;
     }

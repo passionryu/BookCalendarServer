@@ -29,7 +29,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -45,6 +48,9 @@ public class BookManager {
 
     private final ChatClient chatClient;
     private final CacheManager cacheManager;
+
+    private static final Set<String> INVALID_TOPICS = Set.of("책", "도서", "서적", "추천", "중고", "알라딘",
+            "포장팩", "가방", "쇼핑", "상품", "판매");
 
     // ======================= Util 코드 =========================
 
@@ -127,45 +133,53 @@ public class BookManager {
     @Transactional
     public List<CompleteResponse> completeReading(Member member, Book book) {
 
-        List<String> emotionList = reviewRepository.findByBook_BookId(book.getBookId()).stream()
-                .map(Review::getEmotion)
-                .collect(Collectors.toList());
+        // 해당 도서에 대한 독후감 리스트를 반환
+        List<String> contentsList = reviewRepository.findByBook_BookId(book.getBookId()).stream()
+                .map(Review::getContents)
+                .toList();
 
+        // 유저의 나이 반환
         int age = Period.between(member.getBirth(), LocalDate.now()).getYears();
 
-        String prompt = BookHelper.buildPrompt(book, emotionList, member, age); // Helper 클래스에서 프롬프트 메시지 생성
-        String aiResponse = chatClient.call(prompt); // AI 추천 도서 반환
+        // Input 정보에서 2개의 메인 주제를 추출
+        List<String> topicList = getTopicsFromInformation(book,contentsList,member,age).stream()
+                .filter(topic -> !INVALID_TOPICS.contains(topic)) // 주제로 나오면 안되는 블랙리스트 운영
+                .collect(Collectors.toList());
 
-        List<CompleteResponse> recommendations = BookHelper.parseRecommendations(aiResponse);
-        // 알라딘 API로 각 도서의 URL 가져오기
-        recommendations = recommendations.stream().map(response -> {
-            try {
-                AladinResponse aladinResponse = aladinService.searchBook(response.getBookName(), response.getAuthor());
-                return new CompleteResponse(
-                        response.getBookName(),
-                        response.getAuthor(),
-                        response.getReason(),
-                        aladinResponse.url()
-                );
-            } catch (Exception e) {
-                // 알라딘 API 호출 실패 시 URL을 빈 문자열로 설정
-                return new CompleteResponse(
-                        response.getBookName(),
-                        response.getAuthor(),
-                        response.getReason(),
-                        ""
-                );
-            }
-        }).collect(Collectors.toList());
+        // 2개의 주제로 3+2=5 권 추천
+        return getBookFromAladin(topicList);
+    }
 
-        // todo : 이 두가지는 서비스 레이어로 분리
-        /* Book 객체에서 "독서중" -> "독서 완료"로 정보 수정 */
-        book.setStatus(Book.Status.독서완료);
-        bookRepository.save(book);
+    /* Input 정보에서 2개의 메인 주제를 추출 */
+    private List<String> getTopicsFromInformation(Book book, List<String> contentsList, Member member, int age){
 
-        /* Member 객체에서 독서량(Completion) +1 */
-        member.setCompletion(member.getCompletion() + 1);
-        memberRepository.save(member);
+        /* Input 정보에서 2개의 메인 주제를 추출 */
+        String prompt = BookHelper.buildPrompt(book, contentsList, member, age); // Helper 클래스에서 프롬프트 메시지 생성
+        String aiResponse = chatClient.call(prompt); // AI가 2가지의 주제 반환
+        List<String> topicList = BookHelper.parseTopicList(aiResponse); // AI의 답변을 파싱
+        log.info("getTopicList메서드 결과 : {}", topicList);
+
+        return topicList;
+    }
+
+    /* 알라딘에서 5권의 도서를 추출 */
+    private List<CompleteResponse> getBookFromAladin(List<String> topicList){
+
+        List<CompleteResponse> recommendations = new ArrayList<>();
+
+        // 주제1로 책 3권 추천
+        List<Optional<CompleteResponse>> topic1Books = aladinService.searchTopBooksByTopic(topicList.get(0), 3);
+        topic1Books.stream()
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .forEach(recommendations::add);
+
+        // 주제2로 책 2권 추천
+        List<Optional<CompleteResponse>> topic2Books = aladinService.searchTopBooksByTopic(topicList.get(1), 2);
+        topic2Books.stream()
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .forEach(recommendations::add);
 
         return recommendations;
     }

@@ -9,7 +9,9 @@ import bookcalendar.server.Domain.Book.DTO.Response.PeriodResponse;
 import bookcalendar.server.Domain.Book.Entity.Book;
 import bookcalendar.server.Domain.Book.Helper.BookHelper;
 import bookcalendar.server.Domain.Book.Manager.BookManager;
+import bookcalendar.server.Domain.Book.Repository.BookRepository;
 import bookcalendar.server.Domain.Member.Entity.Member;
+import bookcalendar.server.Domain.Member.Repository.MemberRepository;
 import bookcalendar.server.Domain.Mypage.Entity.Cart;
 import bookcalendar.server.global.Security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +31,9 @@ import java.util.List;
 public class BookServiceImpl implements BookService {
 
     private final BookManager bookManager;
+
+    private final BookRepository bookRepository;
+    private final MemberRepository memberRepository;
 
     /* 현재 독서중인 도서 존재 확인 메서드 */
     @Override
@@ -91,9 +96,15 @@ public class BookServiceImpl implements BookService {
         Member member = bookManager.getmember(customUserDetails.getMemberId());
         Book book = bookManager.getRedaingBook(customUserDetails.getMemberId());
 
-        // todo : Manager 메서드는 도서 추천 메서드로 이름 정정
+        /* 독서 완료 후 추천 도서 반환 */
+        List<CompleteResponse> bookLists = bookManager.completeReading(member,book);
 
-        return bookManager.completeReading(member,book);
+        book.setStatus(Book.Status.독서완료); // Book 객체에서 "독서중" -> "독서 완료"로 정보 수정
+        bookRepository.save(book);
+        member.setCompletion(member.getCompletion() + 1); // Member 객체에서 독서량(Completion) +1
+        memberRepository.save(member);
+
+        return bookLists;
     }
 
     /* 추천 도서에서 저장 버튼을 눌러 장바구니에 책 저장 메서드 */

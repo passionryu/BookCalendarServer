@@ -13,6 +13,7 @@ import bookcalendar.server.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -51,6 +52,15 @@ public class CommunityManager {
     public Member getMember(Integer memberId) {
         return memberRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new MemberException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    /**
+     * 게시글 리스트 캐시 삭제 메서드
+     *
+     */
+    @CachePut(value = "postList")
+    public void updatePostListCache() {
+        postRepository.findAllPostSummaries();
     }
 
     // ======================= 게시글 작성 메서드 =========================

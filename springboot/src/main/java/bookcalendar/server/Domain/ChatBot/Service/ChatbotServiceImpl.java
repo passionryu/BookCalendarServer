@@ -44,13 +44,6 @@ public class ChatbotServiceImpl implements ChatbotService{
     private final CartRepository cartRepository;
     private final IntentClient intentClient;
 
-    private final AladinService aladinService;
-    private final NaverService naverService;
-    private final NationalCentralLibraryService nationalCentralLibraryService;
-
-    /* 도서 주제 블랙리스트 */
-    private static final Set<String> INVALID_TOPICS = Set.of("책", "도서", "서적");
-
    // ======================= AI 채팅 로직 =========================
 
     /* Fast-API 서버 AI 챗봇 채팅 로직 */
@@ -84,7 +77,7 @@ public class ChatbotServiceImpl implements ChatbotService{
     @Transactional
     public List<CompleteResponse> recommend(CustomUserDetails customUserDetails) {
 
-        List<String> topicList = redisManager.getTopicsFromMessages(customUserDetails);  // 채팅 내용에서 두개의 주제 추출
+        List<String> topicList = redisManager.getTopicsFromMessages(customUserDetails);  // 채팅 내용에서 1개의 주제 추출
         List<CompleteResponse> recommendations = redisManager.getBookFromAladin(topicList);// 알라딘에서 도서 반환 메서드 호출
         redisManager.deleteAllMessages(customUserDetails.getMemberId()); // Redis에 저장된 모든 대화 메시지 삭제
 

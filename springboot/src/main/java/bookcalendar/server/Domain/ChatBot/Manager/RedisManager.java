@@ -39,8 +39,8 @@ public class RedisManager {
     /**
      * 이전 메시지 반환 메서드
      *
-     * @param userNumber
-     * @return
+     * @param userNumber 유저의 고유 번호
+     * @return 이전 메시지 반환
      */
     public String getPreviousMessage(Integer userNumber){
 
@@ -122,43 +122,31 @@ public class RedisManager {
         // Redis 메모리에서 모든 메시지 반환
         String everyMessages = getAllMessage(customUserDetails.getMemberId());
 
-        // 2개의 메인 주제 추출 (Gpt프롬프팅, Gpt 호출, 파싱)
+        // 1개의 메인 주제 추출 (Gpt프롬프팅, Gpt 호출, 파싱)
         List<String> topicList = getTopicList(everyMessages).stream()
                 .filter(topic -> !INVALID_TOPICS.contains(topic)) // 주제로 나오면 안되는 블랙리스트 운영
                 .collect(Collectors.toList());
 
         // 주제가 2개가 아니면 GPT 재호출 + 재필터링
-        if (topicList.size() != 2) {
-            List<String> retriedTopicList = getTopicList(everyMessages).stream()
-                    .filter(topic -> !INVALID_TOPICS.contains(topic))
-                    .collect(Collectors.toList());
-
-            topicList = retriedTopicList.size() == 2 ? retriedTopicList : List.of(); // 그래도 안 되면 빈 리스트 반환
-        }
+//        if (topicList.size() != 2) {
+//            List<String> retriedTopicList = getTopicList(everyMessages).stream()
+//                    .filter(topic -> !INVALID_TOPICS.contains(topic))
+//                    .collect(Collectors.toList());
+//
+//            topicList = retriedTopicList.size() == 2 ? retriedTopicList : List.of(); // 그래도 안 되면 빈 리스트 반환
+//        }
 
         return topicList;
     }
 
-    /**
-     * 알라딘에서 2개의 주제로 총 5권의 추천도서를 반환
-     *
-     * @param topicList 주제 2개
-     * @return 5권의 추천도서
-     */
+    /* 알라딘에서 5권의 도서를 추출 */
     public List<CompleteResponse> getBookFromAladin(List<String> topicList){
 
         List<CompleteResponse> recommendations = new ArrayList<>();
 
-        // 주제1로 책 3권 추천
-        List<Optional<CompleteResponse>> topic1Books = aladinService.searchTopBooksByTopic(topicList.get(0), 3);
+        // 주제1로 책 5권 추천
+        List<Optional<CompleteResponse>> topic1Books = aladinService.searchTopBooksByTopic(topicList.get(0), 5);
         topic1Books.stream()
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .forEach(recommendations::add);
-
-        // 주제2로 책 2권 추천
-        List<Optional<CompleteResponse>> topic2Books = aladinService.searchTopBooksByTopic(topicList.get(1), 2);
-        topic2Books.stream()
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .forEach(recommendations::add);

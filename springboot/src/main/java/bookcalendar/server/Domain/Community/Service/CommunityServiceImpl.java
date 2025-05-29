@@ -104,10 +104,10 @@ public class CommunityServiceImpl implements CommunityService {
 
     /* 게시글 리스트 반환 메서드 */
     @Override
-    @Cacheable(value = "postList")
+    // @Cacheable(value = "postList")
     public List<PostListResponse> getPostList() {
 
-        log.info("==> Cache Miss (게시글 리스트 반환) : DB에서 게시글 리스트 정보를 가져옵니다.");
+        // log.info("==> Cache Miss (게시글 리스트 반환) : DB에서 게시글 리스트 정보를 가져옵니다.");
 
         // 게시글 리스트 DTO 반환
         return postRepository.findAllPostSummaries();

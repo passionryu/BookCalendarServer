@@ -47,7 +47,7 @@ public class CommunityServiceImpl implements CommunityService {
     /* 게시글 작성 메서드 */
     @Override
     @Transactional
-    @CacheEvict(value = "postList", beforeInvocation = false)
+    //@CacheEvict(value = "postList", beforeInvocation = false)
     public Integer writePost(CustomUserDetails customUserDetails, PostRequest postRequest) {
 
         // 현재 멤버 객체 반환
@@ -73,7 +73,7 @@ public class CommunityServiceImpl implements CommunityService {
 
     /* 게시글 삭제 메서드 */
     @Override
-    @CacheEvict(value = "postList")
+    // @CacheEvict(value = "postList")
     public void deletePost(CustomUserDetails customUserDetails, Integer postId) {
 
         // 게시글 ID를 통한 게시글 객체 반환

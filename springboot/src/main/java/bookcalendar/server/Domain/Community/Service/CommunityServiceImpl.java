@@ -55,6 +55,10 @@ public class CommunityServiceImpl implements CommunityService {
 
         // 입력 정보 및 유저 정보를 통해 Post 엔티티 생성
         Post post = postRepository.save(CommunityHelper.postEntityBuilder(member, postRequest));
+
+        // 캐시 갱신 메서드 호출
+        communityManager.updatePostListCache();
+
         return post.getPostId();
     }
     /**
@@ -80,6 +84,10 @@ public class CommunityServiceImpl implements CommunityService {
 
         // 해당 post 객체 삭제
         postRepository.delete(post);
+
+        // 캐시 갱신 메서드 호출
+        communityManager.updatePostListCache();
+
     }
 
     /* 랭크 반환 메서드 */

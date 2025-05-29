@@ -57,7 +57,7 @@ public class CommunityServiceImpl implements CommunityService {
         Post post = postRepository.save(CommunityHelper.postEntityBuilder(member, postRequest));
 
         // 캐시 갱신 메서드 호출
-        communityManager.updatePostListCache();
+        // communityManager.updatePostListCache();
 
         return post.getPostId();
     }
@@ -86,7 +86,7 @@ public class CommunityServiceImpl implements CommunityService {
         postRepository.delete(post);
 
         // 캐시 갱신 메서드 호출
-        communityManager.updatePostListCache();
+        // communityManager.updatePostListCache();
 
     }
 

@@ -2,8 +2,12 @@ package bookcalendar.server.Domain.ChatBot.Manager;
 
 import bookcalendar.server.Domain.Book.DTO.Response.CompleteResponse;
 import bookcalendar.server.Domain.ChatBot.Helper.RedisHelper;
+import bookcalendar.server.Domain.Member.Entity.Member;
+import bookcalendar.server.Domain.Member.Exception.MemberException;
+import bookcalendar.server.Domain.Member.Repository.MemberRepository;
 import bookcalendar.server.global.BookOpenApi.Aladin.AladinService;
 import bookcalendar.server.global.Security.CustomUserDetails;
+import bookcalendar.server.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.ChatClient;
@@ -12,11 +16,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -28,11 +33,21 @@ public class RedisManager {
     private RedisTemplate<String, String> sessionRedisTemplate;
     @Autowired
     private ChatClient chatClient;
-
+    private final MemberRepository memberRepository;
     private final AladinService aladinService;
+
     /* 도서 주제 블랙리스트 */
     private static final Set<String> INVALID_TOPICS = Set.of("책", "도서", "서적", "추천", "중고", "알라딘",
             "포장팩", "가방", "쇼핑", "상품", "판매");
+
+    // ======================= Util 영역 =========================
+
+    /* 현재 멤버 객체 반환 */
+    public Member getMember(CustomUserDetails customUserDetails) {
+
+        return memberRepository.findByMemberId(customUserDetails.getMemberId())
+                .orElseThrow(()-> new MemberException(ErrorCode.USER_NOT_FOUND) );
+    }
 
     // ======================= 챗봇 채팅 영역 =========================
 
@@ -117,45 +132,63 @@ public class RedisManager {
      * @param customUserDetails 인증된 유저의 정보 객체
      * @return 주제 리스트
      */
-    public List<String> getTopicsFromMessages(CustomUserDetails customUserDetails) {
+    public String getTopicsFromMessages(CustomUserDetails customUserDetails) {
 
-        // Redis 메모리에서 모든 메시지 반환
-        String everyMessages = getAllMessage(customUserDetails.getMemberId());
+        String everyMessages = getAllMessage(customUserDetails.getMemberId()); // Redis 메모리에서 모든 메시지 반환
+        String topic = getTopic(everyMessages); // 1개의 메인 주제 추출 (Gpt프롬프팅, Gpt 호출, 파싱)
 
-        // 1개의 메인 주제 추출 (Gpt프롬프팅, Gpt 호출, 파싱)
-        List<String> topicList = getTopicList(everyMessages).stream()
-                .filter(topic -> !INVALID_TOPICS.contains(topic)) // 주제로 나오면 안되는 블랙리스트 운영
-                .collect(Collectors.toList());
-
-        // 주제가 2개가 아니면 GPT 재호출 + 재필터링
-//        if (topicList.size() != 2) {
-//            List<String> retriedTopicList = getTopicList(everyMessages).stream()
-//                    .filter(topic -> !INVALID_TOPICS.contains(topic))
-//                    .collect(Collectors.toList());
-//
-//            topicList = retriedTopicList.size() == 2 ? retriedTopicList : List.of(); // 그래도 안 되면 빈 리스트 반환
-//        }
-
-        return topicList;
+        /* 주제를 추출하고 블랙리스트에 있는 값이 아니면 주제 반환 */
+        if (topic == null || INVALID_TOPICS.contains(topic)) {
+            /* 방어 코드 1 : 만약 메인 주제를 추출하지 못했으면 혹은 블랙리스트를 추출했으면 한번더 추출한다. */
+            log.info("주제 추출 실패, 방어코드 작동 - 주제 추출 재시도");
+            topic = getTopic(everyMessages);
+            log.info("주제 추출 재시도 결과 : {}", topic);
+            if (topic != null && !INVALID_TOPICS.contains(topic)) {
+                /* 방어 코드 2 : 만약 메인 주제를 추출하지 못했으면 유저의 직업을 주제로 잡는다. */
+                Member member = getMember(customUserDetails);
+                topic = member.getJob();
+                log.info("1차 주제 추출, 2차 주제 추출 실패 - 유저의 직업으로 도서 검색 - 유저의 직업 :{}",topic);
+            }
+        }
+        return topic;
     }
 
     /* 알라딘에서 5권의 도서를 추출 */
-    public List<CompleteResponse> getBookFromAladin(List<String> topicList){
+    public List<CompleteResponse> getBookFromAladin(String topic, CustomUserDetails customUserDetails){
 
         List<CompleteResponse> recommendations = new ArrayList<>();
 
-        // 주제1로 책 5권 추천
-        List<Optional<CompleteResponse>> topic1Books = aladinService.searchTopBooksByTopic(topicList.get(0), 5);
+        // 주제로 Aladin에서 책 5권 반환
+        List<Optional<CompleteResponse>> topic1Books = aladinService.searchTopBooksByTopic(topic, 5);
         topic1Books.stream()
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .forEach(recommendations::add);
 
+        /* 만약 해당 주제로 알라딘에 충분한 도서가 없으면? */
+        int remaining = 5 - recommendations.size();
+        if (remaining > 0) {
+            /* 사용자의 직업 추출 */
+            Member member = getMember(customUserDetails);
+            String job = member.getJob();
+            log.info("주어진 주제로 5권의 도서 정상 반환 실패 - 유저의 직업인 {}을 키워드로로 남은 도서 {}권 반환", job,remaining );
+
+            /* 방어 코드 - 부족한 권 수만큼 유저 직업 기반으로 보충 */
+            List<Optional<CompleteResponse>> additionalBooks = aladinService.searchTopBooksByTopic(job, remaining);
+            additionalBooks.stream()
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .forEach(recommendations::add);
+        }else{
+            log.info("주어진 주제로 5권의 도서 정상 반환");
+        }
+
+        log.info("도서 반환 결과 : {}", recommendations);
         return recommendations;
     }
 
     /* 주제를 통한 도서 반환 */
-    public List<String> getTopicList(String everyMessages) {
+    public String getTopic(String everyMessages) {
 
         /* Helper 클래스에서 Gpt 프롬프팅 */
         String promptedMessage = RedisHelper.buildPrompt_getTopic(everyMessages);
@@ -164,11 +197,11 @@ public class RedisManager {
         String topicsResponseByGpt = chatClient.call(promptedMessage);
 
         /* 데이터 파싱 */
-        List<String> topicList = RedisHelper.parseTopicList(topicsResponseByGpt);
+        String topic = RedisHelper.parseTopic(topicsResponseByGpt);
 
         /* 로그 출력 */
-        log.info("RedisManager 클래스 getTopicList메서드 결과 : {}", topicList);
+        log.info("추출한 주제 : {}", topic);
 
-        return topicList;
+        return topic;
     }
 }

@@ -1,21 +1,20 @@
 package bookcalendar.server.Domain.ChatBot.Helper;
 
-import bookcalendar.server.Domain.Book.DTO.Response.CompleteResponse;
-import bookcalendar.server.Domain.ChatBot.Exception.ChatBotException;
-import bookcalendar.server.global.exception.ErrorCode;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import groovy.util.logging.Slf4j;
+import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class RedisHelper {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    /* 도서 주제 블랙리스트 */
+    private static final Set<String> INVALID_TOPICS = Set.of("책", "도서", "서적", "추천", "중고", "알라딘",
+            "포장팩", "가방", "쇼핑", "상품", "판매");
 
     /**
      * 메시지 프롬프팅 메서드
@@ -45,12 +44,18 @@ public class RedisHelper {
     }
 
     /**
-     * Gpt에게 2가지의 대표 주제를 추출하도록 요청하는 프롬프트 메시지 생성기
+     * Gpt에게 1가지의 대표 주제를 추출하도록 요청하는 프롬프트 메시지 생성기
      *
      * @param everyMessages 유저와 챗봇의 모든 대화
      * @return 프롬프트 메시지
      */
     public static String buildPrompt_getTopic(String everyMessages) {
+
+        /* 블랙리스트 */
+        String blacklist = INVALID_TOPICS.stream()
+                .map(word -> "\"" + word + "\"") // 각각의 항목에 "붙이기
+                .collect(Collectors.joining(", ", "[", "]")); // JSON 배열 형식으로 변환
+
         return String.format(
                 """
                 너는 유능한 AI 분석가이다. 아래는 사용자와 챗봇이 나눈 대화 내용이다:
@@ -65,6 +70,7 @@ public class RedisHelper {
                 - 반드시 **정확히 1개의 주제 단어**만 추출하라. 그 이상도 이하도 안 된다.
                 - 이 1개는 전체 대화를 가장 잘 대표하는 핵심 주제어여야 한다.
                 - **주제를 상위 카테고리로 추상화하지 말고, 가능한 한 구체적인 관심사나 개념을 선택하라.**
+                 - 다음 주제 단어들은 블랙리스트이다. 절대 출력해서는 안 된다: %s
                 - 응답은 반드시 아래 JSON 형식으로 반환하라:
                 
                 {
@@ -73,36 +79,32 @@ public class RedisHelper {
                 
                 대화가 모호하더라도, 사용자의 흥미를 기반으로 **적절한 1가지 단어 주제**를 반드시 생성하라.
                 """,
-                everyMessages
+                everyMessages, blacklist
         );
     }
 
-
     /**
-     * GPT가 응답한 JSON 문자열에서 "topics" 배열을 파싱하여 List<String>으로 반환
+     * GPT가 응답한 JSON 문자열에서 "topics" 배열의 첫 번째 요소를 파싱하여 반환
      *
      * @param gptResponse GPT가 반환한 JSON 문자열
-     * @return 주제 리스트 (정상적으로 파싱 실패 시 빈 리스트 반환)
+     * @return 첫 번째 주제 문자열 (파싱 실패 시 null 반환)
      */
-    public static List<String> parseTopicList(String gptResponse) {
-        List<String> topicList = new ArrayList<>();
+    public static String parseTopic(String gptResponse) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode rootNode = objectMapper.readTree(gptResponse);
 
             JsonNode topicsArray = rootNode.get("topics");
-            if (topicsArray != null && topicsArray.isArray()) {
-                for (JsonNode topic : topicsArray) {
-                    topicList.add(topic.asText());
-                }
+            if (topicsArray != null && topicsArray.isArray() && !topicsArray.isEmpty()) {
+                return topicsArray.get(0).asText();  // 첫 번째 주제만 추출
             }
         } catch (Exception e) {
-            // 파싱 실패 로그 출력 또는 처리
-            System.err.println("GPT topic 파싱 실패: " + gptResponse);
+            log.info("GPT topic 파싱 실패: {}", gptResponse);
             e.printStackTrace();
         }
 
-        return topicList;
+        return null;  // 파싱 실패 시 null
     }
+
 
 }

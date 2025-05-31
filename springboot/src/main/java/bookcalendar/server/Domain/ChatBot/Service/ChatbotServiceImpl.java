@@ -77,8 +77,8 @@ public class ChatbotServiceImpl implements ChatbotService{
     @Transactional
     public List<CompleteResponse> recommend(CustomUserDetails customUserDetails) {
 
-        List<String> topicList = redisManager.getTopicsFromMessages(customUserDetails);  // 채팅 내용에서 1개의 주제 추출
-        List<CompleteResponse> recommendations = redisManager.getBookFromAladin(topicList);// 알라딘에서 도서 반환 메서드 호출
+        String topic = redisManager.getTopicsFromMessages(customUserDetails);  // 채팅 내용에서 1개의 주제 추출
+        List<CompleteResponse> recommendations = redisManager.getBookFromAladin(topic,customUserDetails); // 알라딘에서 도서 반환 메서드 호출
         redisManager.deleteAllMessages(customUserDetails.getMemberId()); // Redis에 저장된 모든 대화 메시지 삭제
 
         return recommendations;

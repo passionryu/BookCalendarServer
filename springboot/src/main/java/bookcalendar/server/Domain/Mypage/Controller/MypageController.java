@@ -317,11 +317,12 @@ public class MypageController {
                     @ApiResponse(responseCode = "500", description = "서버 내부 오류")
             })
     @DeleteMapping("/cart/{cartId}")
-    public ResponseEntity<ApiResponseWrapper<String>> deleteCart(@PathVariable("cartId") Integer cartId){
+    public ResponseEntity<ApiResponseWrapper<String>> deleteCart(@AuthenticationPrincipal CustomUserDetails customUserDetails,
+                                                                 @PathVariable("cartId") Integer cartId){
 
 
         // 저장된 장바구니 도서 취소 서비스 레이어 호출
-        mypageService.deleteCart(cartId);
+        mypageService.deleteCart(cartId, customUserDetails);
 
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ApiResponseWrapper<>("장바구니 취소된 도서의 장바구니 고유 번호 : " + cartId,"장바구니의 책이 정상적으로 취소 되었습니다."));

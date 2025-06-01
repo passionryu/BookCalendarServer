@@ -298,9 +298,7 @@ public class MypageServiceImpl implements MypageService {
         log.info("==> Cache Miss (내 장바구니 리스트 반환): DB에서 내 장바구니 리스트 정보를 가져옵니다.");
 
         // 장바구니의 도서 리스트 반환
-        List<Cart> cartList = cartRepository.findByMember_MemberId(customUserDetails.getMemberId());
-
-        return cartList;
+        return cartRepository.findByMember_MemberId(customUserDetails.getMemberId());
     }
 
     /**
@@ -311,7 +309,7 @@ public class MypageServiceImpl implements MypageService {
     @Override
     @Transactional
     @CacheEvict(value = "myCartList", key = "#customUserDetails.memberId")
-    public void deleteCart(Integer cartId) {
+    public void deleteCart(Integer cartId, CustomUserDetails customUserDetails) {
 
         /**
          * 요청한 장바구니 객체가 있는지 확인

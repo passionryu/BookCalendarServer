@@ -4,6 +4,7 @@ import bookcalendar.server.Domain.Book.DTO.Response.CompleteResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.ai.chat.ChatClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -22,15 +23,17 @@ public class AladinService {
     private final String aladinApiKey;
     private final String aladinSearchUrl;
     private final ObjectMapper objectMapper;
+    private final ChatClient chatClient;
 
     public AladinService(RestTemplate restTemplate,
-                             @Value("${aladinApiKey}") String aladinApiKey,
-                             @Value("${aladinSearchUrl}") String aladinSearchUrl,
-                             ObjectMapper objectMapper) {
+                         @Value("${aladinApiKey}") String aladinApiKey,
+                         @Value("${aladinSearchUrl}") String aladinSearchUrl,
+                         ObjectMapper objectMapper, ChatClient chatClient) {
         this.restTemplate = restTemplate;
         this.aladinApiKey = aladinApiKey;
         this.aladinSearchUrl = aladinSearchUrl;
         this.objectMapper = objectMapper;
+        this.chatClient = chatClient;
     }
 
     /**
@@ -58,14 +61,37 @@ public class AladinService {
             JsonNode items = rootNode.path("item");
 
             if (items.isArray()) {
+
+                  /* 구버전 코드 : [문제점 발견] - description이 반환되지 않는 경우 종종 발생 */
+//                for (int i = 0; i < Math.min(count, items.size()); i++) {
+//                    JsonNode book = items.get(i);
+//
+//                    Optional<CompleteResponse> completeResponse = Optional.of(
+//                            CompleteResponse.builder()
+//                                    .bookName(book.path("title").asText())
+//                                    .author(book.path("author").asText())
+//                                    .reason(book.path("description").asText()) // description은 itemDescription 또는 description
+//                                    .url(book.path("link").asText())
+//                                    .build()
+//                    );
+
                 for (int i = 0; i < Math.min(count, items.size()); i++) {
                     JsonNode book = items.get(i);
 
+                    String title = book.path("title").asText();
+                    String author = book.path("author").asText();
+                    String description = book.path("description").asText();
+
+                    // 방어 코드 1 : description이 null이거나 빈 문자열인 경우 GPT로 대체 설명 생성
+                    if (description == null || description.isBlank()) {
+                        description = generateTempDescriptionWithGpt(title, author);
+                    }
+
                     Optional<CompleteResponse> completeResponse = Optional.of(
                             CompleteResponse.builder()
-                                    .bookName(book.path("title").asText())
-                                    .author(book.path("author").asText())
-                                    .reason(book.path("description").asText()) // description은 itemDescription 또는 description
+                                    .bookName(title)
+                                    .author(author)
+                                    .reason(description)
                                     .url(book.path("link").asText())
                                     .build()
                     );
@@ -81,77 +107,33 @@ public class AladinService {
     }
 
     /**
-     * 주제를 토대로 도서 리스트 반환 (각 주제별로 1권씩)
+     * 설명이 없을 시, 제목&저자 이름으로 description을 추가하는 메서드
      *
-     * @param topic 주제
-     * @return 도서 리스트
+     * @param title 도서의 제목
+     * @param author 도서의 저자
+     * @return 해당 도서의 설명
      */
-    public Optional<CompleteResponse> searchBookByTopic(String topic) {
+    private String generateTempDescriptionWithGpt(String title, String author) {
+
+        log.info("title={}, author={} - 이 책에 대해 설명을 추출하지 못하여 Gpt가 임시 생성합니다.", title, author);
+
+        String prompt = String.format("""
+        책 제목: %s
+        저자: %s
+
+        위의 책 정보를 바탕으로, 책의 주제나 내용을 추정해서 40~60자 내외로 짧은 설명 문장을 만들어줘.
+        명확한 정보가 없어도 적당한 추정 설명을 생성해.
+    """, title, author);
+
         try {
-            String url = UriComponentsBuilder.fromHttpUrl(aladinSearchUrl)
-                    .queryParam("ttbkey", aladinApiKey)
-                    .queryParam("Query", topic) // 주제 기반 검색
-                    .queryParam("QueryType", "Keyword")
-                    .queryParam("Output", "JS")
-                    .queryParam("Version", "20131101")
-                    .build()
-                    .toUriString();
-
-            ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
-            JsonNode rootNode = objectMapper.readTree(response.getBody());
-            JsonNode items = rootNode.path("item");
-
-            if (items.isArray() && items.size() > 0) {
-                JsonNode book = items.get(0); // 가장 상단 책
-                return Optional.of(
-                        CompleteResponse.builder()
-                                .bookName(book.path("title").asText())
-                                .author(book.path("author").asText())
-                                .reason(book.path("description").asText()) // itemDescription or description
-                                .url(book.path("link").asText())
-                                .build()
-                );
-            }
+            // chatClient는 사용자의 기존 GPT 통신 유틸이라 가정
+            String response = chatClient.call(prompt);
+            return response.trim();
         } catch (Exception e) {
-            log.warn("알라딘 도서 검색 실패: topic={}, message={}", topic, e.getMessage());
-        }
-        return Optional.empty();
-    }
-
-    /**
-     * 제목, 저자로 Url 반환 메서드
-     *
-     * @param bookTitle 도서 제목
-     * @param author 저자
-     * @return Url
-     * @throws Exception
-     */
-    public AladinResponse searchBook(String bookTitle, String author) throws Exception {
-        log.info("Aladin URL 반환");
-        // 알라딘 검색 API URL 구성
-        String url = UriComponentsBuilder.fromHttpUrl(aladinSearchUrl)
-                .queryParam("ttbkey", aladinApiKey)
-                .queryParam("Query", bookTitle + " " + author) // 제목과 저자 결합
-                .queryParam("QueryType", "Keyword") // QueryType을 Keyword로 변경
-                .queryParam("Output", "JS")
-                .queryParam("Version", "20131101")
-                .build()
-                .toUriString();
-
-        // API 호출
-        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
-
-        // JSON 파싱
-        JsonNode rootNode = objectMapper.readTree(response.getBody());
-        JsonNode itemNode = rootNode.path("item");
-
-        if (itemNode.isArray() && itemNode.size() > 0) {
-            JsonNode firstItem = itemNode.get(0);
-            String title = firstItem.path("title").asText();
-            String link = firstItem.path("link").asText();
-            return new AladinResponse(title, link);
-        } else {
-            throw new Exception("No book found for title: " + bookTitle + " and author: " + author);
+            log.warn("GPT 설명 생성 실패: title={}, author={}, message={}", title, author, e.getMessage());
+            return "이 책에 대한 자세한 설명은 준비 중입니다.";
         }
     }
+
+
 }

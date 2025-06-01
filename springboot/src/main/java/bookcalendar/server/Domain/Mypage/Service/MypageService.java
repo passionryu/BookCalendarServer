@@ -103,7 +103,7 @@ public interface MypageService {
      *
      * @param cartId 장바구니 객체 고유 번호
      */
-    void deleteCart(Integer cartId);
+    void deleteCart(Integer cartId, CustomUserDetails customUserDetails);
 
     /**
      * 독서 수 & 독후감 작성 수 조회 인터페이스

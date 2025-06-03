@@ -49,6 +49,20 @@ public class ReviewServiceImpl implements ReviewService {
 
     // ======================= 독후감 작성 영역 =========================
 
+
+    /* 향상된 독후감 작성 메서드 */
+    @Override
+    @Transactional
+    @CacheEvict(value = "mainPageResponse", key = "#customUserDetails.memberId")
+    @Caching(evict = {
+            @CacheEvict(value = "mainPageResponse", key = "#customUserDetails.memberId"),
+            @CacheEvict(value = "myReviewList", key = "#customUserDetails.memberId"),
+            @CacheEvict(value = "myStatistics", key = "#customUserDetails.memberId")
+    })
+    public QuestionResponse enhancedWriteReview(CustomUserDetails customUserDetails, ReviewRequest reviewRequest) {
+        return null;
+    }
+
     /* 독후감 작성 메서드 */
     @Override
     @Transactional
@@ -60,54 +74,27 @@ public class ReviewServiceImpl implements ReviewService {
     })
     public QuestionResponse writeReview(CustomUserDetails customUserDetails, ReviewRequest reviewRequest) {
 
+        /* 메서드에서 필요한 데이터 준비 */
         String contents = reviewRequest.contents(); // 오늘 독후감 본문
         Integer pages = reviewRequest.pages(); // 오늘 독서한 페이지 수
         Book book = reviewManager.getBook_UserReading(customUserDetails.getMemberId()); // 현재 유저의 독서중인 도서 객체 반환
         Member member = reviewManager.getMember(customUserDetails.getMemberId()); // 현재 유저의 멤버 객체 반환
+        ProgressResponse progressResponse = reviewManager.getProgress(customUserDetails.getMemberId(), pages); // (진행률 + 기존 독서 페이지) DTO 반환 메서드
 
-        // 오늘 독후감이 존재하는지 확인
+        /* 검증 코드 : 오늘 독후감이 존재하는지 확인 (독후감은 하루에 한개만 허용)*/
         reviewManager.check_today_review(customUserDetails.getMemberId());
 
-        // (진행률 + 기존 독서 페이지) DTO 반환 메서드
-        ProgressResponse progressResponse = reviewManager.getProgress(customUserDetails.getMemberId(), pages);
+        /* 감정 분석 AI 모델 호출 */
+       EmotionAiResponse emotionAiResponse = reviewManager.requestEmotionAi(contents);
+        /* 질문지 생성 AI 모델 호출 */
+        QuestionNumberTwoThreeResponse questionNumberTwoThreeResponse  = reviewManager.requestQuestionAi(contents);
 
-        /* 감정 분석 AI 모델로 요청 */
-        String emotion = emotionMockModel.numberOneQuestion(contents); // 로컬 용 Mock AI 모델 호출
-        //String emotion = emotionClient.predict(contents).block(); // Fast-API 의 감정 분류 AI 모델 호출
-        String question1 = ReviewHelper.makeQuestion1(emotion); // 1번 질문지 생성
+        /* 독후감 제출시 DB 작업 메서드 호출 */
+        ReviewAndQuestionResponse reviewAndQuestionResponse = reviewManager.processReviewSubmission(customUserDetails, contents, progressResponse, pages, emotionAiResponse.emotion(), member, book, emotionAiResponse.question1(), questionNumberTwoThreeResponse);
 
-        /* 2번 질문지 생성 AI 모델로 요청 */
-        QuestionNumberTwoThreeResponse questionNumberTwoThreeResponse = questionMockModel.numberTwoThreeQuestion(contents); //로컬 용 Mock AI 모델 호출
-        // QuestionNumberTwoThreeResponse questionNumberTwoThreeResponse = questionClient.predict(contents).block(); // Fast-API 의 질문지 생성 AI 모델 호출
-
-        /* 결과 Review DB에 저장 하는 로직 */
-        Review savedReview = reviewManager.saveReview(
-                contents, progressResponse, pages,
-                emotion, member, book
-        );
-
-
-        member.setReviewCount(member.getReviewCount() + 1); // review저장 후 member의 reviewCount에 +1
-        reviewManager.deleteMonthlyReviewListCache(customUserDetails); // monthlyReviewList 캐시 삭제
-
-        // 이벤트 큐에 유저 고유 번호를 저장
-        redisTemplate.opsForSet().add("ranking:update:memberIds", member.getMemberId().toString());
-
-        /* 결과를 Question DB에 저장하는 로직 */
-        Question question = reviewManager.saveQuestion(
-                savedReview,
-                member,
-                question1,
-                questionNumberTwoThreeResponse.question1(),
-                questionNumberTwoThreeResponse.question2()
-        );
-
-        return new QuestionResponse(
-                savedReview.getReviewId(),
-                question.getQuestionId(),
-                question1,
-                questionNumberTwoThreeResponse.question1(),
-                questionNumberTwoThreeResponse.question2());
+        /* AI 질문지 3개 최종 반환 */
+        return new QuestionResponse(reviewAndQuestionResponse.review().getReviewId(), reviewAndQuestionResponse.question().getQuestionId(),
+                emotionAiResponse.question1(), questionNumberTwoThreeResponse.question1(), questionNumberTwoThreeResponse.question2());
     }
 
     // ======================= 캘린더에서 날짜 선택 후 독후감 기록 조회 로직 =========================

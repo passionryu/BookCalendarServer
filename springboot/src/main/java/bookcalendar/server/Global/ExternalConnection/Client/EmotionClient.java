@@ -20,28 +20,26 @@ public class EmotionClient {
     private final WebClient webClient;
 
     public EmotionClient(@Qualifier("fastApiWebClient") WebClient webClient) {
+
         this.webClient = webClient;
     }
 
     public Mono<String> predict(String text) {
 
-        /* 입력 검증 */
-        if (text == null || text.trim().isEmpty()) {
-            log.error("입력 텍스트가 null 또는 빈 문자열입니다.");
-            return Mono.error(new IllegalArgumentException("텍스트가 필요합니다."));
-        }
-
         return webClient.post()
                 .uri("/emotion/predict_emotion")
                 .bodyValue(Map.of("text", text))
                 .retrieve()
-                .onStatus(status -> status.is4xxClientError(), response ->
-                        response.bodyToMono(String.class)
-                                .map(errorBody -> {
-                                    log.error("FastAPI 오류 응답  ", errorBody);
-                                    return new RuntimeException("422 Error: " + errorBody);
+                .onStatus(
+                        status -> status.is4xxClientError() || status.is5xxServerError(),
+                        clientResponse -> clientResponse.bodyToMono(String.class)
+                                .defaultIfEmpty("응답 바디 없음")
+                                .flatMap(errorBody -> {
+                                    log.error("FastAPI 오류 응답: HTTP {} - {}", clientResponse.statusCode(), errorBody);
+                                    return Mono.error(new RuntimeException("FastAPI 오류 발생: " + errorBody));
                                 })
                 )
+
                 .bodyToMono(new ParameterizedTypeReference<Map<String, String>>() {})
                 .map(response -> response.get("emotion"))
                 .doOnNext(emotion -> log.info("감정 분석 결과: {}", emotion))

@@ -51,7 +51,7 @@ services:
       - LOGGING_LEVEL_ORG_HIBERNATE_SQL=INFO
       # SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.MySQLDialect
     ports:
-      - "8081:8080"
+      - "8082:8080"
     depends_on:
       - redis-session
       - redis-cache

@@ -13,11 +13,20 @@ import java.util.List;
 public interface ReviewService {
 
     /**
+     * 향상된 독후감 작성 인터페이스
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param reviewRequest 독후감 데이터
+     * @return 질문지
+     */
+    QuestionResponse enhancedWriteReview(CustomUserDetails customUserDetails, ReviewRequest reviewRequest);
+
+    /**
      *독후감 작성 인터페이스
      *
      * @param customUserDetails 인증된 유저의 정보 객체
      * @param reviewRequest 독후감 데이터
-     * @return
+     * @return 질문지
      */
     QuestionResponse writeReview(CustomUserDetails customUserDetails, ReviewRequest reviewRequest);
 

@@ -5,11 +5,17 @@ import bookcalendar.server.Domain.Book.Repository.BookRepository;
 import bookcalendar.server.Domain.Member.Entity.Member;
 import bookcalendar.server.Domain.Member.Exception.MemberException;
 import bookcalendar.server.Domain.Member.Repository.MemberRepository;
+import bookcalendar.server.Domain.MockAiModel.Emotion.EmotionMockModel;
+import bookcalendar.server.Domain.MockAiModel.Question.QuestionMockModel;
 import bookcalendar.server.Domain.Question.Entity.Question;
 import bookcalendar.server.Domain.Question.Exception.QuestionException;
 import bookcalendar.server.Domain.Question.Repository.QuestionRepository;
+import bookcalendar.server.Domain.Review.DTO.Response.EmotionAiResponse;
 import bookcalendar.server.Domain.Review.DTO.Response.ProgressResponse;
+import bookcalendar.server.Domain.Review.DTO.Response.QuestionNumberTwoThreeResponse;
+import bookcalendar.server.Domain.Review.DTO.Response.ReviewAndQuestionResponse;
 import bookcalendar.server.Domain.Review.Entity.Review;
+import bookcalendar.server.Domain.Review.Helper.ReviewHelper;
 import bookcalendar.server.Domain.Review.Repository.ReviewRepository;
 import bookcalendar.server.Domain.Review.ReviewException;
 import bookcalendar.server.global.Security.CustomUserDetails;
@@ -42,6 +48,10 @@ public class ReviewManager {
 
     private final CacheManager cacheManager;
 
+    /* Gpt Mock AI 모델 */
+    private final EmotionMockModel emotionMockModel;
+    private final QuestionMockModel questionMockModel;
+
     // ======================= Util 영역 =========================
 
     /* 유저 본인이 "독서중"인 도서를 반환하는 메서드 */
@@ -52,13 +62,101 @@ public class ReviewManager {
 
     // ======================= 독후감 작성 영역 =========================
 
-    /* 독후감을 작성하기 전에 오늘 작성한 독후감이 있는지 Check하는 메서드 */
+    /**
+     * 감정 분석 AI 모델 호출 메서드
+     *
+     * @param contents 유저의 독후감
+     * @return 감정, 1번 질문지 DTO
+     */
+    public EmotionAiResponse requestEmotionAi(String contents){
+
+        /* 로컬 용 Mock AI 모델 호출 */
+        String emotion = emotionMockModel.numberOneQuestion(contents);
+
+        /* Fast-API 의 감정 분류 AI 모델 호출 */
+        //String emotion = emotionClient.predict(contents).block();
+
+        /* 1번 질문지 생성 */
+        String question1 = ReviewHelper.makeQuestion1(emotion);
+
+        return new EmotionAiResponse(emotion, question1);
+    }
+
+    /**
+     * 질문지 생성 AI 모델 호출 메서드
+     *
+     * @param contents 유저의 독후감
+     * @return 2,3번 질문지 DTO
+     */
+    public QuestionNumberTwoThreeResponse requestQuestionAi(String contents){
+
+        /* 로컬 용 Mock AI 모델 호출 */
+        QuestionNumberTwoThreeResponse questionNumberTwoThreeResponse = questionMockModel.numberTwoThreeQuestion(contents);
+
+        /* Fast-API 의 질문지 생성 AI 모델 호출 */
+        // QuestionNumberTwoThreeResponse questionNumberTwoThreeResponse = questionClient.predict(contents).block();
+
+        return questionNumberTwoThreeResponse;
+    }
+
+    /**
+     * 독후감 제출시 DB 작업 메서드
+     *
+     * @param customUserDetails 인증된 유저의 정보 객체
+     * @param contents 독후감 본문
+     * @param progressResponse 진행률
+     * @param pages 오늘 독서한 페이지 수
+     * @param emotion 유저의 감정
+     * @param member 멤버 객체
+     * @param book 도서 객체
+     * @param question1 1번 질문
+     * @param questionNumberTwoThreeResponse 2,3번 질문 DTO
+     * @return Review,Question 객체 DTO
+     */
+    public ReviewAndQuestionResponse processReviewSubmission(CustomUserDetails customUserDetails, String contents, ProgressResponse progressResponse,
+                                                             Integer pages, String emotion, Member member,
+                                                             Book book, String question1, QuestionNumberTwoThreeResponse questionNumberTwoThreeResponse) {
+
+        /* 결과 Review DB에 저장 하는 로직 */
+        Review savedReview = saveReview(
+                contents, progressResponse, pages,
+                emotion, member, book
+        );
+
+        member.setReviewCount(member.getReviewCount() + 1); // review저장 후 member의 reviewCount에 +1
+        deleteMonthlyReviewListCache(customUserDetails); // monthlyReviewList 캐시 삭제
+
+        // 이벤트 큐에 유저 고유 번호를 저장
+        redisTemplate.opsForSet().add("ranking:update:memberIds", member.getMemberId().toString());
+
+        /* 결과를 Question DB에 저장하는 로직 */
+        Question question = saveQuestion(
+                savedReview,
+                member,
+                question1,
+                questionNumberTwoThreeResponse.question1(),
+                questionNumberTwoThreeResponse.question2()
+        );
+
+        return new ReviewAndQuestionResponse(savedReview, question);
+    }
+
+    /**
+     * 독후감을 작성하기 전에 오늘 작성한 독후감이 있는지 Check하는 메서드
+     *
+     * @param memberId 유저의 고유 번호
+     */
     public void check_today_review(Integer memberId){
         if(reviewRepository.existsByMember_MemberIdAndDate(memberId, LocalDate.now()))
             throw new ReviewException(ErrorCode.ALREADY_EXIST_REVIEW);
     }
 
-    /* 유저 고유 번호를 통한 멤버 객체 반환 메서드 */
+    /**
+     * 유저 고유 번호를 통한 멤버 객체 반환 메서드
+     *
+     * @param memberId 유저의 고유 번호
+     * @return 유저 객체
+     */
     public Member getMember(Integer memberId){
         return memberRepository.findByMemberId(memberId)
                 .orElseThrow(()->new MemberException(ErrorCode.USER_NOT_FOUND));

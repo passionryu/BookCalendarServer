@@ -9,6 +9,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @Component
@@ -26,7 +27,6 @@ public class QuestionClient {
         return webClient.post()
                 .uri("/question/predict_question")
                 .bodyValue(Map.of("paragraph", text))
-                //.bodyValue(BodyInserters.fromValue(requestBody))
                 .retrieve()
                 .onStatus(
                         status -> status.is4xxClientError() || status.is5xxServerError(),
@@ -38,8 +38,7 @@ public class QuestionClient {
                                 })
                 )
                 .bodyToMono(QuestionNumberTwoThreeResponse.class)
-                .filter(response -> response != null)
-                .switchIfEmpty(Mono.error(new IllegalStateException("FastAPI 응답이 null입니다.")))
+                .filter(Objects::nonNull)
                 .doOnNext(response -> log.info("질문 생성 결과: {}", response))
                 .doOnError(error -> log.error("질문 생성 실패: {}", error.getMessage()));
     }

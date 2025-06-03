@@ -93,7 +93,7 @@ public class ChatbotServiceImpl implements ChatbotService{
                 // 이 명령을 bash script로 만들어 놓고, Java에서 sh restart_fastapi.sh 실행하도록 해도 관리가 더 편리할 수 있을 것 같음.
                 try {
                     ProcessBuilder builder = new ProcessBuilder(
-                            "bash", "-c", "uvicorn main:app --host 0.0.0.0 --port 3004 --reload"
+                            "/usr/bin/bash", "-c", "uvicorn main:app --host 0.0.0.0 --port 3004 --reload"
                     );
                     builder.directory(new File("/home/t25101/v0.5/ai/BookCalendar-AI")); // FastAPI가 위치한 디렉토리
                     builder.start();

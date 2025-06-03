@@ -51,8 +51,8 @@ public class ChatbotServiceImpl implements ChatbotService{
      /* 1. Redis-Session에 fastapi관련 에러기록이 있는지 확인 */
 
         // Redis-Session에 fastapi 관련 에러 기록이 있는지 확인
-        String redisKey = "FastAPI-Error";
         String aiResponse;
+        String redisKey = "FastAPI-Error";
         String errorFlag = sessionRedisTemplate.opsForValue().get(redisKey);
 
      /* 2. 에러 기록 없으면 fastapi 호출 || 에러 기록 있으면 바로 Gpt 모델로 연결 */
@@ -61,10 +61,13 @@ public class ChatbotServiceImpl implements ChatbotService{
         if (errorFlag != null) {
             log.info("fastapi 오류 기록 확인 {}, Gpt모델로 임시 대체", errorFlag);
 
+            // todo : requestGptChatBot
             String previousMessage  = chatBotManager.getPreviousMessage(customUserDetails.getMemberId()); // Redis DB에서 기존의 대화내용이 있으면 반환
             String promptMessage = ChatBotHelper.makePromptMessage(chatRequest.chatMessage(), previousMessage); // 사용자 메시지를 프롬프팅
             String rawAiResponse = chatClient.call(promptMessage); // 프로프팅한 유저의 채팅에 대한 AI 상담사 챗봇 답변 반환
             aiResponse = ChatBotHelper.textCleaner(rawAiResponse); // AI 상담사 챗봇의 답변에 불순물 제거
+            // todo : requestGptChatBot
+
         }else{
             // 3. FastAPI 시도 → 실패 시 GPT 호출 및 Redis에 에러 기록 (TTL 30분)
             try {
@@ -74,19 +77,21 @@ public class ChatbotServiceImpl implements ChatbotService{
 
                 log.info("FastAPI 예외 발생 & Gpt모델 호출 전환 - Fast-API 에러메시지 :{}", e.getMessage());
 
-                // todo : get errorTime
+                // todo : uploadFastAPIConnectionErrorToSession
                 // 에러 발생 시간을 에러키의 Value로 대입
                 LocalDateTime errorTime = LocalDateTime.now();
                 String errorTimeStr = errorTime.toString();
-
                 // Redis에 FastAPI 오류 보고 (TTL: 30분)
                 sessionRedisTemplate.opsForValue().set(redisKey, errorTimeStr, Duration.ofMinutes(30));
+                // todo : uploadFastAPIConnectionErrorToSession
 
+                // todo : requestGptChatBot
                 // Gpt 모델 호출
                 String previousMessage = chatBotManager.getPreviousMessage(customUserDetails.getMemberId());
                 String promptMessage = ChatBotHelper.makePromptMessage(chatRequest.chatMessage(), previousMessage);
                 String rawAiResponse = chatClient.call(promptMessage);
                 aiResponse = ChatBotHelper.textCleaner(rawAiResponse);
+                // todo : requestGptChatBot
 
                 // todo : reRunFast-API
                 // fast-api 재시작 명령어 가동
@@ -101,6 +106,8 @@ public class ChatbotServiceImpl implements ChatbotService{
                 } catch (IOException e2) {
                     log.info("FastAPI 재시작 실패", e2);
                 }
+                // todo : reRunFast-API
+
             }
         }
 

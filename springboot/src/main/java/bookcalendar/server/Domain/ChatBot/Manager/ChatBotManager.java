@@ -1,7 +1,7 @@
 package bookcalendar.server.Domain.ChatBot.Manager;
 
 import bookcalendar.server.Domain.Book.DTO.Response.CompleteResponse;
-import bookcalendar.server.Domain.ChatBot.Helper.RedisHelper;
+import bookcalendar.server.Domain.ChatBot.Helper.ChatBotHelper;
 import bookcalendar.server.Domain.Member.Entity.Member;
 import bookcalendar.server.Domain.Member.Exception.MemberException;
 import bookcalendar.server.Domain.Member.Repository.MemberRepository;
@@ -16,8 +16,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
-import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -26,7 +24,7 @@ import java.util.Set;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class RedisManager {
+public class ChatBotManager {
 
     @Qualifier("sessionRedisTemplate")
     @Autowired
@@ -191,13 +189,13 @@ public class RedisManager {
     public String getTopic(String everyMessages) {
 
         /* Helper 클래스에서 Gpt 프롬프팅 */
-        String promptedMessage = RedisHelper.buildPrompt_getTopic(everyMessages);
+        String promptedMessage = ChatBotHelper.buildPrompt_getTopic(everyMessages);
 
         /* Gpt 호출 */
         String topicsResponseByGpt = chatClient.call(promptedMessage);
 
         /* 데이터 파싱 */
-        String topic = RedisHelper.parseTopic(topicsResponseByGpt);
+        String topic = ChatBotHelper.parseTopic(topicsResponseByGpt);
 
         /* 로그 출력 */
         log.info("추출한 주제 : {}", topic);

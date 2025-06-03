@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
-public class RedisHelper {
+public class ChatBotHelper {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
 

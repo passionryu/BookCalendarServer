@@ -24,7 +24,11 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
+import java.io.IOException;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 
@@ -35,6 +39,9 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Qualifier("cacheRedisTemplate")
     private final RedisTemplate<String, String> redisTemplate;
+
+    @Qualifier("sessionRedisTemplate")
+    private final RedisTemplate<String, String> sessionRedisTemplate;
 
     private final ReviewManager reviewManager;
     private final ReviewRepository reviewRepository;
@@ -49,7 +56,6 @@ public class ReviewServiceImpl implements ReviewService {
 
     // ======================= 독후감 작성 영역 =========================
 
-
     /* 향상된 독후감 작성 메서드 */
     @Override
     @Transactional
@@ -60,7 +66,84 @@ public class ReviewServiceImpl implements ReviewService {
             @CacheEvict(value = "myStatistics", key = "#customUserDetails.memberId")
     })
     public QuestionResponse enhancedWriteReview(CustomUserDetails customUserDetails, ReviewRequest reviewRequest) {
-        return null;
+
+        /* 메서드에서 필요한 데이터 준비 */
+        String contents = reviewRequest.contents(); // 오늘 독후감 본문
+        Integer pages = reviewRequest.pages(); // 오늘 독서한 페이지 수
+        Book book = reviewManager.getBook_UserReading(customUserDetails.getMemberId()); // 현재 유저의 독서중인 도서 객체 반환
+        Member member = reviewManager.getMember(customUserDetails.getMemberId()); // 현재 유저의 멤버 객체 반환
+        ProgressResponse progressResponse = reviewManager.getProgress(customUserDetails.getMemberId(), pages); // (진행률 + 기존 독서 페이지) DTO 반환 메서드
+
+        /* 검증 코드 : 오늘 독후감이 존재하는지 확인 (독후감은 하루에 한개만 허용)*/
+        reviewManager.check_today_review(customUserDetails.getMemberId());
+
+        /* 1. Redis-Session에 fastapi관련 에러기록이 있는지 확인 */
+        String redisKey = "FastAPI-Error";
+        String errorFlag = sessionRedisTemplate.opsForValue().get(redisKey);
+        EmotionAiResponse emotionAiResponse;
+        QuestionNumberTwoThreeResponse questionNumberTwoThreeResponse;
+
+        /* 2. 에러 기록 없으면 fastapi 호출 || 에러 기록 있으면 바로 Gpt 모델로 연결 */
+        // Fast- API서버 다운 시 Gpt 모델 호출
+        if(errorFlag != null) {
+            log.info("fastapi 오류 기록 확인 {}, Gpt모델로 임시 대체", errorFlag);
+
+            /* Gpt 모델 호출 */
+            String emotion = emotionMockModel.numberOneQuestion(contents); // 로컬 용 Mock AI 모델 호출
+            String question1 = ReviewHelper.makeQuestion1(emotion); // 1번 질문지 생성
+            emotionAiResponse = new EmotionAiResponse(emotion, question1);
+            questionNumberTwoThreeResponse = questionMockModel.numberTwoThreeQuestion(contents); /* 로컬 용 Mock AI 모델 호출 */
+
+        }else{
+            // 3. FastAPI 시도 → 실패 시 GPT 호출 및 Redis에 에러 기록 (TTL 30분)
+            try {
+
+                /* 실제 Fast-API의 AI 모델 호출 */
+                String emotion = emotionClient.predict(contents).block(); // Fast-API 감정 분류 모델 호출
+                String question1 = ReviewHelper.makeQuestion1(emotion); // 1번 질문지 생성
+                emotionAiResponse = new EmotionAiResponse(emotion, question1);
+                questionNumberTwoThreeResponse = questionClient.predict(contents).block(); // Fast-API 질문지 생성 모델 호출
+
+            } catch (Exception e) {
+                log.info("FastAPI 예외 발생 & Gpt모델 호출 전환 - Fast-API 에러메시지 :{}", e.getMessage());
+
+                // todo : uploadFastAPIConnectionErrorToSession
+                LocalDateTime errorTime = LocalDateTime.now(); // 에러 발생 시간을 에러키의 Value로 대입
+                String errorTimeStr = errorTime.toString();
+                sessionRedisTemplate.opsForValue().set(redisKey, errorTimeStr, Duration.ofMinutes(30)); // Redis에 FastAPI 오류 보고 (TTL: 30분)
+                // todo : uploadFastAPIConnectionErrorToSession
+
+                /* Gpt 모델 호출 */
+                String emotion = emotionMockModel.numberOneQuestion(contents); // 로컬 용 Mock AI 모델 호출
+                String question1 = ReviewHelper.makeQuestion1(emotion); // 1번 질문지 생성
+                emotionAiResponse = new EmotionAiResponse(emotion, question1);
+                questionNumberTwoThreeResponse = questionMockModel.numberTwoThreeQuestion(contents); /* 로컬 용 Mock AI 모델 호출 */
+
+                // todo : reRunFast-API
+                // fast-api 재시작 명령어 가동
+                // 이 명령을 bash script로 만들어 놓고, Java에서 sh restart_fastapi.sh 실행하도록 해도 관리가 더 편리할 수 있을 것 같음.
+                try {
+                    ProcessBuilder builder = new ProcessBuilder(
+                            "/usr/bin/bash", "-c", "uvicorn main:app --host 0.0.0.0 --port 3004 --reload"
+                    );
+                    builder.directory(new File("/home/t25101/v0.5/ai/BookCalendar-AI")); // FastAPI가 위치한 디렉토리
+                    builder.start();
+                    log.info("FastAPI 재시작 명령 실행 완료");
+                } catch (IOException e2) {
+                    log.info("FastAPI 재시작 실패", e2);
+                }
+                // todo : reRunFast-API
+            }
+
+        }
+
+        /* 3. 에러 기록이 없어서 fastapi 호출간에 에러 반환 시, Gpt호출 && Redis에 보고 && fastapi 재시작 명령어 호출 */
+
+        /* 독후감 제출시 DB 작업 메서드 호출 */
+        ReviewAndQuestionResponse reviewAndQuestionResponse = reviewManager.processReviewSubmission(customUserDetails, contents, progressResponse, pages, emotionAiResponse.emotion(), member, book, emotionAiResponse.question1(), questionNumberTwoThreeResponse);
+        /* AI 질문지 3개 최종 반환 */
+        return new QuestionResponse(reviewAndQuestionResponse.review().getReviewId(), reviewAndQuestionResponse.question().getQuestionId(),
+                emotionAiResponse.question1(), questionNumberTwoThreeResponse.question1(), questionNumberTwoThreeResponse.question2());
     }
 
     /* 독후감 작성 메서드 */
@@ -86,6 +169,7 @@ public class ReviewServiceImpl implements ReviewService {
 
         /* 감정 분석 AI 모델 호출 */
        EmotionAiResponse emotionAiResponse = reviewManager.requestEmotionAi(contents);
+
         /* 질문지 생성 AI 모델 호출 */
         QuestionNumberTwoThreeResponse questionNumberTwoThreeResponse  = reviewManager.requestQuestionAi(contents);
 

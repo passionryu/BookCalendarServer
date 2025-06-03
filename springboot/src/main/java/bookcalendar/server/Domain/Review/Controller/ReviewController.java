@@ -51,7 +51,10 @@ public class ReviewController {
                                                                   @RequestBody ReviewRequest reviewRequest){
 
         // 독후감 작성 서비스 레이어 호츌
-        QuestionResponse questionResponse = reviewService.writeReview(customUserDetails, reviewRequest);
+        // QuestionResponse questionResponse = reviewService.writeReview(customUserDetails, reviewRequest);
+
+        // 독후감 작성 서비스 레이어 호츌
+        QuestionResponse questionResponse = reviewService.enhancedWriteReview(customUserDetails, reviewRequest);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new ApiResponseWrapper<>(questionResponse,"독후감이 작성된 후, 정상적으로 AI 질문지가 반환되었습니다."));

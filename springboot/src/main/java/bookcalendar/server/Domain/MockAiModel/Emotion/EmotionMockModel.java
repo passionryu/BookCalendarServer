@@ -12,6 +12,8 @@ public class EmotionMockModel {
 
     private final ChatClient chatClient;
 
+    // 기쁨, 슬픔, 분노, 불안, 당황, 감동, 외로움, 후회, 평온, 혼란, 설렘, 무기력
+
     public String numberOneQuestion(String contents){
 
         String contentsPrompt = """
@@ -21,7 +23,8 @@ public class EmotionMockModel {
                 이 독후감을 읽고 사용자의 주된 감정을 아래 목록 중 **가장 잘 맞는 하나의 감정 단어로만** 분류해주세요.
 
                 가능한 감정 목록:
-                기쁨, 슬픔, 분노, 불안, 당황, 감동, 외로움, 후회, 평온, 혼란, 설렘, 무기력
+                
+                기쁨, 슬픔, 분노, 불안, 당황
 
                 **다른 말은 절대 하지 말고**, 반드시 감정 단어 하나만 출력하세요. 예: 기쁨, 슬픔, 설렘
 

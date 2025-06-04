@@ -24,7 +24,7 @@ public class ConnectionService {
     // Redis 키 상수
     private static final String REDISKEY = "FastAPI-Error";
 
-    private static final String SCRIPT_PATH = "/home/t25101/v0.5/"; // 경로는 실제 경로로 바꿔주세요
+    private static final String SCRIPT_PATH = "/home/t25101/v0.5/server/BookCalendarServer/auto/rerun_fastapi.sh"; // 경로는 실제 경로로 바꿔주세요
 
     /**
      * Fast-API 커넥션 오류 발생 시 Redis에 오류 업로드 메서드

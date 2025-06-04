@@ -13,6 +13,7 @@ import bookcalendar.server.Domain.Review.Manager.ReviewManager;
 import bookcalendar.server.Domain.Review.Repository.ReviewRepository;
 import bookcalendar.server.global.ExternalConnection.Client.EmotionClient;
 import bookcalendar.server.global.ExternalConnection.Client.QuestionClient;
+import bookcalendar.server.global.ExternalConnection.Service.ConnectionService;
 import bookcalendar.server.global.Security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +46,7 @@ public class ReviewServiceImpl implements ReviewService {
 
     private final ReviewManager reviewManager;
     private final ReviewRepository reviewRepository;
+    private final ConnectionService connectionService;
 
     /* AI 모델 커넥션 영역 */
     private final EmotionClient emotionClient;
@@ -53,6 +55,9 @@ public class ReviewServiceImpl implements ReviewService {
     /* Gpt Mock AI 모델 */
     private final EmotionMockModel emotionMockModel;
     private final QuestionMockModel questionMockModel;
+
+    // Redis 키 상수
+    private static final String REDISKEY = "FastAPI-Error";
 
     // ======================= 독후감 작성 영역 =========================
 
@@ -74,12 +79,11 @@ public class ReviewServiceImpl implements ReviewService {
         Member member = reviewManager.getMember(customUserDetails.getMemberId()); // 현재 유저의 멤버 객체 반환
         ProgressResponse progressResponse = reviewManager.getProgress(customUserDetails.getMemberId(), pages); // (진행률 + 기존 독서 페이지) DTO 반환 메서드
 
-        /* 검증 코드 : 오늘 독후감이 존재하는지 확인 (독후감은 하루에 한개만 허용)*/
+        /* 검증 코드 : 오늘 독후감이 존재하는지 확인 (독후감은 하루에 한개만 허용) */
         reviewManager.check_today_review(customUserDetails.getMemberId());
 
         /* 1. Redis-Session에 fastapi관련 에러기록이 있는지 확인 */
-        String redisKey = "FastAPI-Error";
-        String errorFlag = sessionRedisTemplate.opsForValue().get(redisKey);
+        String errorFlag = sessionRedisTemplate.opsForValue().get(REDISKEY);
         EmotionAiResponse emotionAiResponse;
         QuestionNumberTwoThreeResponse questionNumberTwoThreeResponse;
 
@@ -107,11 +111,8 @@ public class ReviewServiceImpl implements ReviewService {
             } catch (Exception e) {
                 log.info("FastAPI 예외 발생 & Gpt모델 호출 전환 - Fast-API 에러메시지 :{}", e.getMessage());
 
-                // todo : uploadFastAPIConnectionErrorToSession
-                LocalDateTime errorTime = LocalDateTime.now(); // 에러 발생 시간을 에러키의 Value로 대입
-                String errorTimeStr = errorTime.toString();
-                sessionRedisTemplate.opsForValue().set(redisKey, errorTimeStr, Duration.ofMinutes(30)); // Redis에 FastAPI 오류 보고 (TTL: 30분)
-                // todo : uploadFastAPIConnectionErrorToSession
+                /* Fast-API 커넥션 오류 발생 시 Redis에 오류 업로드 */
+                connectionService.uploadFastAPIConnectionErrorToSession();
 
                 /* Gpt 모델 호출 */
                 String emotion = emotionMockModel.numberOneQuestion(contents); // 로컬 용 Mock AI 모델 호출
@@ -119,20 +120,8 @@ public class ReviewServiceImpl implements ReviewService {
                 emotionAiResponse = new EmotionAiResponse(emotion, question1);
                 questionNumberTwoThreeResponse = questionMockModel.numberTwoThreeQuestion(contents); /* 로컬 용 Mock AI 모델 호출 */
 
-                // todo : reRunFast-API
-                // fast-api 재시작 명령어 가동
-                // 이 명령을 bash script로 만들어 놓고, Java에서 sh restart_fastapi.sh 실행하도록 해도 관리가 더 편리할 수 있을 것 같음.
-                try {
-                    ProcessBuilder builder = new ProcessBuilder(
-                            "/usr/bin/bash", "-c", "uvicorn main:app --host 0.0.0.0 --port 3004 --reload"
-                    );
-                    builder.directory(new File("/home/t25101/v0.5/ai/BookCalendar-AI")); // FastAPI가 위치한 디렉토리
-                    builder.start();
-                    log.info("FastAPI 재시작 명령 실행 완료");
-                } catch (IOException e2) {
-                    log.info("FastAPI 재시작 실패", e2);
-                }
-                // todo : reRunFast-API
+                /* Fast-API 재가동 스크립트 호출 */
+                connectionService.rerunFastApiScript();
             }
 
         }
@@ -149,7 +138,6 @@ public class ReviewServiceImpl implements ReviewService {
     /* 독후감 작성 메서드 */
     @Override
     @Transactional
-    @CacheEvict(value = "mainPageResponse", key = "#customUserDetails.memberId")
     @Caching(evict = {
             @CacheEvict(value = "mainPageResponse", key = "#customUserDetails.memberId"),
             @CacheEvict(value = "myReviewList", key = "#customUserDetails.memberId"),

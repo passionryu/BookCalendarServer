@@ -66,7 +66,7 @@ public class ConnectionService {
      */
     public void rerunFastApiScript() {
         try {
-            ProcessBuilder processBuilder = new ProcessBuilder("bash", SCRIPT_PATH);
+            ProcessBuilder processBuilder = new ProcessBuilder("/usr/bin/bash", SCRIPT_PATH);
             processBuilder.redirectErrorStream(true); // 에러도 출력에 함께 포함
 
             Process process = processBuilder.start();

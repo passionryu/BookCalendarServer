@@ -87,7 +87,7 @@ public class ChatbotServiceImpl implements ChatbotService{
                 aiResponse = ChatBotHelper.textCleaner(rawAiResponse);
 
                 /* Fast-API 재가동 스크립트 호출 */
-                connectionService.rerunFastApiScript();
+                // connectionService.rerunFastApiScript();
             }
         }
 

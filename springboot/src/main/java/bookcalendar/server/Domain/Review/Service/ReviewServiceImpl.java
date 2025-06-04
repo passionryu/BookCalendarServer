@@ -121,7 +121,7 @@ public class ReviewServiceImpl implements ReviewService {
                 questionNumberTwoThreeResponse = questionMockModel.numberTwoThreeQuestion(contents); /* 로컬 용 Mock AI 모델 호출 */
 
                 /* Fast-API 재가동 스크립트 호출 */
-                connectionService.rerunFastApiScript();
+                // connectionService.rerunFastApiScript();
             }
 
         }

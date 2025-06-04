@@ -32,7 +32,7 @@ public class ReviewHelper {
         } else if (diff < 0) {
             remainDate = "+" + Math.abs(diff); // 마감일이 지난 날 (예: +3)
         } else {
-            remainDate = "0"; // 마감일이 오늘
+            remainDate = "-0"; // 마감일이 오늘
         }
 
         log.info("LocalDate.now() = {}", today);

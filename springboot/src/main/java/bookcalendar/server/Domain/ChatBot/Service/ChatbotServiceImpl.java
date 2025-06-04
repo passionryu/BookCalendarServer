@@ -11,6 +11,7 @@ import bookcalendar.server.Domain.Member.Repository.MemberRepository;
 import bookcalendar.server.Domain.Mypage.Entity.Cart;
 import bookcalendar.server.Domain.Mypage.Repository.CartRepository;
 import bookcalendar.server.global.ExternalConnection.Client.IntentClient;
+import bookcalendar.server.global.ExternalConnection.Service.ConnectionService;
 import bookcalendar.server.global.Security.CustomUserDetails;
 import bookcalendar.server.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,7 @@ public class ChatbotServiceImpl implements ChatbotService{
     private final MemberRepository memberRepository;
     private final CartRepository cartRepository;
     private final IntentClient intentClient;
+    private final ConnectionService connectionService;
 
     @Qualifier("sessionRedisTemplate")
     private final RedisTemplate<String, String> sessionRedisTemplate;
@@ -61,12 +63,10 @@ public class ChatbotServiceImpl implements ChatbotService{
         if (errorFlag != null) {
             log.info("fastapi 오류 기록 확인 {}, Gpt모델로 임시 대체", errorFlag);
 
-            // todo : requestGptChatBot
             String previousMessage  = chatBotManager.getPreviousMessage(customUserDetails.getMemberId()); // Redis DB에서 기존의 대화내용이 있으면 반환
             String promptMessage = ChatBotHelper.makePromptMessage(chatRequest.chatMessage(), previousMessage); // 사용자 메시지를 프롬프팅
             String rawAiResponse = chatClient.call(promptMessage); // 프로프팅한 유저의 채팅에 대한 AI 상담사 챗봇 답변 반환
             aiResponse = ChatBotHelper.textCleaner(rawAiResponse); // AI 상담사 챗봇의 답변에 불순물 제거
-            // todo : requestGptChatBot
 
         }else{
             // 3. FastAPI 시도 → 실패 시 GPT 호출 및 Redis에 에러 기록 (TTL 30분)
@@ -77,37 +77,17 @@ public class ChatbotServiceImpl implements ChatbotService{
 
                 log.info("FastAPI 예외 발생 & Gpt모델 호출 전환 - Fast-API 에러메시지 :{}", e.getMessage());
 
-                // todo : uploadFastAPIConnectionErrorToSession
-                // 에러 발생 시간을 에러키의 Value로 대입
-                LocalDateTime errorTime = LocalDateTime.now();
-                String errorTimeStr = errorTime.toString();
-                // Redis에 FastAPI 오류 보고 (TTL: 30분)
-                sessionRedisTemplate.opsForValue().set(redisKey, errorTimeStr, Duration.ofMinutes(30));
-                // todo : uploadFastAPIConnectionErrorToSession
+                /* Fast-API 커넥션 오류 발생 시 Redis에 오류 업로드 */
+                connectionService.uploadFastAPIConnectionErrorToSession();
 
-                // todo : requestGptChatBot
                 // Gpt 모델 호출
                 String previousMessage = chatBotManager.getPreviousMessage(customUserDetails.getMemberId());
                 String promptMessage = ChatBotHelper.makePromptMessage(chatRequest.chatMessage(), previousMessage);
                 String rawAiResponse = chatClient.call(promptMessage);
                 aiResponse = ChatBotHelper.textCleaner(rawAiResponse);
-                // todo : requestGptChatBot
 
-                // todo : reRunFast-API
-                // fast-api 재시작 명령어 가동
-                // 이 명령을 bash script로 만들어 놓고, Java에서 sh restart_fastapi.sh 실행하도록 해도 관리가 더 편리할 수 있을 것 같음.
-                try {
-                    ProcessBuilder builder = new ProcessBuilder(
-                            "/usr/bin/bash", "-c", "uvicorn main:app --host 0.0.0.0 --port 3004 --reload"
-                    );
-                    builder.directory(new File("/home/t25101/v0.5/ai/BookCalendar-AI")); // FastAPI가 위치한 디렉토리
-                    builder.start();
-                    log.info("FastAPI 재시작 명령 실행 완료");
-                } catch (IOException e2) {
-                    log.info("FastAPI 재시작 실패", e2);
-                }
-                // todo : reRunFast-API
-
+                /* Fast-API 재가동 스크립트 호출 */
+                connectionService.rerunFastApiScript();
             }
         }
 
@@ -135,15 +115,6 @@ public class ChatbotServiceImpl implements ChatbotService{
         return aiResponse;
     }
 
-      /* Fast-API AI서버의 AI 챗봇 채팅 로직 */
-//    @Override
-//    public String aiChat(CustomUserDetails customUserDetails, ChatRequest chatRequest) {
-//
-//        String aiResponse = intentClient.predict(chatRequest.chatMessage()).block(); // fast-api 서버의 ai 챗봇 모델 호출
-//        chatBotManager.saveMessageInRedis(customUserDetails.getMemberId(), chatRequest.chatMessage(),aiResponse); // 유저 메시지,챗봇 답변 Redis에 업로드
-//
-//        return aiResponse;
-//    }
 
     // ======================= 챗봇 도서 추천 로직 =========================
 

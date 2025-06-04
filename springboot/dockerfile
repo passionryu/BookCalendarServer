@@ -7,6 +7,10 @@ WORKDIR /app
 # 일반적으로 Spring Boot에서 ./gradlew build 하면 build/libs/에 .jar가 생성됨
 COPY build/libs/*.jar app.jar
 
+# 시간대 설정
+ENV TZ=Asia/Seoul
+ENV JAVA_TOOL_OPTIONS="-Duser.timezone=Asia/Seoul"
+
 # 컨테이너에서 사용하는 포트를 외부에 열어줌 (문서용)
 EXPOSE 8080
 

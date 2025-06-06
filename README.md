@@ -44,7 +44,7 @@ DB 구조도는 ERD Cloud 서비스로 제작하였고,
 위 DB는 우선 유저 서버를 위한 DB만 표현하고 있다.  
 > 제작자 : 류성열(팀장/유저 백엔드), 김광수(관리자 웹 풀스택)
 
-## 🧾 Wire Frame  
+## 🧾 팀원들간의 원할한 소통을 위한 WireFrame 제작   
 Link : https://www.figma.com/design/ndspvub92U64eh9J2MDZSV/Untitled?node-id=0-1&p=f&t=GYPT6faNrPDJDjhF-0
 ![image](https://github.com/user-attachments/assets/d10e1946-0ff0-40ca-81f1-df5589b581c0)
 

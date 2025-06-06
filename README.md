@@ -1,3 +1,9 @@
+## 📱 앱 소개
+앱 이름 : Book Calendar "AI가 독서의 깊이를 더하다"
+
+🎯서비스 소개 : 기존의 1도서 1독후감이라는 편견을 깨고, 1도서 N독후감이라는 독자적인 "AI Daily 독후감" 서비스를 중심으로 "AI사서 컨셉의 챗봇"의 AI 도서추천 및 게시판 형식의 "독후감 활동 공유 커뮤니티"를 개발하였다.   
+또한 3가지의 AI모델을 관리하기 위해 관리자 웹에서는 기본적인 데이터 관리/통계 조회 서비스 이외에도, AI모델 자동&수동학습 서비스 또한 구현하여 개발자가 퇴사하여도 1명의 관리자가 버튼만 한두번 눌러서 AI모델을 지속적으로 관리할 수 있도록 서비스를 구현하였다.
+
 ## 📌 팀 정보 
 프로젝트 명 : Gachon Univ. 2025-1 CapStone Design - AI Project   
 팀 이름 : AI Vengers  
@@ -6,23 +12,14 @@
 - Admin WEB Developer ( 김광수 )
 - AI Developer ( 안서현, 이정현 )
 
-## 📱 앱 소개
-앱 이름 : Book Calendar "AI가 독서의 깊이를 더하다"
+## 프로젝트 소개 
+Notion : https://faint-lavender-bab.notion.site/AI-Vengers-BookCalendar-AI-1d1bc068c52d8087b61fdf9677abf2b9?source=copy_link
 
-🎯서비스 소개 : 기존의 1도서 1독후감이라는 편견을 깨고, 1도서 N독후감이라는 독자적인 "AI Daily 독후감" 서비스를 중심으로 "AI사서 컨셉의 챗봇"의 AI 도서추천 및 게시판 형식의 "독후감 활동 공유 커뮤니티"를 개발하였다.   
-또한 3가지의 AI모델을 관리하기 위해 관리자 웹에서는 기본적인 데이터 관리/통계 조회 서비스 이외에도, AI모델 자동&수동학습 서비스 또한 구현하여 개발자가 퇴사하여도 1명의 관리자가 버튼만 한두번 눌러서 AI모델을 지속적으로 관리할 수 있도록 서비스를 구현하였다.
+## 효율적인 API 문서화를 위한 Swagger UI 
+학과 서버 swagger 입장 주소 : http://ceprj.gachon.ac.kr:60001/api/swagger-ui/index.html   
+로컬 서버 swagger입장 주소 : http://localhost:60001/swagger-ui/index.html
 
-### 🧪Swagger UI
-학과 서버 swagger 입장 주소 
-```
-http://ceprj.gachon.ac.kr:60001/api/swagger-ui/index.html
-```
-로컬 서버 swagger입장 주소 
-```
-http://localhost:60001/swagger-ui/index.html
-```
-
-### 🧱 아키텍쳐 구축
+## 🧱 아키텍쳐 구축
 구축 환경 : 가천대학교 컴퓨터 공학과 학과 서버   
 운영 체제 :  Rocky Linux 9.3 (=RHEL)   
 CPU : i9 18 Core  
@@ -37,7 +34,7 @@ SSD : 7TB (RAID1)
 
 > 설계자 : 류성열(팀장/유저 백엔드)
 
-### 🧬 DB 구축
+## 🧬 DB 구축
 
 ![BookCalendar](https://github.com/user-attachments/assets/3baff7b3-c9c5-4801-99e7-2f24b822ea4d)
 
@@ -47,7 +44,7 @@ DB 구조도는 ERD Cloud 서비스로 제작하였고,
 위 DB는 우선 유저 서버를 위한 DB만 표현하고 있다.  
 > 제작자 : 류성열(팀장/유저 백엔드), 김광수(관리자 웹 풀스택)
 
-### 🧾 Wire Frame  
+## 🧾 Wire Frame  
 Link : https://www.figma.com/design/ndspvub92U64eh9J2MDZSV/Untitled?node-id=0-1&p=f&t=GYPT6faNrPDJDjhF-0
 ![image](https://github.com/user-attachments/assets/d10e1946-0ff0-40ca-81f1-df5589b581c0)
 
@@ -55,7 +52,7 @@ Link : https://www.figma.com/design/ndspvub92U64eh9J2MDZSV/Untitled?node-id=0-1&
 와이어 프레임은 피그마로 제작하였다. 
 > 제작자 : 류성열(팀장/유저 백엔드)
 
-### 깃모지
+## 깃모지
 > 가독성 높은 Commit을 기록한다.  
 
 | 아이콘 | 타이틀 | 설명 | 원문 |

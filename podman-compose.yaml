@@ -108,10 +108,10 @@ services:
 
   mariadb:
     image: docker.io/library/mariadb:latest
-    container_name: mariadb
+    container_name: db25101
     restart: always
     environment:
-      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_ROOT_PASSWORD=dbpass25101
       - MYSQL_DATABASE=bookcalendar
       - MYSQL_USER=bookcalendar
       - MYSQL_PASSWORD=bookcalendar123

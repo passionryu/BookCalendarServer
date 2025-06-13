@@ -1,4 +1,11 @@
-## 📌 About Us
+## 📱 앱 소개
+앱 이름 : Book Calendar "AI가 독서의 깊이를 더하다"
+
+🎯서비스 소개   
+기존의 1도서 1독후감이라는 편견을 깨고, 1도서 N독후감이라는 독자적인 "AI Daily 독후감" 서비스를 중심으로 "AI사서 컨셉의 챗봇"의 AI 도서추천 및 게시판 형식의 "독후감 활동 공유 커뮤니티"를 개발하였다.   
+또한 3가지의 AI모델을 관리하기 위해 관리자 웹에서는 기본적인 데이터 관리/통계 조회 서비스 이외에도, AI모델 자동&수동학습 서비스 또한 구현하여 개발자가 퇴사하여도 1명의 관리자가 버튼만 한두번 눌러서 AI모델을 지속적으로 관리할 수 있도록 서비스를 구현하였다.
+
+## 📌 팀 정보 
 프로젝트 명 : Gachon Univ. 2025-1 CapStone Design - AI Project   
 팀 이름 : AI Vengers  
 - User Server Backend Developer(DevOps) / Team Leader ( 류성열 )
@@ -6,149 +13,47 @@
 - Admin WEB Developer ( 김광수 )
 - AI Developer ( 안서현, 이정현 )
 
-## 📱 About Our App
-앱 이름 : Book Calendar  
+## 프로젝트 소개 
+Notion : https://faint-lavender-bab.notion.site/AI-Vengers-BookCalendar-AI-1d1bc068c52d8087b61fdf9677abf2b9?source=copy_link
 
-🎯해결하려는 문제 : 우리 나라의 과도한 IT문화의 발달로 인해, 쇠퇴한 성인 독서율 문제에 대해 해결책을 간구한다.  
-특히 본 서비스는 독서 동기부여 및 독서 습관 형성을 위한 AI 서비스 및 커뮤니티 기능을 제공하여 해당 문제를 해결하고자 한다.  
+## 효율적인 API 문서화를 위한 Swagger UI 
+학과 서버 swagger 입장 주소 : http://ceprj.gachon.ac.kr:60001/api/swagger-ui/index.html   
+로컬 서버 swagger입장 주소 : http://localhost:60001/swagger-ui/index.html
 
-### 📖 1. 독후감 나눠 쓰기 기능 
-우리는 흔히 독후감이라 하면, 책을 완독 한 후 한번만 기록하는 것으로 알고 있다.  
-그러나 우리 BoolCalendar앱에서는 한 권의 도서에 대해 여러번 독후감을 나눠서 작성할 수 있으며,   
-각 독서 기록은 캘린더에 추적되며, 매 독서 활동 마다 AI 서비스들(내 독후감을 기반으로 한 질문지 작성 & AI 사서의 독후감 리뷰)이 적용된다. 
+## 🧱 아키텍쳐 구축
+구축 환경 : 가천대학교 컴퓨터 공학과 학과 서버   
+운영 체제 :  Rocky Linux 9.3 (=RHEL)   
+CPU : i9 18 Core  
+RAM : 124GB  
+GPU : RTX A5000 (24GB) AI Tensor 코어  
+SSD : 7TB (RAID1)
+서버 주소 : http://ceprj.gachon.ac.kr   
+할당된 포트 번호 : 60001 (추가 포트 할당은 없이 하나의 포트로 서비스를 구축해야 함)  
 
-### 🗣️ 2. 도서 커뮤니티 
-게시판 형식의 도서 커뮤니티를 지원한다.  
-유저들은 챌린지를 통해 메달을 획득, 본인의 랭킹을 올릴 수 있다.   
-본인의 메달 및 랭킹은 도서 커뮤니티에서 활동을 할 떄, 본인 사진 옆에 자동으로 표시되어 동기부여 효과를 기대한다. 
-
-### 🤖 3. AI 서비스 
-1. 유저 맞춤형 질문지 생성 서비스-> 유저의 당일 독후감을 스캔하여 3개의 질문지를 맞춤형 생성
-2. AI BookCalendar 사서의 독후감 리뷰 -> 유저의 당일 독후감과 질문지 답변 기록을 AI가 스캔하여 리뷰 및 격려 메시지를 반환
-3. AI BookCalendar 사서의 챗봇 서비스 -> 유저와의 챗봇 서비스를 통해, 유저의 니즈를 파악하여 맞춤형 추천 도서 5가지를 추천이유와 함께 반환
-
-## 🙋‍♂️ About Me _ in this project
-### 🧭 TeamLeading
-* 매주 2회 팀 회의 리딩 (15주)
-* 매주 팀장 발표 전담 (15주)
-* 서비스 기획 및 와이어프레임 제작(Figma)
-### ⚙️Backend 
-* Springboot 3.3.6 (Java 17)
-* JPA - 단순 CRUD 서비스 구현
-* MyBatis - 복잡한 쿼리(JOIN,서브쿼리 등), 성능 최적화가 필요한 서비스 구현
-* Spring AI - GPT api 연결
-* JWT, Spring Security - Refresh Token Rotation(RTR방식)을 통한 높은 보안의 인증&인가 시스템 구축
-* WebClient - Fast-API AI 서버와 통신 
-### 🚀DevOps 
-* 시스템 아키텍쳐 설계 : Gachon univ. Onpremise server 
-* CI/CD 파이프 라인 구축 : Github Actions
-* 컨테이너 관리  : Podman, Podman-compose
-* 모니터링/로깅 시스템 구축 : Prometheus, Grafana
-### 🛢️DB  (MariaDB)
-* DB 설계
-* Container Redis(Port:6381) - Session Redis
-* Server Redis(Port:6382) - Cahcing Redis 
-* INDEX - 쿼리 기능 최적화 
-* ON DELETE CASECADE 
-### 🤝Collaboration
-* Figma - wireframe  
-* Swagger - for FE & BE 
-* Notion, Discord -for Team 
----
-
-### 🧪Swagger UI
-학과 서버 swagger 입장 주소 
-```
-http://ceprj.gachon.ac.kr:60001/api/swagger-ui/index.html
-```
-로컬 서버 swagger입장 주소 
-```
-http://localhost:8081/swagger-ui/index.html
-```
-
-### 🧱 Infra Structure
-
-![image](https://github.com/user-attachments/assets/88ed10de-ca05-4ba2-bff5-a9178057abeb)
+![image](https://github.com/user-attachments/assets/7633af89-374b-4422-b4af-714cf5dd61c4)
 
 
-위 인프라 구조도는, 가천대학교 학과 서버를 기준으로 설계되었다.  
-내가 담당하고 있는 부분은 좌측 하단에 8개의 컨테이너가 띄어져 있는 유저 서버 부분이며,   
-Github Actions를 통해 학과서버에 CI/CD를 진행한다.  
+> 설계자 : 류성열(팀장/유저 백엔드)
 
+## 🧬 DB 구축
 
-학과 서버에서는 Docker를 사용할 수 없으며, 그나마 비슷한 Podman을 활용할 수 있다한다.   
-Podman으로 총 8개의 컨테이너를 구현하여 서버 구축, 리버스 프록시, DB 구축, 메트릭 수집&모니터링을 진행한다.
-
-그리고 Fast-API에 있는 4가지의 AI 모델을 사용하기 위해, Spring 프레임워크에 내장되어 있는 Http Client인 WebClinet를 활용하여 Fast-API에 요청을 보내고,
-Fast-API 앞단에 Router를 배치하여 요청에 맞는 알맞는 AI 모델로 라우팅하여 반환값을 다시 Spring 서버로 받아온다.  
-
-외부 API는 GPT-turbo3.5 와 알라딘 API를 활용하며, 
-Redis는 학과서버에 설치되어 있는 Redis와 유저 서버 내부에 컨테이너를 활용해 하나의 Redis를 추가하며,  
-- 6381포트 Redis Container = 세션 및 기능 구현 Redis (Read & Write)  
-- 6382포트 Redis Container = 캐싱용 Redis (Only Read)   
-
-로 역할을 나눠서 구현한다.   
-
-컨테이너는 기본적으로 메모리를 제한하지 않으면 무제한으로 자원을 소비할 수 있기에 8개의 각 컨테이너는 compose 파일에서 최대 메모리를 제한하고,   
-특히 Spring Boot 서버의 경우 최초 시작 메모리와 최대 메모리를 동일하게 설정하여 동적 메모리 할당을 방지하여 성능 향상을 유도한다.
-
-> 설계자 : 류성열
-### 🤖자동화 파일 Automation Code
-1. rebuild_springboot.sh
-> springboot 코드를 수정한 후, 모든 컨테이너 중지 -> jar file rebuild -> image rebuild ->  모든 컨테이너 재시작
-``` 
-bash rebuild_springboot.sh
-```
-2.  check-logs.sh
-> redis-session, redis-exporter-session, redis-cache, redis-exporter-cache의 현재 로그 모두 조회 후 최종적으로 springboot 로그 실시간 조회
-```
-bash check_logs.sh  
-```
-
-### 🧠 역할과 책임에 따른 Redis의 분할
-
-#### 1. Redis-Cache
-안정성과 보안성 보다는 빠른 데이터 반응속도를 염두에 두고 설계
-
-#### 2. Redis-Session
-유실되면 안되는 데이터와 민감한 데이터가 입력될 수 있으므로 안정성과 보안성을 염두에 두고 설계
-
-#### 3. 각 저장소 접근 방식 
-redis-cache 접근 
-```
-podman exec -it redis-cache redis-cli
-```
-redis-session 접근
-```
-podman exec -it redis-session redis-cli
-```
-비밀번호 입력 
-```
-auth (비밀번호 입력)
-```
-
-### 🌐 Nginx Strategy 
-
-### 🧬 DB Structure
-
-![Copy of Copy of BookCalendar (4)](https://github.com/user-attachments/assets/c782ce1b-4f56-40aa-9cbb-8bc5d51fb862)
+![BookCalendar](https://github.com/user-attachments/assets/3baff7b3-c9c5-4801-99e7-2f24b822ea4d)
 
 DB 구조도는 ERD Cloud 서비스로 제작하였고,  
 파란색 선은 식별 관계, 분홍색 선은 비식별 관계를 의미한다. 
 그리고 서비스 안에서 쿼리의 성능을 올리기 위해, 적절히 인덱싱을 설정하였다.  
 위 DB는 우선 유저 서버를 위한 DB만 표현하고 있다.  
-> 제작자 : 류성열
+> 제작자 : 류성열(팀장/유저 백엔드), 김광수(관리자 웹 풀스택)
 
-
-### 🧾 Wire Frame  
+## 🧾 팀원들간의 원할한 소통을 위한 WireFrame 제작   
 Link : https://www.figma.com/design/ndspvub92U64eh9J2MDZSV/Untitled?node-id=0-1&p=f&t=GYPT6faNrPDJDjhF-0
 ![image](https://github.com/user-attachments/assets/d10e1946-0ff0-40ca-81f1-df5589b581c0)
 
+와이어 프레임은 프로젝트 초기 팀원들과 원활한 소통을 위해 서비스 구현 전에 회의 내용을 기반으로 간단하게 구현하였다.
 와이어 프레임은 피그마로 제작하였다. 
-> 제작자 : 류성열
+> 제작자 : 류성열(팀장/유저 백엔드)
 
-
-### 깃모지
+## 깃모지
 > 가독성 높은 Commit을 기록한다.  
 
 | 아이콘 | 타이틀 | 설명 | 원문 |
@@ -186,3 +91,42 @@ Link : https://www.figma.com/design/ndspvub92U64eh9J2MDZSV/Untitled?node-id=0-1&
 | 🗃 | [DB 변경] | 데이터베이스 관련 수정 | Perform database related changes. |
 | 🔊 | [로그 업데이트] | 로그 추가/수정 | Add or update logs. |
 | 🙈 | [.gitignore] | .gitignore 추가/수정 | Add or update a .gitignore file. |
+
+### 🧠 역할과 책임에 따른 Redis의 분할
+
+#### 1. Redis-Cache
+안정성과 보안성 보다는 빠른 데이터 반응속도를 염두에 두고 설계
+
+#### 2. Redis-Session
+유실되면 안되는 데이터와 민감한 데이터가 입력될 수 있으므로 안정성과 보안성을 염두에 두고 설계
+
+#### 3. 각 저장소 접근 방식 
+redis-cache 접근 
+```
+podman exec -it redis-cache redis-cli
+```
+redis-session 접근
+```
+podman exec -it redis-session redis-cli
+```
+비밀번호 입력 
+```
+auth (비밀번호 입력)
+```
+
+### 🤖자동화 파일 Automation Code
+1. rebuild_springboot.sh
+> springboot 코드를 수정한 후, 모든 컨테이너 중지 -> jar file rebuild -> image rebuild ->  모든 컨테이너 재시작
+``` 
+bash rebuild_springboot.sh
+```
+2.  check_logs.sh
+> redis-session, redis-exporter-session, redis-cache, redis-exporter-cache의 현재 로그 모두 조회 후 최종적으로 springboot 로그 실시간 조회
+```
+bash check_logs.sh  
+```
+3.  rerun_fastapi.sh
+> 학과서버의 공용 Gpu에 여유가 없을때 Fast-API AI 서버가 다운되는 경우를 대비해, 빠르게 AI서버의 복구  
+```
+bash rerun_fastapi.sh
+```
